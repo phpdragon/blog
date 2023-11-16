@@ -181,6 +181,10 @@ $ source/_posts> tree
 ```
 
 然后在文章的 blogBuildRemark.md 文件里，通过以下方式即可引用对应的图片。
+```markdown
+{% asset_img example.jpg This is an example image %}
+```
+
 {% asset_img example.jpg This is an example image %}
 
 图片的引用方式也不只这一种，更多详细介绍可参考官方文档 (https://hexo.io/zh-cn/docs/asset-folders.html)。

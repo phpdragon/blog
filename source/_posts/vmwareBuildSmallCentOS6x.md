@@ -28,104 +28,87 @@ tags:
 ## 1. 新建虚拟机
 
 菜单 -> 文件 -> 新建虚拟机, 选择自定义, 点击下一步：
-
-![image.png](https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/4ad93030b2874663a672745030276219~tplv-k3u1fbpfcp-jj-mark:0:0:0:0:q75.image#?w=497&h=429&s=29537&e=png&b=cce8cf)
+{% asset_img 1.png 新建虚拟机 %}
 
 ## 2. 选择兼容性
 
 选择兼容性， Workstation 16.x, 点击下一步：
-
-![image.png](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/0add9b5e42ec4ffb82fd4d786e368c37~tplv-k3u1fbpfcp-jj-mark:0:0:0:0:q75.image#?w=497&h=425&s=19739&e=png&b=f0f0f0)
+{% asset_img 2.png 选择兼容性 %}
 
 ## 3. 如何安装操作系统
 
 选择稍后安装操作系统, 点击下一步：
-
-![image.png](https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/2e0b5b5367424993be75ccbf311869ee~tplv-k3u1fbpfcp-jj-mark:0:0:0:0:q75.image#?w=497&h=427&s=19154&e=png&b=efefef)
+{% asset_img 3.png 选择兼容性 %}
 
 ## 4. 选择操作系统版本
 
 选择 Linux 版本  CentOS 6 64位, 点击下一步：
-
-![image.png](https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/ac433462ccc5480ba436b9e6d499b0d4~tplv-k3u1fbpfcp-jj-mark:0:0:0:0:q75.image#?w=497&h=426&s=16062&e=png&b=f0f0f0)
+{% asset_img 4.png 选择 Linux 版本 %}
 
 ## 5. 命名虚拟机
 
 输入虚拟机名称, 点击下一步：
-
-![image.png](https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/454fab4f62754b82832bafc856704b44~tplv-k3u1fbpfcp-jj-mark:0:0:0:0:q75.image#?w=497&h=428&s=14853&e=png&b=f2f2f2)
+{% asset_img 5.png 输入虚拟机名称 %}
 
 ## 6. 处理器配置
 
 设置处理器配置，根据物理机实际CPU核心来自由设置, 点击下一步：
-
-![image.png](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/dbc435abe77d4e48992efa1fb71e5e3a~tplv-k3u1fbpfcp-jj-mark:0:0:0:0:q75.image#?w=497&h=428&s=13485&e=png&b=f1f1f1)
+{% asset_img 6.png 处理器配置 %}
 
 ## 7. 虚拟机内存配置
 
 设置虚拟机内存，根据物理机实际内存大小自由设置, 点击下一步：
-
-![image.png](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/2a6d6e75ee75403c89ad52fab6aef830~tplv-k3u1fbpfcp-jj-mark:0:0:0:0:q75.image#?w=497&h=429&s=20400&e=png&b=f1f1f1)
+{% asset_img 7.png 虚拟机内存配置 %}
 
 ## 8. 网络类型配置
 
 网络类型设置选择默认（使用网络地址转换NAT类型）, 点击下一步：
-
-![image.png](https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/de8a3abd305f42239db637c6eef08639~tplv-k3u1fbpfcp-jj-mark:0:0:0:0:q75.image#?w=497&h=429&s=20875&e=png&b=f1f1f1)
+{% asset_img 8.png 网络类型配置 %}
 
 ## 9. I/O控制器配置
 
 I/O控制器选择默认（LSI LOGIC）, 点击下一步：
-
-![image.png](https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/03005370b60c4ee08fbdc0bdb58d2db7~tplv-k3u1fbpfcp-jj-mark:0:0:0:0:q75.image#?w=497&h=427&s=17052&e=png&b=f0f0f0)
+{% asset_img 9.png I/O控制器配置 %}
 
 ## 10. 选择磁盘类型
 
 磁盘类型选择默认（SCSI）, 点击下一步：
-
-![image.png](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/53d80bcb1c634937a7828989bcc7399c~tplv-k3u1fbpfcp-jj-mark:0:0:0:0:q75.image#?w=497&h=427&s=13610&e=png&b=f0f0f0)
+{% asset_img 10.png 选择磁盘类型 %}
 
 ## 11. 如何使用磁盘
 
 选择新建虚拟磁盘, 点击下一步：
-
-![image.png](https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/1cf97fbbeb56498b996aaff961500da1~tplv-k3u1fbpfcp-jj-mark:0:0:0:0:q75.image#?w=497&h=425&s=20399&e=png&b=f1f1f1)
+{% asset_img 11.png 选择新建虚拟磁盘 %}
 
 ## 12. 磁盘容量配置
 
 磁盘容量选择默认容量20G，单个文件存储(选择其他都行), 点击下一步：
-
-![image.png](https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/fb16a660f8f04ae18101926552d2817c~tplv-k3u1fbpfcp-jj-mark:0:0:0:0:q75.image#?w=497&h=429&s=22479&e=png&b=f1f1f1)
+{% asset_img 12.png 磁盘容量配置 %}
 
 ## 13. 指定磁盘文件
 
 选择磁盘文件（啥也不输入）, 点击下一步：
-
-![image.png](https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/6c6ba4392f0942ba833d0f010935d68f~tplv-k3u1fbpfcp-jj-mark:0:0:0:0:q75.image#?w=497&h=426&s=13657&e=png&b=f0f0f0)
+{% asset_img 13.png 指定磁盘文件 %}
 
 ## 14. 自定义硬件配置
 
 点击自定义硬件，弹窗硬件窗口：
-
-![image.png](https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/65f10d3c7a5f4597be19e0d0e9bd9181~tplv-k3u1fbpfcp-jj-mark:0:0:0:0:q75.image#?w=497&h=427&s=19931&e=png&b=f1f1f1)
+{% asset_img 14.png 自定义硬件配置 %}
 
 ## 15. CD/DVD配置
 
 编辑 CD/DVD 配置项，选择你下载好的IOS映像文件, 再点击窗口的关闭：
-
-![image.png](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/b9dabadfb9e5475cadc77ec675166eb3~tplv-k3u1fbpfcp-jj-mark:0:0:0:0:q75.image#?w=728&h=309&s=21087&e=png&b=f9f9f9)
+{% asset_img 15.png CD/DVD配置 %}
 
 然后点击完成， 完成虚拟机的创建。
 
 ## 16 配置共享文件夹
 
 编辑虚拟机配置，弹出虚拟机配置窗口，再点击添加：
-
-![image.png](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/5bd9dc8f42ba4e1a9ea9b1b38de79956~tplv-k3u1fbpfcp-jj-mark:0:0:0:0:q75.image#?w=718&h=450&s=31083&e=png&b=fbfbfb)
+{% asset_img 16.png 配置共享文件夹 %}
 
 选择想要共享的文件夹：
-
-![image.png](https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/1d8d0ef1b2c3486bbea87a60f3357f24~tplv-k3u1fbpfcp-jj-mark:0:0:0:0:q75.image#?w=497&h=405&s=12372&e=png&b=f1f1f1)
+{% asset_img 17.png 选择想要共享的文件夹 %}
 
 点击下一步，选择启用此共享，再点击完成。 然后启动客户机
 
@@ -135,117 +118,100 @@ I/O控制器选择默认（LSI LOGIC）, 点击下一步：
 
 # 四、安装操作系统
 
-## 1. 开机
+## 1. 虚拟机开机
 
-新建好的虚拟机CentOS_6_64_MINI开机
-
-![image.png](https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/d06ea9f06e634c21b65c7281dfd9e4d3~tplv-k3u1fbpfcp-jj-mark:0:0:0:0:q75.image#?w=314&h=368&s=16203&e=png&b=ffffff)
+新建好的虚拟机CentOS_6_64_MINI开机:
+{% asset_img 18.png 虚拟机开机 %}
 
 ## 2. 选择启动项
 
 进入开机画面，选择第一项安装系统，敲回车确认，开始安装虚拟机:
-
-![image.png](https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/ddf0ecb7c3404a79842fc037ac41cf31~tplv-k3u1fbpfcp-jj-mark:0:0:0:0:q75.image#?w=640&h=480&s=469209&e=png&b=0e1a40)
+{% asset_img 19.png 选择启动项 %}
 
 ## 3. 测试硬件媒体
 
 使用Tab键，选中Skip选项，跳过测试步骤:
-
-![image.png](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/b644c29f198f48e0a9ca9df52aa708e9~tplv-k3u1fbpfcp-jj-mark:0:0:0:0:q75.image#?w=720&h=400&s=20072&e=png&b=0000aa)
+{% asset_img 20.png 测试硬件媒体 %}
 
 显示检测到了本地安装媒体：
-
-![image.png](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/ce499a87bb3843548fb9374eea9a766c~tplv-k3u1fbpfcp-jj-mark:0:0:0:0:q75.image#?w=720&h=400&s=13329&e=png&b=0000aa)
+{% asset_img 21.png 显示检测到了本地安装媒体 %}
 
 ## 4. 配置安装系统
 
 进入配置安装界面，点击下一步：
-
-![image.png](https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/0086d283c3eb4c548350ae114c594140~tplv-k3u1fbpfcp-jj-mark:0:0:0:0:q75.image#?w=958&h=621&s=210857&e=png&b=edeceb)
+{% asset_img 22.png 进入配置安装界面 %}
 
 ## 5. 选择系统语言
 
 语言选择默认（English），点击下一步：
-
-![image.png](https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/fcdcdc0481504d69a628f0c0903b68db~tplv-k3u1fbpfcp-jj-mark:0:0:0:0:q75.image#?w=398&h=274&s=23391&e=png&b=f9f8f8)
+{% asset_img 23.png 选择系统语言 %}
 
 ## 6. 选择键盘类型
 
 键盘类型选择默认（U.S.English），点击下一步：
-
-![image.png](https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/722b7202109b4f15836369670ab1ff91~tplv-k3u1fbpfcp-jj-mark:0:0:0:0:q75.image#?w=329&h=393&s=18463&e=png&b=fafafa)
+{% asset_img 24.png 选择键盘类型 %}
 
 ## 7. 选择安装的设备类型
 
 选择默认第一个选项（Basic Storage Devices 基本存储设备），点击下一步：
-
-![image.png](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/a7c5febfdc7349d2a137af39f80da156~tplv-k3u1fbpfcp-jj-mark:0:0:0:0:q75.image#?w=643&h=178&s=21045&e=png&b=ecebea)
+{% asset_img 25.png 选择安装的设备类型 %}
 
 ## 8. 写入存储设备警告
 
 弹出警告，确认是否重新格式化所有硬盘数据，选择丢弃所有数据（Yes，discard any data）：
-
-![image.png](https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/4076b6e873444421b398cf6b93e5624a~tplv-k3u1fbpfcp-jj-mark:0:0:0:0:q75.image#?w=639&h=371&s=48180&e=png&b=ecebea)
+{% asset_img 26.png 写入存储设备警告 %}
 
 ## 9. 配置系统名称
 
 输入主机名称：
-
-![image.png](https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/285a37d9c29d4d5c974bbd0bbcc905d0~tplv-k3u1fbpfcp-jj-mark:0:0:0:0:q75.image#?w=375&h=137&s=9944&e=png&b=eeedec)
+{% asset_img 27.png 配置系统名称 %}
 
 ## 10. 配置系统网络
 
 右下角点击 Configure Network , 配置网络：
-
-![image.png](https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/2a328f94f5f04bf4babd362a7ff0638d~tplv-k3u1fbpfcp-jj-mark:0:0:0:0:q75.image#?w=456&h=325&s=23721&e=png&b=f4f3f3)
+{% asset_img 28.png 配置系统网络 %}
 
 编辑网络，修改为eth0(也可不改)， 勾选自动连接网络，然后点击关闭，再点击下一步：
-
-![image.png](https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/5bc74546a3ae4860a5380dcc3de34128~tplv-k3u1fbpfcp-jj-mark:0:0:0:0:q75.image#?w=433&h=267&s=23889&e=png&b=f1f0ef)
+{% asset_img 29.png 编辑网络，修改为eth0 %}
 
 ## 11. 配置系统时区
 
 选择时区为上海：
-
-![image.png](https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/8a27b3c24a6142c697a7be6261305e4b~tplv-k3u1fbpfcp-jj-mark:0:0:0:0:q75.image#?w=560&h=358&s=84298&e=png&b=eae8e5)
+{% asset_img 30.png 配置系统时区 %}
 
 ## 12. 设置Root用户密码
 
 设置Root用户密码，密码过于简单会弹窗再次确认：
-
-![image.png](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/8ed918197f5546f4bb83cc13a4eab10a~tplv-k3u1fbpfcp-jj-mark:0:0:0:0:q75.image#?w=388&h=152&s=13413&e=png&b=f0efee)
+{% asset_img 31.png 设置Root用户密码 %}
 
 ## 13. 选择安装到硬盘的类型
 
 选择使用所有硬盘空间（Use All Space），你也可以进行自定义分区，在右下角勾选【Review and modify partitioning layout】，点击下一步：
-
-![image.png](https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/344ec951fc924ea2822384ab651cd83d~tplv-k3u1fbpfcp-jj-mark:0:0:0:0:q75.image#?w=726&h=390&s=58039&e=png&b=ecebea)
+{% asset_img 32.png 选择安装到硬盘的类型 %}
 
 ## 14. 写入配置到硬盘警告
 
 确认将修改写入硬盘（Write changes to disk）
-
-![image.png](https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/b9455c55f39d4ac68b00cad013ced27e~tplv-k3u1fbpfcp-jj-mark:0:0:0:0:q75.image#?w=393&h=182&s=18274&e=png&b=edeceb)认
+{% asset_img 33.png 写入配置到硬盘警告 %}
 
 ## 15. 开启系统安装
 
 显示安装进程：
+{% asset_img 34.png 显示安装进程 %}
 
-![image.png](https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/f8c047149b4a4fda95637605bff535c0~tplv-k3u1fbpfcp-jj-mark:0:0:0:0:q75.image#?w=426&h=118&s=9052&e=png&b=edeceb)
-
-![image.png](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/eb4585d796ca49e7a84cee8661d2047c~tplv-k3u1fbpfcp-jj-mark:0:0:0:0:q75.image#?w=1020&h=360&s=213464&e=png&b=ecebea)
+显示安装进度：
+{% asset_img 35.png 写入配置到硬盘警告 %}
 
 ## 16. 系统安装完毕重启
 
 17.显示系统安装完毕， 点击 Reboot 重启系统：
-
-![image.png](https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/befe99b55dff4b398b3642e268080a7c~tplv-k3u1fbpfcp-jj-mark:0:0:0:0:q75.image#?w=961&h=514&s=50907&e=png&b=edeceb)
+{% asset_img 36.png 显示系统安装完毕 %}
 
 # 五、配置虚拟机
 
 ## 1. 登录root用户
 
-![image.png](https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/be0983f2f0ba44fbb8a325661d44dd86~tplv-k3u1fbpfcp-jj-mark:0:0:0:0:q75.image#?w=419&h=111&s=4336&e=png&b=000000)
+{% asset_img 37.png 登录root用户 %}
 
 ## 2. 配置SSH
 
@@ -257,8 +223,7 @@ sed -i 's|^#PermitRootLogin yes|PermitRootLogin yes|g' /etc/ssh/sshd_config
 ```
 
 如图所示：
-
-![image.png](https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/f90d7b583b654331a47baf2efa9bf13b~tplv-k3u1fbpfcp-jj-mark:0:0:0:0:q75.image#?w=738&h=400&s=24842&e=png&b=000000)
+{% asset_img 38.png 配置SSH %}
 
 ## 3. 重启sshd服务
 
@@ -369,8 +334,7 @@ SELINUXTYPE=targeted
 ### 8.2 挂载 VMware-Tools ISO 文件
 
 选择客户机，点击右键，菜单栏选择 安装 VMware-Tools 
-
-![image.png](https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/c7233351c13c4d7a92767473d793e52a~tplv-k3u1fbpfcp-jj-mark:0:0:0:0:q75.image#?w=370&h=415&s=20458&e=png&b=f7f7f7)
+{% asset_img 39.png 挂载 VMware-Tools ISO 文件 %}
 
 控制台执行如下命令挂载ISO文件：
 
@@ -529,7 +493,7 @@ Unable to establish SSL connection。
 
 > wget、curl、openssh等依赖OpenSSL的动态链接库, 其依赖版本低于1.0.1的都不支持TLS1.2协议，所以存量老机器需要更新openssl用于支撑TLS1.2协议。
 
-![image.png](https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/ef2be1e8f69b49008a45a74972b6c36a~tplv-k3u1fbpfcp-jj-mark:0:0:0:0:q75.image#?w=756&h=354&s=37776&e=png&b=ffffff)
+{% asset_img 40.png 升级Openssl版本不低于1.0.1 %}
 
 
 本文选择升级openssl至1.0.1e，为何不使用更新的版本？
