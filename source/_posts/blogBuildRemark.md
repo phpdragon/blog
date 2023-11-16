@@ -6,4 +6,4 @@ tags:
 
 引入图片示例：
 
-{% asset_img example.jpg This is an example image %}
+{% asset_img example.png This is an example image %}
