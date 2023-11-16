@@ -28,87 +28,87 @@ tags:
 ## 1. 新建虚拟机
 
 菜单 -> 文件 -> 新建虚拟机, 选择自定义, 点击下一步：
-{% asset_img 1.png 新建虚拟机 %}
+![](/img/vmware/1.png)
 
 ## 2. 选择兼容性
 
 选择兼容性， Workstation 16.x, 点击下一步：
-{% asset_img 2.png 选择兼容性 %}
+![](/img/vmware/2.png)
 
 ## 3. 如何安装操作系统
 
 选择稍后安装操作系统, 点击下一步：
-{% asset_img 3.png 选择兼容性 %}
+![](/img/vmware/3.png)
 
 ## 4. 选择操作系统版本
 
 选择 Linux 版本  CentOS 6 64位, 点击下一步：
-{% asset_img 4.png 选择 Linux 版本 %}
+![](/img/vmware/4.png)
 
 ## 5. 命名虚拟机
 
 输入虚拟机名称, 点击下一步：
-{% asset_img 5.png 输入虚拟机名称 %}
+![](/img/vmware/5.png)
 
 ## 6. 处理器配置
 
 设置处理器配置，根据物理机实际CPU核心来自由设置, 点击下一步：
-{% asset_img 6.png 处理器配置 %}
+![](/img/vmware/6.png)
 
 ## 7. 虚拟机内存配置
 
 设置虚拟机内存，根据物理机实际内存大小自由设置, 点击下一步：
-{% asset_img 7.png 虚拟机内存配置 %}
+![](/img/vmware/7.png)
 
 ## 8. 网络类型配置
 
 网络类型设置选择默认（使用网络地址转换NAT类型）, 点击下一步：
-{% asset_img 8.png 网络类型配置 %}
+![](/img/vmware/8.png)
 
 ## 9. I/O控制器配置
 
 I/O控制器选择默认（LSI LOGIC）, 点击下一步：
-{% asset_img 9.png I/O控制器配置 %}
+![](/img/vmware/9.png)
 
 ## 10. 选择磁盘类型
 
 磁盘类型选择默认（SCSI）, 点击下一步：
-{% asset_img 10.png 选择磁盘类型 %}
+![](/img/vmware/10.png)
 
 ## 11. 如何使用磁盘
 
 选择新建虚拟磁盘, 点击下一步：
-{% asset_img 11.png 选择新建虚拟磁盘 %}
+![](/img/vmware/11.png)
 
 ## 12. 磁盘容量配置
 
 磁盘容量选择默认容量20G，单个文件存储(选择其他都行), 点击下一步：
-{% asset_img 12.png 磁盘容量配置 %}
+![](/img/vmware/12.png)
 
 ## 13. 指定磁盘文件
 
 选择磁盘文件（啥也不输入）, 点击下一步：
-{% asset_img 13.png 指定磁盘文件 %}
+![](/img/vmware/13.png)
 
 ## 14. 自定义硬件配置
 
 点击自定义硬件，弹窗硬件窗口：
-{% asset_img 14.png 自定义硬件配置 %}
+![](/img/vmware/14.png)
 
 ## 15. CD/DVD配置
 
 编辑 CD/DVD 配置项，选择你下载好的IOS映像文件, 再点击窗口的关闭：
-{% asset_img 15.png CD/DVD配置 %}
+![](/img/vmware/15.png)
 
 然后点击完成， 完成虚拟机的创建。
 
 ## 16 配置共享文件夹
 
 编辑虚拟机配置，弹出虚拟机配置窗口，再点击添加：
-{% asset_img 16.png 配置共享文件夹 %}
+![](/img/vmware/16.png)
 
 选择想要共享的文件夹：
-{% asset_img 17.png 选择想要共享的文件夹 %}
+![](/img/vmware/17.png)
 
 点击下一步，选择启用此共享，再点击完成。 然后启动客户机
 
@@ -223,7 +223,7 @@ sed -i 's|^#PermitRootLogin yes|PermitRootLogin yes|g' /etc/ssh/sshd_config
 ```
 
 如图所示：
-{% asset_img 38.png 配置SSH %}
+![](/img/sshd/38.png)
 
 ## 3. 重启sshd服务
 
@@ -333,8 +333,8 @@ SELINUXTYPE=targeted
 
 ### 8.2 挂载 VMware-Tools ISO 文件
 
-选择客户机，点击右键，菜单栏选择 安装 VMware-Tools 
-{% asset_img 39.png 挂载 VMware-Tools ISO 文件 %}
+选择客户机，点击右键，菜单栏选择 安装 VMware-Tools：
+![](/img/vmware/39.png)
 
 控制台执行如下命令挂载ISO文件：
 
@@ -493,8 +493,7 @@ Unable to establish SSL connection。
 
 > wget、curl、openssh等依赖OpenSSL的动态链接库, 其依赖版本低于1.0.1的都不支持TLS1.2协议，所以存量老机器需要更新openssl用于支撑TLS1.2协议。
 
-{% asset_img 40.png 升级Openssl版本不低于1.0.1 %}
-
+![](/img/sshd/40.png)
 
 本文选择升级openssl至1.0.1e，为何不使用更新的版本？
 
