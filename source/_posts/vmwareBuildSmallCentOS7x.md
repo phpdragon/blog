@@ -1,5 +1,5 @@
 ---
-title: VMware虚拟机最小化安装CentOS7.X系统
+title: VMware虚拟机最小化安装CentOS 7.X系统
 date: 2023-11-16 19:55:54
 tags:
 ---
