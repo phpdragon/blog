@@ -42,7 +42,7 @@ Hexo 基于 NodeJS 运行，因此在开始前，需要安装 NodeJS 和 npm 工
 
 ## 1. 全局安装 hexo-cli 工具
 ```shell script
-npm install -g hexo-cli
+npm install -g hexo-cli --registry=https://registry.npm.taobao.org
 
 hexo -v # 查看版本，目前最新版本为 4.3.1
 ```
@@ -152,7 +152,7 @@ hexo clean && hexo g && hexo s
 post_asset_folder: true
 ```
 
-创建文件名为 my-blog-build-remark 文章。
+创建文件名为 blogBuildRemark 文章。
 
 ```shell script
 hexo new post blogBuildRemark
