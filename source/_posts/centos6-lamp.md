@@ -183,7 +183,7 @@ service httpd restart          #重启httpd
 ```shell
 echo '<?php phpinfo();' > /var/www/html/info.php
 ```
-访问网页，http://192.168.168.142/info.php （请使用客户机ip）
+访问网页，http://客户机IP/info.php
 {% asset_img 2.png 添加测试代码 %}
 
 ### 3.3 添加PHP5扩展模块
@@ -247,7 +247,7 @@ service httpd restart    #重启httpd
 ```
 
 
-访问测试页 http://192.168.168.142/info.php ，查验是否已正确安装新模块：
+访问测试页 http://客户机IP/info.php ，查验是否已正确安装新模块：
 {% asset_img 3.png 访问测试页 %}
 
 
@@ -305,7 +305,7 @@ vi /usr/share/phpmyadmin/config.inc.php
 
 
 ### 4.4 访问phpmyadmin
-访问管理地址 http://192.168.168.142/phpmyadmin/ : 
+访问管理地址 http://客户机IP/phpmyadmin/ : 
 {% asset_img 4.png 访问phpmyadmin %}
 
 ## 5、安装php-mcrypt扩展
@@ -360,7 +360,7 @@ service httpd restart                      #重启服务
 [root@centos-6-3 modules]# php -m | grep mcrypt
 mcrypt
 ```
-或访问网页查看: http://192.168.168.142/info.php
+或访问网页查看: http://客户机IP/info.php
 
 ------------
 
@@ -413,7 +413,7 @@ service httpd restart
 [root@centos-6-3 modules]# php -m | grep redis
 redis
 ```
-或访问网页查看: http://192.168.168.142/info.php （请使用客户机ip）
+或访问网页查看: http://客户机IP/info.php （请使用客户机ip）
 
 
 ## 7、PHP新增拓展通用方法
