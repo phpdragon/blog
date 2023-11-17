@@ -6,9 +6,9 @@ tags:
 
 # 一、系统版本
 
-> 安装LNMP请查看：[CentOS 6.X下搭建LNMP服务器](https://phpdragon.github.io/blog/2023/11/16/centos6-lnmp/)
+> 安装LNMP请查看：[CentOS 6.X下搭建LNMP服务器](/blog/2023/11/16/centos6-lnmp/)
 > 
-> 当前系统基于博文安装：[虚拟机最小化安装CentOS 6.X系统](https://phpdragon.github.io/blog/2023/11/16/vmwareBuildSmallCentOS6x/)
+> 当前系统基于博文安装：[虚拟机最小化安装CentOS 6.X系统](/blog/2023/11/16/vmware-build-small-centos-6x/)
 
 查看系统版本
 ```text

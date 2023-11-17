@@ -6,9 +6,9 @@ tags:
 
 # 一、系统版本
 
-> 安装LAMP请查看：[CentOS 6.X下搭建LAMP服务器](https://phpdragon.github.io/blog/2023/11/16/centos6-lamp/)
+> 安装LAMP请查看：[CentOS 6.X下搭建LAMP服务器](/blog/2023/11/16/centos6-lamp/)
 > 
-> 当前系统基于博文安装：[虚拟机最小化安装CentOS 6.X系统](https://phpdragon.github.io/blog/2023/11/16/vmwareBuildSmallCentOS6x/)
+> 当前系统基于博文安装：[虚拟机最小化安装CentOS 6.X系统](/blog/2023/11/16/vmware-build-small-centos-6x/)
 
 查看系统版本
 ```text
@@ -921,7 +921,7 @@ vi /usr/share/phpmyadmin/config.inc.php +31    #把localhost改为127.0.0.1
 
 ## 5、安装php-mcrypt扩展
 
-> 请参考：[安装php-mcrypt扩展](https://phpdragon.github.io/blog/2023/11/16/centos6-lamp/#5%E3%80%81%E5%AE%89%E8%A3%85php-mcrypt%E6%89%A9%E5%B1%95) 、[PHP新增拓展通用方法](https://phpdragon.github.io/blog/2023/11/16/centos6-lamp/#7%E3%80%81PHP%E6%96%B0%E5%A2%9E%E6%8B%93%E5%B1%95%E9%80%9A%E7%94%A8%E6%96%B9%E6%B3%95)
+> 请参考：[安装php-mcrypt扩展](/blog/2023/11/16/centos6-lamp/#5%E3%80%81%E5%AE%89%E8%A3%85php-mcrypt%E6%89%A9%E5%B1%95) 、[PHP新增拓展通用方法](/blog/2023/11/16/centos6-lamp/#7%E3%80%81PHP%E6%96%B0%E5%A2%9E%E6%8B%93%E5%B1%95%E9%80%9A%E7%94%A8%E6%96%B9%E6%B3%95)
 
 ### 5.1. 安装libmcrypt库
 
