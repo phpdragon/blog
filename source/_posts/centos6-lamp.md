@@ -22,7 +22,7 @@ Linux centos-6 2.6.32-71.29.1.el6.x86_64 #1 SMP Mon Jun 27 19:49:27 BST 2011 x86
 # 二、准备工作
 1. 修改selinux配置文件(/etc/sysconfig/selinux)关闭selinux
 
-```shell
+```bash
 sed -i 's|^SELINUX=enforcing|SELINUX=disabled|g' /etc/selinux/config
 ```
 2. 修改防火墙开放80、3306端口号，配置文件(/etc/sysconfig/iptables) 
@@ -40,7 +40,7 @@ echo '-A INPUT -p tcp -m state --state NEW -m tcp --dport 80 -j ACCEPT' >> /etc/
 ## 1、安装MySQL
 
 ### 1.1 安装、设置启动项目、启动服务
-```shell
+```bash
 yum -y install mysql mysql-devel mysql-server
 
 chkconfig --levels 235 mysqld on   #设置随机启动
@@ -52,7 +52,9 @@ service mysqld status              #查看状态
 service mysqld stop                #停止
 ```
 ### 1.2 修改mysql密码
-```shell
+
+#### 1.2.1 修改mysql密码方式1
+```bash
 mysql_secure_installation
 ```
 回显如下：
@@ -118,10 +120,15 @@ installation should now be secure.
 Thanks for using MySQL!
 ```
 
+#### 1.2.1 修改mysql密码方式2
+```bash
+mysqladmin -u root password 你的密码
+```
+
 ### 1.3 登录MySQL
 
 执行如下命令，返回数据库列表则表明安装成功
-```shell
+```bash
 mysql -hlocalhost -uroot -p -e 'show databases;'     #输入密码,修改成功则显示数据库列表
 ```
 
@@ -131,7 +138,7 @@ mysql -hlocalhost -uroot -p -e 'show databases;'     #输入密码,修改成功�
 
 ### 2.1 安装、设置随机启动、启动服务
 
-```shell
+```bash
 yum -y install httpd              #yum安装
 
 chkconfig --levels 235 httpd on   #设置随机启动
@@ -170,7 +177,7 @@ httpd: Could not reliably determine the server's fully qualified domain name, us
 
 执行命令
 
-```shell
+```bash
 yum -y install php php-devel
 
 service httpd restart          #重启httpd
@@ -180,7 +187,7 @@ service httpd restart          #重启httpd
 ### 3.2 添加测试代码
 
 写入脚本
-```shell
+```bash
 echo '<?php phpinfo();' > /var/www/html/info.php
 ```
 访问网页，http://客户机IP/info.php
@@ -189,7 +196,7 @@ echo '<?php phpinfo();' > /var/www/html/info.php
 ### 3.3 添加PHP5扩展模块
 
 查询当前系统版本支持的模块
-```shell
+```bash
 yum search php
 ```
 回显：
@@ -239,11 +246,11 @@ php-pecl-memcache.x86_64 : Extension to work with the Memcached caching daemon
 ### 3.4 安装MySQL等模块
 
 执行命令
-```shell
+```bash
 yum -y install php-mysql php-gd php-imap php-ldap php-mbstring
 yum -y install php-odbc php-pear php-xml php-xmlrpc
 
-service httpd restart    #重启httpd
+service httpd restart
 ```
 
 
@@ -253,20 +260,23 @@ service httpd restart    #重启httpd
 
 ### 3.5 设置PHP时区
 
-```shell
+```bash
 vi /etc/php.ini
 
 #设置时区为上海
-data.timezone = Asia/Shanghai
+date.timezone = Asia/Shanghai
 ```
-
+然后重启
+```bash
+service httpd restart
+```
 
 ## 4、安装phpMyAdmin
 
 ### 4.1 下载安装包
 
 首先前往官方网站下载：[phpMyAdmin-4.0.3-all-languages.zip](https://files.phpmyadmin.net/phpMyAdmin/4.0.3/phpMyAdmin-4.0.3-all-languages.zip)，然后上传解压到/usr/share/目录下
-```shell
+```bash
 wget https://files.phpmyadmin.net/phpMyAdmin/4.0.3/phpMyAdmin-4.0.3-all-languages.zip
 unzip phpMyAdmin-4.0.3-all-languages.zip
 mv phpMyAdmin-4.0.3-all-languages /usr/share/phpmyadmin
@@ -292,13 +302,13 @@ Alias /mysqladmin /usr/share/phpmyadmin
 ```
 
 重启httpd
-```shell
+```bash
 service httpd restart
 ```
 
 
 ### 4.3 配置phpMyAdmin
-```shell
+```bash
 cp /usr/share/phpmyadmin/config.sample.inc.php /usr/share/phpmyadmin/config.inc.php
 vi /usr/share/phpmyadmin/config.inc.php
 ```
@@ -332,7 +342,7 @@ make -j64 && make install                  #这里的64对应你的CPU核心倍�
 
 #### 5.1.3. phpize安装mcrypt
 
-```shell
+```bash
 yum -y install php-devel                   #安装phpize命令
 
 cd /usr/local/src
@@ -345,9 +355,9 @@ make -j64 && make install                  #这里的32对应你的CPU核心倍�
 
 
 vi /etc/php.d/mcrypt.ini
-    #加入内容
-    ; Enable mcrypt extension module
-    extension=mcrypt.so
+#加入内容
+; Enable mcrypt extension module
+extension=mcrypt.so
 
 service httpd restart                      #重启服务
 ```
@@ -376,7 +386,7 @@ mcrypt
 
 
 ### 6.2 安装扩展
-```shell
+```bash
 cd /usr/local/src                 #进入软件包存放目录
 wget https://pecl.php.net/get/redis-4.3.0.tgz
 tar xvf redis-4.3.0.tar.gz       #解压
@@ -394,7 +404,7 @@ Installing shared extensions:     /usr/lib64/php/modules/
 ```
 
 ### 6.3 配置php支持redis扩展
-```shell
+```bash
 vi /etc/php.d/redis.ini               #编辑配置文件，在最后一行添加以下内容
 
 #添加下面内容
@@ -429,7 +439,7 @@ redis
 
 ### 7.2 解压并进入到解压后的目录
 
-```shell
+```bash
 tar zxvf *.tar.gz
 cd 扩展目录
 ```
@@ -438,19 +448,19 @@ cd 扩展目录
 
 根据当前php版本动态的创建扩展的configure文件
 
-```shell
+```bash
 phpize
 ```
 
 ### 7.4 执行 ./configure
 
 用生成的configure文件执行
-```shell
+```bash
 ./configure
 ```
 
 ### 7.5 编译并安装
-```shell
+```bash
 make -j64 && make install           #这里的64对应你的CPU核心，加快编译
 ```
 
@@ -459,7 +469,7 @@ make -j64 && make install           #这里的64对应你的CPU核心，加快�
 
 
 查看扩展安装目录
-```shell
+```bash
 php -i | grep extension_dir | grep lib64
 ```
 回显:
@@ -468,7 +478,7 @@ php -i | grep extension_dir | grep lib64
 extension_dir => /usr/lib64/php/modules => /usr/lib64/php/modules
 ```
 
-添加扩展 vi /etc/php.ini (php.ini路径可以通过命令[ php -i | grep 'Loaded Configuration' ] 获得)
+添加扩展 vi /etc/php.ini (php.ini路径可以通过命令 `php -i | grep 'Loaded Configuration'` 获得)
 ```text
 ; Enable 扩展名称 extension module
 extension=/usr/lib64/php/modules/扩展名称.so
@@ -482,10 +492,9 @@ extension=扩展.so
 
 ### 7.7 重启httpd、php-fpm
 
-```shell
+```bash
 service httpd restart
-system restatrt httpd
-```
+``` 
 
 -----------
 

@@ -25,7 +25,7 @@ Linux centos-6 2.6.32-71.29.1.el6.x86_64 #1 SMP Mon Jun 27 19:49:27 BST 2011 x86
 ## 1. 关闭SELINUX
 修改selinux配置文件(/etc/sysconfig/selinux) 关闭防火墙
 
-```shell
+```bash
 sed -i 's|^SELINUX=enforcing|SELINUX=disabled|g' /etc/selinux/config
 ```
 ## 2. 开放80、3306端口
@@ -37,8 +37,8 @@ echo '-A INPUT -p tcp -m state --state NEW -m tcp --dport 3306 -j ACCEPT' >> /et
 echo '-A INPUT -p tcp -m state --state NEW -m tcp --dport 80 -j ACCEPT' >> /etc/sysconfig/iptables
 ```
 
-## 3. 添加用户
-```shell
+## 3. 添加用户mysql、nginx、php
+```bash
 groupadd www
 useradd mysql -g www -s /sbin/nologin -M
 useradd nginx -g www -s /sbin/nologin -M
@@ -67,13 +67,13 @@ useradd php -g www -s /sbin/nologin -M
 
 或者前往国内阿里云软件源镜像下载：[mysql-5.5.60.tar.gz](https://mirrors.aliyun.com/mysql/MySQL-5.5/mysql-5.5.60.tar.gz)
 
-```shell
+```bash
 cd /usr/local/src
 curl -O https://mirrors.aliyun.com/mysql/MySQL-5.5/mysql-5.5.60.tar.gz
 ```
 
 ### 1.2 安装依赖库
-```shell
+```bash
 yum -y install ncurses-devel
 ```
 
@@ -140,7 +140,7 @@ yum -y install ncurses-devel
 
 
 ### 1.4 编译MySQL
-```shell
+```bash
 cd /usr/local/src
 curl -O https://mirrors.aliyun.com/mysql/MySQL-5.5/mysql-5.5.60.tar.gz
 tar zxvf mysql-5.5.60.tar.gz
@@ -175,7 +175,7 @@ make install
 ```
 
 ### 1.5 设置启动项
-```shell
+```bash
 #数据库设置初始化
 cp /usr/local/mysql/support-files/my-small.cnf /etc/my.cnf
 chown mysql:www /etc/my.cnf
@@ -195,7 +195,7 @@ chkconfig mysqld off
 
 
 ### 1.6 创建数据目录、环境变量
-```shell
+```bash
 mkdir -p /var/mysql/data
 chown -R mysql:www /var/mysql/data
 
@@ -206,13 +206,15 @@ source /etc/profile
 
 
 ### 1.7 启动服务、修改密码
-```shell
+```bash
 service mysqld start               #启动
 service mysqld restart             #重启
 service mysqld status              #查看状态
 service mysqld stop                #停止
 
 # 修改密码
+mysqladmin -u root password 你的密码
+# 或者
 mysql_secure_installation
 ```
 回显如下：
@@ -281,7 +283,7 @@ Thanks for using MySQL!
 ### 1.8 登录MySQL
 
 执行如下命令，返回数据库列表则表明安装成功
-```shell
+```bash
 mysql -hlocalhost -uroot -p -e 'show databases;'     #输入密码,修改成功则显示数据库列表
 
 #查询版本
@@ -316,13 +318,13 @@ mysql -V
 
 下载地址[nginx.org](http://nginx.org/en/download.html), 下载 [nginx-1.25.0.tar.gz](https://nginx.org/download/nginx-1.25.0.tar.gz)：
 
-```shell
+```bash
 cd /usr/local/src
-curl -O https://nginx.org/download/nginx-1.25.0.tar.gz
+wget https://nginx.org/download/nginx-1.25.0.tar.gz
 ```
 
 ### 2.2 安装依赖库
-```shell
+```bash
 yum -y install gcc gcc-c++ autoconf automake make
 yum -y install pcre pcre-devel
 yum -y install zlib zlib-devel make libtool
@@ -333,7 +335,7 @@ yum -y install libxml2-devel libxslt-devel gd gd-devel perl-devel perl-ExtUtils-
 
 ### 2.3 编译Nginx
 
-```shell
+```bash
 cd /usr/local/src
 tar zxvf nginx-1.25.0.tar.gz
 cd nginx-1.25.0
@@ -390,7 +392,7 @@ make -j64 && make install
 ### 2.4 设置启动项
 
 编写引导启动脚本 /etc/init.d/nginx , 内容如下：
-```shell
+```text
 #!/bin/bash
 ### BEGIN INIT INFO
 # Provides:          nginx
@@ -416,7 +418,7 @@ case "$1" in
                 echo "nginx service start success!"
                 $0 status
             else
-                $0 status
+                echo "nginx configuration file test fail!"
             fi
         else
             nginx_pid=$(cat $pidf)
@@ -479,7 +481,7 @@ esac
 ```
 
 添加随机启动
-```shell
+```bash
 chmod +x /etc/init.d/nginx
 
 chkconfig --add nginx           #添加启动项
@@ -495,7 +497,7 @@ service nginx stop              #停止
 
 
 ### 2.5 创建运行目录、环境变量：
-```shell
+```bash
 mkdir -p /etc/nginx/conf.d /var/log/nginx/ /var/tmp/nginx/
 chown -R nginx:www /etc/nginx /var/log/nginx/ /var/tmp/nginx/
 
@@ -506,7 +508,7 @@ source /etc/profile
 
 ### 2.6 配置Nginx
 
-```shell
+```bash
 #备份配置文件
 cp /etc/nginx/nginx.conf{,.bak}
 
@@ -522,7 +524,7 @@ vim /etc/nginx/nginx.conf
 
 ### 2.7 启动Nginx
 
-```shell
+```bash
 #查看配置是否正确
 nginx -t
 
@@ -559,13 +561,13 @@ ss -antu | grep 80 | column -t
 ### 3.1 下载源码包
 
 到官方 [php.net](https://www.php.net/releases/) 去下载源码包, 上传至/usr/local/src目录
-```shell
+```bash
 cd /usr/local/src
 wget http://museum.php.net/php5/php-5.3.3.tar.gz
 ```
 
 ### 3.2 安装依赖库
-```shell
+```bash
 yum -y install libevent-devel libxml2-devel bzip2-devel libxslt-devel
 yum -y install libpng-devel libjpeg-devel gd gd-devel
 ```
@@ -578,7 +580,7 @@ yum -y install libpng-devel libjpeg-devel gd gd-devel
 >
 > 同理: --with-jpeg=/usr、--with-png=/usr、--with-gd=/usr 
 
-```shell
+```bash
 ln -s /usr/lib64/libssl.so /usr/lib/
 
 
@@ -599,15 +601,15 @@ ln -s /usr/lib64/libgd.so /usr/lib/
 ```
 
 设置编译参数
-```shell
+```bash
 cd /usr/local/src
 tar zxvf php-5.3.3.tar.gz
 cd php-5.3.3
 
 ./configure \
 --prefix=/usr/local/php \
---with-config-file-scan-dir=/etc/php.d \
---with-config-file-path=/etc/php \
+--with-config-file-scan-dir=/usr/local/php/etc/php.d \
+--with-config-file-path=/usr/local/php/etc/ \
 --enable-mbstring \
 --enable-xml \
 --enable-sockets \
@@ -648,9 +650,9 @@ make -j64 && make install
 
 ### 3.4 设置启动项
 
-编写引导启动脚本 /etc/init.d/php-fpm , 内容如下：
+编写引导启动脚本 `vi /etc/init.d/php-fpm` , 内容如下：
 
-```shell
+```bash
 #!/bin/bash
 ### BEGIN INIT INFO
 # Provides:          php-fpm
@@ -717,7 +719,7 @@ esac
 ```
 
 添加随机启动
-```shell
+```bash
 chmod +x /etc/init.d/php-fpm
 
 chkconfig --add php-fpm           #添加启动项
@@ -727,7 +729,7 @@ chkconfig --list | grep php-fpm   #查看启动项
 
 
 ### 3.5 设置环境变量：
-```shell
+```bash
 echo '' >> /etc/profile
 echo 'export PATH=/usr/local/php/bin:$PATH' >> /etc/profile
 echo 'export PATH=/usr/local/php/sbin:$PATH' >> /etc/profile
@@ -737,7 +739,9 @@ source /etc/profile
 
 ### 3.6 配置PHP-FPM
 
-修改配置文件：
+#### 3.6.1. php-fpm.conf
+
+修改配置文件php-fpm.conf
 ```text
 cd /usr/local/php/etc/
 cp php-fpm.conf.default php-fpm.conf
@@ -753,17 +757,25 @@ cp php-fpm.conf.default php-fpm.conf
 即去掉这三行前面的;号也行
 
 
-#复制源码包内的配置文件到安装目录下，并改名即可
-```shell
-cd /usr/local/src/php-5.3.3/
-mkdir -p /etc/php
-cp php.ini-production /etc/php/php.ini
-chown -R php:www /etc/php /usr/local/php
+#### 3.6.2. php.ini
+复制源码包内的配置文件到安装目录下，并改名即可
+```bash
+cp /usr/local/src/php-5.3.3/php.ini-production /usr/local/php/etc/php.ini                                                                         
+mkdir -p /usr/local/php/etc/php.d
+chown -R php:www /usr/local/php
+```
+
+#### 3.6.3. 设置时区
+```text
+vi /usr/local/php/etc/php.ini
+
+#设置时区为上海
+date.timezone = Asia/Shanghai
 ```
 
 ### 3.7 启动PHP-FPM
 
-```shell
+```bash
 service php-fpm start             #启动
 service php-fpm status            #查看进程状态
 service php-fpm reload            #重置配置
@@ -776,7 +788,7 @@ ss -antu | grep 9000 | column -t
 
 ### 3.8 编写网页并验证
 
-添加测试配置文件 /etc/nginx/conf.d/test.conf ，内容如下：
+添加测试配置文件 `vi /etc/nginx/conf.d/test.conf` ，内容如下：
 
 ```text
 server {
@@ -811,7 +823,7 @@ server {
 
 
 写入测试脚本
-```shell
+```bash
 service nginx reload
 
 mkdir -p /var/www/html
@@ -821,7 +833,7 @@ echo '<?php phpinfo();' > /var/www/html/info.php
 
 测试链接MySQL，
 
-写入如下文件到/var/www/html/mysql.php
+写入如下文件到 `vi /var/www/html/mysql.php`
 ```text
 <?php
 $servername = '127.0.0.1';
@@ -847,7 +859,8 @@ echo 'success';
 ### 4.1 下载安装包
 
 首先前往官方网站下载：[phpMyAdmin-4.0.3-all-languages.zip](https://files.phpmyadmin.net/phpMyAdmin/4.0.3/phpMyAdmin-4.0.3-all-languages.zip)，然后上传解压到/usr/share/目录下
-```shell
+```bash
+cd /usr/local/src
 wget https://files.phpmyadmin.net/phpMyAdmin/4.0.3/phpMyAdmin-4.0.3-all-languages.zip
 unzip phpMyAdmin-4.0.3-all-languages.zip
 mv phpMyAdmin-4.0.3-all-languages /usr/share/phpmyadmin
@@ -855,7 +868,7 @@ mv phpMyAdmin-4.0.3-all-languages /usr/share/phpmyadmin
 
 ### 4.2 配置Nginx
 
-编辑配置文件 /etc/nginx/conf.d/phpmyadmin.conf ，内容如下：
+编辑配置文件 `vi /etc/nginx/conf.d/phpmyadmin.conf` ，内容如下：
 
 ```text
 server {
@@ -888,13 +901,13 @@ server {
 ```
 
 重置nginx配置
-```shell
+```bash
 service nginx reload
 ```
 
 
 ### 4.3 配置phpMyAdmin: 
-```shell
+```bash
 cp /usr/share/phpmyadmin/config.sample.inc.php /usr/share/phpmyadmin/config.inc.php
 vi /usr/share/phpmyadmin/config.inc.php +31    #把localhost改为127.0.0.1
 ```
@@ -904,6 +917,47 @@ vi /usr/share/phpmyadmin/config.inc.php +31    #把localhost改为127.0.0.1
 
 访问管理地址 http://客户机IP:8081 :
 {% asset_img 4.png Welcome to 访问phpmyadmin！ %}
+
+
+## 5、安装php-mcrypt扩展
+
+> 请参考：[安装php-mcrypt扩展](https://phpdragon.github.io/blog/2023/11/16/centos6-lamp/#5%E3%80%81%E5%AE%89%E8%A3%85php-mcrypt%E6%89%A9%E5%B1%95) 、[PHP新增拓展通用方法](https://phpdragon.github.io/blog/2023/11/16/centos6-lamp/#7%E3%80%81PHP%E6%96%B0%E5%A2%9E%E6%8B%93%E5%B1%95%E9%80%9A%E7%94%A8%E6%96%B9%E6%B3%95)
+
+### 5.1. 安装libmcrypt库
+
+```bash
+cd /usr/local/src
+tar zxvf libmcrypt-2.5.8.tar.gz
+cd libmcrypt-2.5.8
+./configure
+make -j64 && make install
+```
+
+### 5.2. 安装mcrypt扩展
+
+```bash
+cd /usr/local/src
+tar zxvf php-5.3.3.tar.gz
+cd php-5.3.3/ext/mcrypt
+phpize
+./configure
+make -j64 && make install
+```
+
+### 5.3. 配置mcrypt扩展
+
+```text
+vi /usr/local/php/etc/php.d/mcrypt.ini
+
+#加入如下内容
+; Enable mcrypt extension module
+extension=mcrypt.so
+```
+
+### 5.4. 重载php-fpm
+```bash
+service php-fpm reload
+```
 
 
 ------------

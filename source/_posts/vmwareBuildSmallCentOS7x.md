@@ -165,7 +165,7 @@ I/O控制器选择默认（LSI LOGIC）, 点击下一步：
 
 ## 7. 设置安装目的地
 
-双击进入设置安装目的地选项：
+点击进入设置安装目的地选项：
 {% asset_img 28.png 设置安装目的地 %}
 
 默认已选择自动分区，这里我们不手动分区，直接点击左上角按钮Done提交：
@@ -188,7 +188,7 @@ I/O控制器选择默认（LSI LOGIC）, 点击下一步：
 
 {% asset_img 34.png 设置客户机主机名称 %}
 
-设置客户机主机名称为 centos-7-64 ， 点击左上角按钮 Done 提交。
+设置客户机主机名称为 centos-7-64-mini ， 点击左上角按钮 Done 提交。
 
 ## 9. 开始安装
 
@@ -197,7 +197,7 @@ I/O控制器选择默认（LSI LOGIC）, 点击下一步：
 
 ## 10. 设置root密码
 
-双击进入设置root密码选项：
+点击进入设置root密码选项：
 {% asset_img 36.png 设置root密码 %}
 
 输入root用户密码， 点击左上角按钮Done提交：
@@ -226,6 +226,7 @@ I/O控制器选择默认（LSI LOGIC）, 点击下一步：
 去除：PermitRootLogin 前面的 # 注释 
 ```bash
 sed -i 's|^#PermitRootLogin yes|PermitRootLogin yes|g' /etc/ssh/sshd_config
+cat /etc/ssh/sshd_config | grep PermitRootLogin | grep yes
 ```
 
 如图所示：
@@ -279,7 +280,7 @@ sudo sed -e 's|^mirrorlist=|#mirrorlist=|g' \
 ### 5.2 更新YUM缓存
 
 重置yum缓存:
-```
+```base
 yum clean all 
 yum makecache
 ```
@@ -326,7 +327,6 @@ systemctl list-unit-files | grep firewalld
 
 ```bash
 sed -i 's|^SELINUX=enforcing|SELINUX=disabled|g' /etc/selinux/config
-
 cat /etc/selinux/config | grep  SELINUX=disabled
 ```
 
@@ -370,7 +370,7 @@ vmware-hgfsclient
 ```
 
 挂载共享文件, 简版 vmhgfs-fuse .host:/ /mnt/hgfs
-```shel
+```bash
 vmhgfs-fuse .host:/ /mnt/hgfs -o subtype=vmhgfs-fuse,allow_other,uid=1000,gid=1000
 echo 'vmhgfs-fuse .host:/ /mnt/hgfs -o subtype=vmhgfs-fuse,allow_other,uid=1000,gid=1000' >> /etc/rc.local
 chmod +x /etc/rc.local
@@ -424,6 +424,31 @@ yum -y install openssl openssl-devel
 
 #常用工具
 yum -y install unzip zip lrzsz vim wget
+```
+
+安装中如果出现如下提示：
+```text
+There are unfinished transactions remaining. You might consider running yum-complete-transaction, 
+or "yum-complete-transaction --cleanup-only" and "yum history redo last", first to finish them. 
+If those don't work you'll have to try removing/installing packages by hand (maybe package-cleanup can help).
+```
+
+解决方法：使用yum-complete-transaction命令清理未完成事务，使用该命令是需要先安装 yum-utils 工具包
+```bash
+# 安装工具包
+yum install yum-utils
+ 
+#清空缓存
+yum clean all
+ 
+# 清楚未完成事务
+yum-complete-transaction --cleanup-only
+```
+
+如果还是无法安装，可能是有损坏包存在，可以尝试在安装命令后面添加 --skip-broken 参数
+```bash
+# 安装工具包
+yum -y groupinstall base --skip-broken
 ```
 
 
