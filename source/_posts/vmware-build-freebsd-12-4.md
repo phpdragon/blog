@@ -1,7 +1,8 @@
 ---
 title: VMware虚拟机安装FreeBSD12.4系统
 date: 2023-11-17 19:30:30
-tags:
+categories: ['OS', 'Unix', 'FreeBSD']
+tags: ['Unix', 'FreeBSD', 'FreeBSD 12.4']
 ---
 
 # 一、系统信息

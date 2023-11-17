@@ -1,7 +1,8 @@
 ---
 title: CentOS 6.X + Subversion + Usvn 搭建版本管理服务器
 date: 2023-11-17 18:41:39
-tags:
+categories: ['OS', 'Linux', 'CentOS', 'LAMP', 'SVN']
+tags: ['CentOs','CentOS6.X', 'Linux', 'Nginx', 'PHP', 'MySQL', 'SVN', 'USVN']
 ---
 
 # 一． Subversion 简介   

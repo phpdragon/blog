@@ -1,7 +1,8 @@
 ---
 title: Nginx编译参数详解
 date: 2023-11-16 22:05:41
-tags:
+categories: ['WebServer', 'Nginx']
+tags: ['Nginx']
 ---
 
 # 前言

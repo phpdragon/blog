@@ -1,7 +1,8 @@
 ---
 title: CentOS 6.X下搭建LAMP服务器
 date: 2023-11-16 21:43:49
-tags:
+categories: ['OS', 'Linux', 'CentOS', 'LAMP']
+tags: ['CentOs', 'CentOS6.X', 'Linux', 'Nginx', 'PHP', 'MySQL']
 ---
 
 # 一、系统版本

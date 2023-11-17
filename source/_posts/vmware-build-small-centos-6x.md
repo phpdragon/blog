@@ -1,7 +1,8 @@
 ---
 title: VMware虚拟机最小化安装CentOS 6.X系统
 date: 2023-11-16 19:07:59
-tags:
+categories: ['OS', 'Linux', 'CentOS']
+tags: ['Linux', 'Linux', 'CentOS', 'CentOS6.X']
 ---
 
 # 一、系统信息
