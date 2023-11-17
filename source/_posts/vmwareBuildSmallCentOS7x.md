@@ -14,7 +14,7 @@ tags:
 
 # 二、前期准备
 
-1.下载系统iso镜像包，[CentOS-7.0-1406-x86_64-Minimal.iso](https://mirrors.tuna.tsinghua.edu.cn/centos-vault/7.0.1406/isos/x86_64/CentOS-7.0-1406-x86_64-Minimal.iso) ，也可以使用6系列的其他版本，按实际需要下载
+下载系统iso镜像包，[CentOS-7.0-1406-x86_64-Minimal.iso](https://mirrors.tuna.tsinghua.edu.cn/centos-vault/7.0.1406/isos/x86_64/CentOS-7.0-1406-x86_64-Minimal.iso) ，也可以使用6系列的其他版本，按实际需要下载
 
 下载地址: https://mirrors.tuna.tsinghua.edu.cn/centos-vault/7.0.1406/isos/x86_64/
 
@@ -49,7 +49,7 @@ tags:
 ## 5. 命名虚拟机
 
 输入虚拟机名称, 点击下一步：
-![](/img/vmware/5.png)
+{% asset_img 5.png 命名虚拟机 %}
 
 ## 6. 处理器配置
 
@@ -93,7 +93,7 @@ I/O控制器选择默认（LSI LOGIC）, 点击下一步：
 
 ## 14. 自定义硬件配置
 
-点击自定义硬件，弹窗硬件窗口：
+点击自定义硬件，弹出硬件窗口：
 {% asset_img 14.png 自定义硬件配置 %}
 
 ## 15. CD/DVD配置
@@ -107,7 +107,7 @@ I/O控制器选择默认（LSI LOGIC）, 点击下一步：
 ## 16. 配置共享文件夹
 
 编辑虚拟机配置，弹出虚拟机配置窗口，再点击添加：
-![](/img/vmware/16.png)
+{% asset_img 16.png 配置共享文件夹 %}
 
 选择想要共享的文件夹：
 ![](/img/vmware/17.png)
@@ -224,7 +224,7 @@ I/O控制器选择默认（LSI LOGIC）, 点击下一步：
 配置ssh可以远程登录root账户, 控制台执行下面命令：
 
 去除：PermitRootLogin 前面的 # 注释 
-```shell
+```bash
 sed -i 's|^#PermitRootLogin yes|PermitRootLogin yes|g' /etc/ssh/sshd_config
 ```
 
@@ -233,13 +233,13 @@ sed -i 's|^#PermitRootLogin yes|PermitRootLogin yes|g' /etc/ssh/sshd_config
 
 ### 2.2. 重启sshd服务
 
-```shell
+```bash
 systemctl restart  sshd.service
 ```
 
 ### 2.3. 查看ip地址
 
-```shell
+```bash
 ip addr
 ```
 然后远程登录到虚拟机
@@ -253,7 +253,7 @@ ip addr
 
 设置为南京大学的软件源：
 
-```shell
+```bash
 sed -e 's|^mirrorlist=|#mirrorlist=|g' \
 -e 's|^#baseurl=http://mirror.centos.org/centos|baseurl=https://mirror.nju.edu.cn/centos|g' \
 -i.bak \
@@ -262,14 +262,14 @@ sed -e 's|^mirrorlist=|#mirrorlist=|g' \
 
 或者设置为阿里云的软件源：
 
-```shell
+```bash
 mv /etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo.bak
 curl -o /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-7.repo
 ```
 
 或者设置为中科大的软件源：
 
-```shell
+```bash
 sudo sed -e 's|^mirrorlist=|#mirrorlist=|g' \
 -e 's|^#baseurl=http://mirror.centos.org/centos|baseurl=https://mirrors.ustc.edu.cn/centos|g' \
 -i.bak \
@@ -290,7 +290,7 @@ yum makecache
 ```
 原因是curl版本过低，导致curl命令无法识别https最新的TSL协议，解决办法就是把软件源的https改为http协议。
 
-```shell
+```bash
 sed -i 's|^baseurl=https|baseurl=http|g' /etc/yum.repos.d/CentOS-Base.repo
 yum clean all 
 yum makecache
@@ -304,7 +304,7 @@ yum makecache
 
 ## 4. 关闭防火墙
 
-```shell
+```bash
 #查看防火墙状态
 systemctl status firewalld.service
 #关闭防火墙
@@ -324,7 +324,7 @@ systemctl list-unit-files | grep firewalld
 
 设置 SELINUX=disabled 
 
-```shell
+```bash
 sed -i 's|^SELINUX=enforcing|SELINUX=disabled|g' /etc/selinux/config
 
 cat /etc/selinux/config | grep  SELINUX=disabled
@@ -332,7 +332,7 @@ cat /etc/selinux/config | grep  SELINUX=disabled
 
 或者编辑 /etc/selinux/config 文件
 
-```shell
+```bash
 # This file controls the state of SELinux on the system.
 # SELINUX= can take one of these three values:
 #     enforcing - SELinux security policy is enforced.
@@ -356,7 +356,7 @@ SELINUXTYPE=targeted
 ### 6.2 方式二（推荐）
 安装命令如下：
 
-```shell 
+```bash 
 yum -y install open-vm-tools
 
 systemctl enable vmtoolsd
@@ -364,7 +364,7 @@ systemctl start vmtoolsd
 ```
 
 验证VMware-Tools
-```shell
+```bash
 #查询之前设置的共享文件夹
 vmware-hgfsclient
 ```
@@ -390,7 +390,7 @@ ls /mnt/hgfs
 
 ## 7. 设置时间同步
 
-```shell
+```bash
 yum -y install ntpdate
 echo '#每分钟同步internet时间
 */1 * * * * /usr/sbin/ntpdate cn.pool.ntp.org && /usr/sbin/hwclock -w' >> /var/spool/cron/root
@@ -398,7 +398,7 @@ echo '#每分钟同步internet时间
 
 或手动编辑，加入下文内容：
 
-```shell
+```bash
 crontab -e
 
 #每分钟同步internet时间
@@ -407,9 +407,9 @@ crontab -e
 
 ## 8. 安装基础软件包
 
-```shell
+```bash
 #基础包
-yum -y groupinstall base --skip-broken
+yum -y groupinstall base
 
 #编译工具
 yum -y install gcc gcc-c++ autoconf automake cmake make patch

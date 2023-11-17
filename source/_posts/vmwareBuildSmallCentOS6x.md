@@ -48,7 +48,7 @@ tags:
 ## 5. 命名虚拟机
 
 输入虚拟机名称, 点击下一步：
-![](/img/vmware/5.png)
+{% asset_img 5.png 命名虚拟机 %}
 
 ## 6. 处理器配置
 
@@ -105,7 +105,7 @@ I/O控制器选择默认（LSI LOGIC）, 点击下一步：
 ## 16 配置共享文件夹
 
 编辑虚拟机配置，弹出虚拟机配置窗口，再点击添加：
-![](/img/vmware/16.png)
+{% asset_img 16.png 配置共享文件夹 %}
 
 选择想要共享的文件夹：
 ![](/img/vmware/17.png)
@@ -158,7 +158,7 @@ I/O控制器选择默认（LSI LOGIC）, 点击下一步：
 
 ## 8. 写入存储设备警告
 
-弹出警告，确认是否重新格式化所有硬盘数据，选择丢弃所有数据（Yes，discard any data）：
+弹出警告，确认是否重新格式化所有硬盘数据，选择丢弃所有数据（Re-initialize all）：
 {% asset_img 26.png 写入存储设备警告 %}
 
 ## 9. 配置系统名称
@@ -218,8 +218,9 @@ I/O控制器选择默认（LSI LOGIC）, 点击下一步：
 配置ssh可以远程登录root账户, 控制台执行下面命令：
 
 去除：PermitRootLogin 前面的 # 注释 
-```shell
+```bash
 sed -i 's|^#PermitRootLogin yes|PermitRootLogin yes|g' /etc/ssh/sshd_config
+cat /etc/ssh/sshd_config | grep PermitRootLogin | grep yes
 ```
 
 如图所示：
@@ -227,13 +228,13 @@ sed -i 's|^#PermitRootLogin yes|PermitRootLogin yes|g' /etc/ssh/sshd_config
 
 ## 3. 重启sshd服务
 
-```shell
+```bash
 service sshd restart
 ```
 
 ## 4. 查看ip地址
 
-```shell
+```bash
 ip addr
 ```
 然后远程登录到虚拟机
@@ -272,12 +273,12 @@ ip addr
 
 
 
-```shell
+```bash
 # 只针对于 CentOS 6.0 
 sed -e 's|^mirrorlist=|#mirrorlist=|g' \
-    -e 's|^#baseurl=http://mirror.centos.org/centos/$releasever|baseurl=http://mirrors.aliyun.com/centos-vault/6.0|g' \
-    -i.bak \
-    /etc/yum.repos.d/CentOS-*.repo
+-e 's|^#baseurl=http://mirror.centos.org/centos/$releasever|baseurl=http://mirror.nju.edu.cn/centos-vault/6.0|g' \
+-i.bak \
+/etc/yum.repos.d/CentOS-*.repo
 
 yum clean all 
 yum makecache
@@ -290,11 +291,15 @@ yum makecache
 
 ## 6. 关闭防火墙
 
-```shell
+```bash
 service iptables stop      #关闭防火墙
 service ip6tables stop
+
 chkconfig iptables off     #关闭随机启动
 chkconfig ip6tables off
+
+chkconfig --list iptables
+chkconfig --list ip6tables
 
 service iptables status    #查看防火墙状态
 service ip6tables status
@@ -305,13 +310,14 @@ service ip6tables status
 
 设置 SELINUX=disabled 
 
-```shell
+```bash
 sed -i 's|^SELINUX=enforcing|SELINUX=disabled|g' /etc/selinux/config
+cat /etc/selinux/config | grep 'SELINUX=disabled'
 ```
 
 或者编辑 /etc/selinux/config 文件
 
-```shell
+```bash
 # This file controls the state of SELinux on the system.
 # SELINUX= can take one of these three values:
 #     enforcing - SELinux security policy is enforced.
@@ -326,24 +332,19 @@ SELINUXTYPE=targeted
 
 ## 8. 安装VMware-Tools
 
-### 8.1 关闭虚拟机
-
-控制台输入 poweroof, 或者菜单栏选择 关闭客户机
-
-
-### 8.2 挂载 VMware-Tools ISO 文件
+### 8.1 挂载 VMware-Tools ISO 文件
 
 选择客户机，点击右键，菜单栏选择 安装 VMware-Tools：
 ![](/img/vmware/39.png)
 
 控制台执行如下命令挂载ISO文件：
 
-```shell
-mkdir /mnt/cdrom 
-mount /dev/cdrom /mnt/cdrom/ 
+```bash
+mkdir -p /mnt/cdrom 
+mount /dev/cdrom /mnt/cdrom
 ```
 
-### 8.3 安装 VMware-Tools
+### 8.2 安装 VMware-Tools
 
 > 安装过程中遇到 yes/no 就 yes; 
 > 
@@ -351,7 +352,7 @@ mount /dev/cdrom /mnt/cdrom/
 
 安装命令如下：
 
-```shell 
+```bash 
 cp /mnt/cdrom/VMwareTools-*.tar.gz /tmp && cd /tmp
 tar zxvf /tmp/VMwareTools-*.tar.gz 
 
@@ -366,32 +367,28 @@ rm -rf /tmp/VMwareTools-*.tar.gz
 rm -rf /tmp/vmware-tools-distrib
 ```
 
-
-
-### 8.4 验证VMware-Tools
+### 8.3 验证VMware-Tools
 
 > /mnt/hgfs/ 目录下有文件说明安装成功
 
-```shell
-reboot
+```bash
 ls /mnt/hgfs/
 
 #或者执行命令，查询刚刚共享的文件夹
 vmware-hgfsclient
 ```
 
-
 ## 9. 安装基础软件包
 
-```shell
+```bash
 #基础包
 yum -y groupinstall base
 
 #编译工具
-yum -y install gcc gcc-c++ make autoconf cmake patch
+yum -y install gcc gcc-c++ autoconf automake cmake make patch
 
 #系统工具
-yum -y install psmisc net-tools lsof
+yum -y install psmisc net-tools lsof yum-utils
 
 #类库
 yum -y install pcre pcre-devel
@@ -401,28 +398,21 @@ yum -y install openssl openssl-devel
 #常用工具
 yum -y install unzip zip lrzsz vim wget
 
-#升级所有软件包 
-yum -y update
 ```
 
 ## 10. 设置系统语言
 
-```shell
+```bash
 echo 'LANG="en_US.UTF-8"' > /etc/locale.conf
 ```
 
 ## 11. 设置时间同步
 
-```shell
+```bash
 yum -y install ntpdate
-
-crontab -e
-#加入下文内容
-
-#每分钟同步internet时间
-*/1 * * * * /usr/sbin/ntpdate cn.pool.ntp.org && /usr/sbin/hwclock -w
+echo '#每分钟同步internet时间
+*/1 * * * * /usr/sbin/ntpdate cn.pool.ntp.org && /usr/sbin/hwclock -w' >> /var/spool/cron/root
 ```
-
 
 ## 12. 升级支持TLS1.2协议
 
@@ -451,11 +441,15 @@ Unable to establish SSL connection。
 
 ### 12.3 问题分析：
 
+> wget、curl、openssh等依赖OpenSSL的动态链接库, 其依赖版本低于1.0.1的都不支持TLS1.2协议，所以存量老机器需要更新openssl用于支撑TLS1.2协议。
+> [Can not download from an HTTPS site (ssl) with wget?](https://unix.stackexchange.com/questions/479823/can-not-download-from-an-https-site-ssl-with-wget)
+> ![](/img/sshd/40.png)
+
 诚然，博主已经知道问题是出在哪，所以下面的分析是以结果反推答案。
 
 #### 12.3-1. 分析curl的依赖关系：
 
-```shell
+```text
 [root@centos-6 ~]# yum deplist curl | grep libssh2
   dependency: libssh2.so.1()(64bit)
    provider: libssh2.x86_64 1.2.2-7.el6
@@ -469,14 +463,14 @@ Unable to establish SSL connection。
 
 #### 12.3-2. 分析依赖wget的关系：
 
-```shell
+```text
 [root@centos-6 ~]# yum deplist wget | grep libssl
   dependency: libssl.so.10()(64bit)
 ```
 
 那么通过curl、wget的依赖关系，发现指向一个共同的动态链接库libssl.so.10、libcrypto.so.10，那么这两个动态链接库是谁提供的呢？ 
 
-```shell
+```text
 [root@centos-6 ~]# rpm -ql openssl | grep libssl.so.10
 /usr/lib64/.libssl.so.10.hmac
 /usr/lib64/libssl.so.10
@@ -490,10 +484,6 @@ Unable to establish SSL connection。
 
 
 ### 12.4 升级Openssl版本不低于1.0.1
-
-> wget、curl、openssh等依赖OpenSSL的动态链接库, 其依赖版本低于1.0.1的都不支持TLS1.2协议，所以存量老机器需要更新openssl用于支撑TLS1.2协议。
-
-![](/img/sshd/40.png)
 
 本文选择升级openssl至1.0.1e，为何不使用更新的版本？
 
@@ -527,7 +517,7 @@ mv ./openssl.tar ~/
 
 
 编译安装：
-```shell
+```bash
 #openssl需要zlib库支持
 yum -y install zlib zlib-devel
 
@@ -555,7 +545,7 @@ openssl version -a
 > 
 > 会报如下错误：
 
-```shell
+```bash
 [root@centos-6 openssl-1.0.1e]# service sshd restart
 Stopping sshd:                                             [  OK  ]
 Starting sshd: OpenSSL version mismatch. Built against 10000003, you have 1000105f
@@ -566,7 +556,7 @@ Starting sshd: OpenSSL version mismatch. Built against 10000003, you have 100010
 请不要选择最新版本，最新版本不兼容openssl-1.0.1e的编译，如果选择最新版本，请尝试升级至其他版本Openssl。
 
 开始安装：
-```shell
+```bash
 #安装依赖
 yum -y install pam-devel
 
@@ -586,11 +576,9 @@ service sshd restart
 ```
 
 修复重启报不支持参数警告：
-```shell
+```bash
 sed -i 's|^GSSAPIAuthentication yes|#GSSAPIAuthentication yes|g' /etc/ssh/sshd_config
 sed -i 's|^GSSAPICleanupCredentials yes|#GSSAPICleanupCredentials yes|g' /etc/ssh/sshd_config
-
-#重启
 service sshd restart
 ```
 
@@ -600,7 +588,7 @@ service sshd restart
 前往官网[curl.se](https://curl.se/download) 下载 [curl-8.4.0.tar.gz](https://curl.se/download/curl-8.4.0.tar.gz)：
 
 开始编译安装：
-```shell
+```bash
 cd /usr/local/src
 tar zxvf curl-8.4.0.tar.gz
 cd curl-8.4.0
@@ -618,7 +606,7 @@ curl -V
 ```
 
 添加别名忽略证书检查：
-```shell
+```bash
 vi ~/.bashrc 
     alias curl='curl -k'
 
@@ -636,7 +624,7 @@ ll /tmp/test.tar.gz && unlink /tmp/test.tar.gz
 前往下载版本 [wget-1.20.1.tar.gz](https://ftp.gnu.org/gnu/wget/wget-1.20.1.tar.gz) 
 
 编译安装：
-```shell
+```bash
 cd /usr/local/src
 tar zxvf wget-1.20.1.tar.gz
 cd wget-1.20.1
@@ -651,7 +639,7 @@ wget -V | grep 'GNU Wget'
 
 
 添加别名忽略证书检查：
-```shell
+```bash
 vi ~/.bashrc 
     alias wget='wget --no-check-certificate'
 
