@@ -399,7 +399,14 @@ ps -fU root | grep vmtoolsd
 /usr/local/etc/init.d/open-vm-tools start &
 ```
 
-## 7. 配置修改持久化
+## 7. 开启cron
+
+编辑引导配置文件, `vi /mnt/sda1/tce/boot/extlinux/extlinux.conf`, 在 `APPEND quiet` 的末尾添加参数`cron`，示例：
+```bash
+APPEND quiet cron 其他参数...
+```
+
+## 8. 配置修改持久化
 
 持久化处理，保存密码、ssh、开机启动配置等：
 
@@ -415,6 +422,56 @@ filetool.sh -b  #或 backup
 大功告成，这时可以重启检查下，sshd服务是否已自动开启。
 ```bash
 sudo reboot
+```
+
+## 9. 关机自动持久化
+
+> /opt/shutdown.sh 脚本的注释如下：
+>
+> put user shutdown commands here
+> this is called from exittc, aka the gui shutdown option
+> if you shutdown from cli using shutdown/halt, this will not be called
+>
+> for custom cli shutdown commands, you should edit /etc/init.d/rc.shutdown
+> 
+> 翻译：
+>
+> 将用户关机命令放在这里
+> 这是从exittc调用的，也就是GUI关闭选项
+> 如果使用shutdown/halt从cli中关闭，则不会调用该函数
+>
+> 对于自定义的cli关闭命令，你应该编辑/etc/init.d/rc.shutdown
+
+### 9.1 桌面端
+如果是安装了桌面，请编辑 /opt/shutdown.sh，在文件末尾添加如下内容：
+```text
+echo 'Backup in progress.'
+/usr/bin/filetool.sh -b
+echo 'Backup end!'
+```
+
+然后加入持久化：
+```bash
+echo '/opt/shutdown.sh' >> /opt/.filetool.lst
+filetool.sh -b
+```
+
+可能桌面端自带自动备份配置，需要关闭请编辑`/home/tc/.profile`文件， 把变量`BACKUP=1`改为`BACKUP=0`
+
+### 9.1 CLI模式(推荐)
+
+cli模式下编辑引导配置文件, `sudo vi /etc/init.d/rc.shutdown`, 在文件的末尾添加如下内容：
+```text
+echo 'Backup in progress.'  
+/usr/bin/filetool.sh -b                   
+echo 'Backup end!'  
+echo ""
+```
+
+然后加入持久化：
+```bash
+echo '/etc/init.d/rc.shutdown' >> /opt/.filetool.lst
+filetool.sh -b
 ```
 
 # 五、系统目录说明
@@ -446,11 +503,15 @@ sudo reboot
 /usr/local/lib    本地增加的库根文件系统
 ```
 
+参考： [TinyCore Linux文件结构说明](https://www.kancloud.cn/dlover/linux/1634235)
+
 # 六、参考资料
 
 [Frugal Install Tiny Core Linux](http://www.tinycorelinux.net/install.html)
 
 [Tiny Core Linux 安装配置](https://blog.csdn.net/stevenldj/article/details/112852507)
+
+[TinyCore Linux - Initial steps](https://tiagojsilva.github.io/en/unixlike/meme/2021-10-29_tinycorelinux-install/#installation)
 
 [将TinyCore安装到硬盘](https://www.jianshu.com/p/3f87fc24e2f6)
 
