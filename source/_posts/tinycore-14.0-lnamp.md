@@ -676,3 +676,7 @@ sudo /usr/local/etc/init.d/mysql start
 [轻量化Tiny Core Linux硬盘安装nginx+php+mysql](https://www.ssdlsoft.com/other/144)
 
 [LNAMP(Linux+Nginx+Apache+Mysql+PHP)高性能架构配置实战版](https://blog.51cto.com/hao360/1652709)
+
+# 八、附件
+
+本文使用到的软件包已上传网盘：[BlogDocs->files->tinycore-14.0-lnamp](https://pan.baidu.com/s/1PilxMDxpeAbL92M6zJnFtA?pwd=6666#list/path=%2FBlogDocs%2Ffiles%2Ftinycore-14.0-lnamp)
