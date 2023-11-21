@@ -319,6 +319,7 @@ tce-load -wi gmp                    #支持gmp扩展
 tce-load -wi openldap cyrus-sasl    #支持ldap扩展
 tce-load -wi libonig                #支持mbstring扩展
 tce-load -wi unixODBC               #支持odbc、pdo_odbc扩展
+tce-load -wi postgresql-9.5-client  #支持pgsql、pdo_pgsql扩展
 tce-load -wi sqlite3                #支持sqlite3、pdo_sqlite扩展
 tce-load -wi aspell                 #支持pspell扩展
 tce-load -wi readline               #支持readline扩展
@@ -359,6 +360,8 @@ sudo sed -i 's|^;extension=mysqli|extension=mysqli|g' php.ini
 sudo sed -i 's|^;extension=pdo_mysql|extension=pdo_mysql|g' php.ini
 sudo sed -i 's|^;extension=odbc|extension=odbc|g' php.ini
 sudo sed -i 's|^;extension=pdo_odbc|extension=pdo_odbc|g' php.ini
+sudo sed -i 's|^;extension=pgsql|extension=pgsql|g' php.ini
+sudo sed -i 's|^;extension=pdo_pgsql|extension=pdo_pgsql|g' php.ini
 sudo sed -i 's|^;extension=sqlite3|extension=sqlite3|g' php.ini
 sudo sed -i 's|^;extension=pdo_sqlite|extension=pdo_sqlite|g' php.ini
 sudo sed -i 's|^;extension=pcntl|extension=pcntl|g' php.ini
@@ -423,6 +426,7 @@ tce-load -wi libmcrypt.tcz mhash.tcz
 
 ## 4. 安装oci8、pdo_oci扩展
 
+### 4.1 下载安装包
 前往Oracle官网[Instant Client for Linux x86-64 (64-bit)](https://www.oracle.com/database/technologies/instant-client/linux-x86-64-downloads.html)
 下载instantclient以支持 oci8、pdo_oci扩展：
 ```bash
@@ -433,13 +437,42 @@ ldd --version
 wget https://download.oracle.com/otn_software/linux/instantclient/2112000/instantclient-basic-linux.x64-21.12.0.0.0dbru.zip
 
 unzip instantclient*.zip
-cd instantclient_21_12
-sudo cp libclntsh.so.21.1 /usr/lib/
-sudo cp libclntshcore.so.21.1 /usr/lib/
-sudo cp libnnz21.so /usr/lib/
-sudo cp libocci.so.21.1 /usr/lib/
-sudo ln -s /usr/lib/libclntsh.so.21.1 /usr/lib/libclntsh.so.12.1
+mkdir /home/tc/oracle
+cp instantclient_21_12/libclntsh.so.21.1 /home/tc/oracle/
+cp instantclient_21_12/libclntshcore.so.21.1 /home/tc/oracle/
+cp instantclient_21_12/libnnz21.so /home/tc/oracle/
+cp instantclient_21_12/libocci.so.21.1 /home/tc/oracle/
+cd /home/tc/oracle && ln -s libclntsh.so.21.1 libclntsh.so.12.1 && cd /home/tc
 
+sudo mv /home/tc/oracle/ /usr/local/
+```
+
+### 4.2 配置安装脚本
+`sudo vi /usr/local/tce.installed/oracle`，添加如下内容：
+```text
+#!/bin/sh
+[ $(grep oracle /etc/ld.so.conf) ] || echo /usr/local/oracle >> /etc/ld.so.conf
+ldconfig -q
+```
+
+### 4.3 打包oracle动态库包
+
+```bash
+cd /home/tc
+tce-load -wi squashfs-tools
+sudo chmod 777 /usr/local/tce.installed/oracle
+sudo chown tc:staff /usr/local/tce.installed/oracle
+sudo chmod -R 777 /usr/local/oracle
+sudo chown root:root /usr/local/oracle
+mksquashfs /usr/local/oracle /usr/local/tce.installed/oracle oracle.tcz -no-strip
+
+cp oracle.tcz /mnt/sda1/tce/optional
+echo 'oracle.tcz' >> /mnt/sda1/tce/onboot.lst
+#sudo sh /usr/local/tce.installed/oracle
+``` 
+
+### 4.4 开启oci8、pdo_oci扩展
+```bash
 tce-load -wi libaio
 
 sudo sed -i 's|^;extension=oci8|extension=oci8|g' /usr/local/etc/php7/php.ini
@@ -449,16 +482,11 @@ php -m | grep oci8
 php -m | grep PDO_OCI
 ```
 
-## 5. 安装pgsql、pdo_pgsql扩展
-```bash
-pgsql pdo_pgsql
-tce-load -wi libpq
-```
 
 参考 [linux下安装php扩展pdo_oci和oci8](https://www.cnblogs.com/tanghu/p/10396154.html)
 
 
-## 6. 配置httpd支持php
+## 5. 配置httpd支持php
 
 `sudo vi /usr/local/etc/httpd/httpd.conf`，在文件的末尾追加：
 ```text
@@ -475,7 +503,7 @@ AddType application/x-httpd-php .php
 访问页面index.php， 打开浏览器，使用 http://IP:8080/index.php 地址浏览，可以看到经典的PHP info详情，说明已经配置完毕。
 
 
-## 7. 配置nginx代理转发至httpd
+## 6. 配置nginx代理转发至httpd
 
 ```text
 cd /usr/local/etc/nginx
@@ -529,7 +557,7 @@ sudo /usr/local/etc/init.d/nginx reload
 打开浏览器，使用 http://test.phpmyadmin.com 地址浏览，可以看到经典的PHP info详情，说明Nginx已实现代理转发。
 
 
-## 8. 持久化PHP的配置
+## 7. 持久化PHP的配置
 
 ```bash
 echo '/usr/local/etc/php7' >> /opt/.filetool.lst
