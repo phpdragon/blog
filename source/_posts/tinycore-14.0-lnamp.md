@@ -681,6 +681,7 @@ filetool.sh -b
 sudo mkdir -p /mnt/sda1/www
 sudo mv /usr/local/html/phpmyadmin /mnt/sda1/www/phpmyadmin
 sudo chown -R tc:staff /mnt/sda1/www/
+chmod -R 777 /mnt/sda1/www/phpmyadmin/tmp/
 
 sudo sed -i 's|/usr/local/html|/mnt/sda1/www|g' /usr/local/etc/nginx/conf.d/phpmyadmin.conf
 sudo sed -i 's|/usr/local/html|/mnt/sda1/www|g' /usr/local/etc/httpd/conf.d/phpmyadmin.conf
