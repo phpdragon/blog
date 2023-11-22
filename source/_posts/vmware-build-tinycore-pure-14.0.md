@@ -517,4 +517,4 @@ filetool.sh -b
 
 # 七、附件
 
-本文使用到的软件包已上传网盘：[BlogDocs->files->tinycore-14.0](https://pan.baidu.com/s/1yEbHDQBzy43uV8gIYXqbnw?pwd=6666#list/path=%2FBlogDocs%2Ffiles%2Ftinycore-14.0)
+本文使用到的软件包已上传网盘：[BlogDocs->files->vmware-build-tinycore-pure-14](https://pan.baidu.com/s/1yEbHDQBzy43uV8gIYXqbnw?pwd=6666#list/path=%2FBlogDocs%2Ffiles%2Fvmware-build-tinycore-pure-14)
