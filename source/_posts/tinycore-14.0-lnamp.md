@@ -33,13 +33,13 @@ cd /usr/local/etc/nginx
 #sudo cp original/nginx.conf.default nginx.conf
 sudo cp original/fastcgi_params.default fastcgi_params
 sudo cp original/mime.types.default mime.types
-sudo mkdir -p conf.d
+sudo mkdir -p /usr/local/etc/nginx/conf.d
 
 sudo mkdir -p /usr/local/html
 sudo cp /usr/local/lib/nginx/html/index.html /usr/local/html
 ```
 
-`vi /usr/local/etc/nginx/nginx.conf`，添加配置如下：
+添加nginx配置文件，`sudo vi /usr/local/etc/nginx/nginx.conf`，添加如下内容：
 ```text
 worker_processes  1;
 
@@ -56,17 +56,35 @@ http {
     sendfile        on;
     keepalive_timeout  65;
     gzip  on;
+
     include conf.d/*.conf;
+}
+```
+
+添加vhost配置文件，`sudo vi /usr/local/etc/nginx/conf.d/default.conf`，添加如下内容：
+```text
+server {
+    listen          80;
+    server_name     localhost;
+
+    location / {
+       root   html;
+       index  index.html index.htm;
+    }
+
+    error_page   500 502 503 504  /50x.html;
+    location = /50x.html {
+        root   html;
+    }
+
 }
 ```
 
 启动Nginx：
 ```bash
-sudo nginx -t
-
-sudo /usr/local/etc/init.d/nginx status
 sudo /usr/local/etc/init.d/nginx start
 sudo /usr/local/etc/init.d/nginx reload
+sudo /usr/local/etc/init.d/nginx status
 ```
 
 查看客户机ip：
@@ -85,9 +103,9 @@ ifconfig eth0 | grep "inet addr"
 ## 4. 持久化Nginx的配置与网页
 
 ```bash
+echo '/opt/bootlocal.sh' >> /opt/.filetool.lst
 echo '/usr/local/etc/nginx' >> /opt/.filetool.lst
 echo '/usr/local/html' >> /opt/.filetool.lst
-echo '/opt/bootlocal.sh' >> /opt/.filetool.lst
 
 filetool.sh -b
 ```
@@ -107,6 +125,7 @@ tce-load -wi apache2.4  #请打开http://tinycorelinux.net/14.x/x86/tcz/搜索ap
 cd /usr/local/etc/httpd
 sudo cp original/httpd.conf-sample httpd.conf
 
+sudo mkdir -p /usr/local/etc/httpd/conf.d/
 sudo mkdir -p /usr/local/html
 ```
 
@@ -123,7 +142,6 @@ sudo sed -i 's|^Listen 80|Listen 8080|g' httpd.conf
 启动httpd：
 ```bash
 sudo /usr/local/etc/init.d/httpd start
-sudo /usr/local/etc/init.d/httpd restart
 ```
 
 打开浏览器，使用 IP:8080 地址浏览，可以看到Apache的工作网页，说明Apache已经正常工作了。
@@ -157,7 +175,7 @@ tce-load -wi mariadb-10.4-client.tcz mariadb-10.4-dev.tcz mariadb-10.4.tcz
 ```bash
 cd  /usr/local/mysql/scripts/
 mkdir -p /home/tc/mysql/data
-sudo chmod -R tc:staff /home/tc/mysql
+sudo chown -R tc:staff /home/tc/mysql
 
 sudo mkdir /auth_pam_tool_dir
 sudo ./mysql_install_db --user=root --basedir=/usr/local/mysql --datadir=/home/tc/mysql/data
@@ -174,7 +192,7 @@ sudo unlink my.cnf
 sudo touch my.cnf
 ```
 
-`vi /usr/local/etc/mysql/my.cnf`，添加如下内容：
+`sudo vi /usr/local/etc/mysql/my.cnf`，添加如下内容：
 ```text
 [mysqld]
 bind-address=0.0.0.0
@@ -201,16 +219,15 @@ sudo /usr/local/etc/init.d/mysql start
 ### 5.1 方式一
 
 ```bash
-mysqladmin -u root password 你的密码
+sudo /usr/local/mysql/bin/mysqladmin -u root password 你的密码
 ```
 
 ### 5.1 方式二
 
 ```bash
-mysqladmin -u root password 你的密码
 sudo /usr/local/mysql/bin/mysql_secure_installation
 ```
-回显如下：
+选择操作和回显如下：
 ```text
 NOTE: RUNNING ALL PARTS OF THIS SCRIPT IS RECOMMENDED FOR ALL MariaDB
       SERVERS IN PRODUCTION USE!  PLEASE READ EACH STEP CAREFULLY!
@@ -227,8 +244,11 @@ can log into the MariaDB root user without the proper authorisation.
 
 You already have your root account protected, so you can safely answer 'n'.
 
-Switch to unix_socket authentication [Y/n] n
- ... skipping.
+Switch to unix_socket authentication [Y/n] y
+Enabled successfully!
+Reloading privilege tables..
+ ... Success!
+
 
 You already have your root account protected, so you can safely answer 'n'.
 
@@ -332,6 +352,8 @@ tce-load -wi libzip                 #支持zip扩展
 
 ## 3. 配置php.ini
 
+### 3.1. 开启扩展
+
 添加php.ini配置文件, 请按需开启扩展：
 ```bash
 cd /usr/local/etc/php7/
@@ -407,36 +429,47 @@ php -m | grep 'Warning'
 php -r "echo hash('md5','1234');"
 ```
 
-重启httpd
+### 3.2. 重启服务
+
 ```bash
 sudo /usr/local/etc/init.d/httpd restart
 ```
 
-重启Nginx，需要的话
+重启Nginx，需要的话：
 ```bash
 sudo /usr/local/etc/init.d/nginx stop
 sudo /usr/local/etc/init.d/nginx start
 ```
 
-## 3. 安装扩展mcrypt
+### 3.3. php.ini加入持久化
+
+```bash
+echo '/usr/local/etc/php7' >> /opt/.filetool.lst
+
+filetool.sh -b
+```
+
+## 4. 安装扩展mcrypt
 
 ```bash
 tce-load -wi libmcrypt.tcz mhash.tcz
 ```
 
-## 4. 安装oci8、pdo_oci扩展
+## 5. 安装oci8、pdo_oci扩展
 
-### 4.1 下载安装包
+### 5.1 下载安装包
 前往Oracle官网[Instant Client for Linux x86-64 (64-bit)](https://www.oracle.com/database/technologies/instant-client/linux-x86-64-downloads.html)
 下载instantclient以支持 oci8、pdo_oci扩展：
 ```bash
+cd /home/tc/
+
 #查看glibc的版本
 ldd --version
 
 #选择合适的版本下载
 wget https://download.oracle.com/otn_software/linux/instantclient/2112000/instantclient-basic-linux.x64-21.12.0.0.0dbru.zip
-
 unzip instantclient*.zip
+
 mkdir /home/tc/oracle
 cp instantclient_21_12/libclntsh.so.21.1 /home/tc/oracle/
 cp instantclient_21_12/libclntshcore.so.21.1 /home/tc/oracle/
@@ -445,9 +478,12 @@ cp instantclient_21_12/libocci.so.21.1 /home/tc/oracle/
 cd /home/tc/oracle && ln -s libclntsh.so.21.1 libclntsh.so.12.1 && cd /home/tc
 
 sudo mv /home/tc/oracle/ /usr/local/
+
+rm -rf instantclient_21_12
+unlink instantclient*.zip
 ```
 
-### 4.2 配置安装脚本
+### 5.2 配置安装脚本
 `sudo vi /usr/local/tce.installed/oracle`，添加如下内容：
 ```text
 #!/bin/sh
@@ -455,11 +491,13 @@ sudo mv /home/tc/oracle/ /usr/local/
 ldconfig -q
 ```
 
-### 4.3 打包oracle动态库包
+### 5.3 打包oracle动态库包
 
 ```bash
 cd /home/tc
+
 tce-load -wi squashfs-tools
+
 sudo chmod 777 /usr/local/tce.installed/oracle
 sudo chown tc:staff /usr/local/tce.installed/oracle
 sudo chmod -R 777 /usr/local/oracle
@@ -469,9 +507,17 @@ mksquashfs /usr/local/oracle /usr/local/tce.installed/oracle oracle.tcz -no-stri
 cp oracle.tcz /mnt/sda1/tce/optional
 echo 'oracle.tcz' >> /mnt/sda1/tce/onboot.lst
 #sudo sh /usr/local/tce.installed/oracle
+
+unlink oracle.tcz
+sudo reboot
 ``` 
 
-### 4.4 开启oci8、pdo_oci扩展
+验证是否加载oracle动态库
+```bash
+cat /etc/ld.so.conf | grep oracle
+```
+
+### 5.4 开启oci8、pdo_oci扩展
 ```bash
 tce-load -wi libaio
 
@@ -486,16 +532,21 @@ php -m | grep PDO_OCI
 参考 [linux下安装php扩展pdo_oci和oci8](https://www.cnblogs.com/tanghu/p/10396154.html)
 
 
-## 5. 配置httpd支持php
+## 6. 配置httpd支持php
 
 `sudo vi /usr/local/etc/httpd/httpd.conf`，在文件的末尾追加：
 ```text
 LoadModule php7_module modules/mod_php7.so
-Include /usr/local/etc/httpd/conf.d/*.conf
 AddType application/x-httpd-php .php
 ```
 
-`sudo vi /usr/local/apache2/htdocs/index.php`，添加内容：
+重启httpd服务：
+```bash
+sudo /usr/local/etc/init.d/httpd stop
+sudo /usr/local/etc/init.d/httpd start
+```
+
+添加测试脚本，`sudo vi /usr/local/apache2/htdocs/index.php`，添加内容：
 ```php
 <?php phpinfo();
 ```
@@ -503,15 +554,59 @@ AddType application/x-httpd-php .php
 访问页面index.php， 打开浏览器，使用 http://IP:8080/index.php 地址浏览，可以看到经典的PHP info详情，说明已经配置完毕。
 
 
-## 6. 配置nginx代理转发至httpd
+# 五、安装phpMyAdmin
 
-```text
-cd /usr/local/etc/nginx
-sudo mkdir -p conf.d
-sudo touch phpmyadmin.conf
+## 1.下载安装包
+
+```bash
+cd /home/tc
+wget https://files.phpmyadmin.net/phpMyAdmin/5.2.1/phpMyAdmin-5.2.1-all-languages.tar.gz
+tar zxvf phpMyAdmin-5.2.1-all-languages.tar.gz
+sudo mv phpMyAdmin-5.2.1-all-languages /usr/local/html/phpmyadmin
+sudo chown -R tc:staff /usr/local/html/phpmyadmin
+
+cd /usr/local/html/phpmyadmin/
+sudo mkdir -p tmp
+sudo chmod 777 tmp
+sudo cp config.sample.inc.php config.inc.php
+unlink /home/tc/phpMyAdmin-*.tar.gz
 ```
 
-编辑文件，`sudo vi phpmyadmin.conf`，添加如下内容：
+## 2. 添加httpd配置
+
+修改httpd配置，`sudo vi /usr/local/etc/httpd/httpd.conf`，末尾添加如下内容：
+```text
+Include /usr/local/etc/httpd/conf.d/*.conf
+```
+
+添加httpd配置文件，`sudo vi /usr/local/etc/httpd/conf.d/phpmyadmin.conf`
+```text
+<Directory "/usr/local/html/phpmyadmin">
+     DirectoryIndex index.html
+     Options Indexes FollowSymLinks
+     AllowOverride None
+     Require all granted
+</Directory>
+
+<VirtualHost *:8080>
+    ServerAdmin webmaster@dummy-host.example.com
+    DocumentRoot "/usr/local/html/phpmyadmin"
+    ServerName test.phpmydmin.com
+    ServerAlias test.phpmydmin.com
+</VirtualHost>
+```
+
+重启服务：
+```bash
+sudo /usr/local/etc/init.d/httpd restart
+```
+
+打开浏览器，使用 http://IP:8080/index.php 地址浏览，刷新页面，可以看到进入了phpMyAdmin登录页。
+
+
+## 3. 配置nginx代理转发至httpd
+
+添加nginx配置文件，`sudo vi /usr/local/etc/nginx/conf.d/phpmyadmin.conf`，添加如下内容：
 ```text
 upstream app-lamp{
     server 127.0.0.1:8080 weight=1 max_fails=2 fail_timeout=30s;
@@ -554,74 +649,20 @@ sudo /usr/local/etc/init.d/nginx reload
 你的虚拟机IP test.phpmyadmin.com
 ```
 
-打开浏览器，使用 http://test.phpmyadmin.com 地址浏览，可以看到经典的PHP info详情，说明Nginx已实现代理转发。
+打开浏览器，使用 http://test.phpmyadmin.com 地址浏览，强制刷新页面，可以看到进入了phpMyAdmin登录页，说明Nginx已实现代理转发。
 
+## 4. 验证Nginx转发httpd
 
-## 7. 持久化PHP的配置
-
+监听 httpd 日志：
 ```bash
-echo '/usr/local/etc/php7' >> /opt/.filetool.lst
-
-#需要安装oci8、pdo_oci扩展，请加入持久化
-echo '/usr/lib/libclntsh.so.21.1' >> /opt/.filetool.lst
-echo '/usr/lib/libclntsh.so.12.1' >> /opt/.filetool.lst
-echo '/usr/lib/libclntshcore.so.21.1' >> /opt/.filetool.lst
-echo '/usr/lib/libnnz21.so' >> /opt/.filetool.lst
-echo '/usr/lib/libocci.so.21.1' >> /opt/.filetool.lst
-
-filetool.sh -b
+tail -f /var/log/access_log
 ```
+打开浏览器，使用 http://test.phpmyadmin.com:8080/index.php 地址浏览， 查看到日志会打印js、css、jpg等资源文件请求。
 
-# 五、安装phpMyAdmin
+再使用 http://test.phpmyadmin.com 地址浏览， 查看到日志会打印php的请求路径, 说明Nginx已经实现了静态资源文件的处理。
 
-## 1.下载安装包
 
-```bash
-wget https://files.phpmyadmin.net/phpMyAdmin/5.2.1/phpMyAdmin-5.2.1-all-languages.tar.gz
-tar zxvf phpMyAdmin-5.2.1-all-languages.tar.gz
-sudo mv phpMyAdmin-5.2.1-all-languages /var/local/html/phpmyadmin
-sudo chmod -R tc:staff /var/local/html/phpmyadmin
-
-cd /var/local/html/phpmyadmin/
-sudo mkdir -p tmp
-sudo chmod 777 tmp
-sudo cp config.sample.inc.php config.inc.php
-```
-
-## 2. 添加httpd、nginx配置
-添加httpd配置文件，`sudo vi /usr/local/etc/httpd/conf.d/phpmyadmin.conf`
-```text
-<Directory "/usr/local/html/phpmyadmin">
-     DirectoryIndex index.html
-     Options Indexes FollowSymLinks
-     AllowOverride None
-     Require all granted
-</Directory>
-
-<VirtualHost *:8080>
-    ServerAdmin webmaster@dummy-host.example.com
-    DocumentRoot "/usr/local/html/phpmyadmin"
-    ServerName test.phpmydmin.com
-    ServerAlias test.phpmydmin.com
-</VirtualHost>
-```
-
-## 3. 重启httpd服务
-```bash
-sudo /usr/local/etc/init.d/httpd restart
-```
-
-打开浏览器，使用 http://test.phpmyadmin.com 地址浏览，可以看到进入了phpMyAdmin登录页，说明Nginx已实现代理转。
-
-验证，监听 httpd 日志：
-```bash
-tail -f access_log
-```
-打开浏览器，使用 http://test.phpmyadmin.com:8080 地址浏览， 查看到日志会打印js、css、jpg等资源文件请求。
-
-再使用 http://test.phpmyadmin.com 地址浏览， 查看到日志会打印php的请求路径, 说明nginx已经实现了静态资源文件的处理。
-
-## 4. 持久化phpMyAdmin
+## 5. 持久化phpMyAdmin
 
 ```bash
 filetool.sh -b
@@ -634,22 +675,16 @@ filetool.sh -b
 我们需要考虑将网站与数据库直接存放在硬盘而不是内存中。在Tiny Core Linux中，第一个硬盘会挂载到 /mnt/sda1 ，我们可以直接将网站与数据库的文件夹存放在这个下面，这样就不会占用内存空间了。
 如果是全新安装的话，可以在上面安装过程中，网页与数据库直接使用新的 /mnt/sda1/ 中的路径，这样就可以直接将数据放在硬盘，同时网站持久化中 echo “usr/local/html” >> /opt/.filetool.lst 的这一条命令也不再需要执行。
 
-## 1. 建立目录：
+## 1. 网站文件夹迁移：
 
 ```bash
 sudo mkdir -p /mnt/sda1/www
-sudo mkdir -p /mnt/sda1/mysql
-```
-
-## 2. 网站文件夹迁移：
-
-```bash
 sudo mv /usr/local/html/phpmyadmin /mnt/sda1/www/phpmyadmin
 sudo rm -r /usr/local/html
-sudo chmod -R tc:staff /mnt/sda1/www/
+sudo chown -R tc:staff /mnt/sda1/www/
 
-sudo sed -i 's|/usr/local/html|/home/www|g' /usr/local/etc/nginx/conf.d/phpmyadmin.conf
-sudo sed -i 's|/usr/local/html|/home/www|g' /usr/local/etc/httpd/conf.d/phpmyadmin.conf
+sudo sed -i 's|/usr/local/html|/mnt/sda1/www|g' /usr/local/etc/nginx/conf.d/phpmyadmin.conf
+sudo sed -i 's|/usr/local/html|/mnt/sda1/www|g' /usr/local/etc/httpd/conf.d/phpmyadmin.conf
 
 sudo /usr/local/etc/init.d/nginx reload
 sudo /usr/local/etc/init.d/httpd restart
@@ -659,14 +694,14 @@ sudo sed -i 's|/usr/local/html||g' /opt/.filetool.lst
 filetool.sh -b
 ```
 
-## 3. 数据库迁移
+## 2. 数据库迁移
 ```bash
 sudo /usr/local/etc/init.d/mysql stop
 
 sudo mv /home/tc/mysql /mnt/sda1/mysql
-sudo chmod -R tc:staff /mnt/sda1/mysql/
+sudo chown -R tc:staff /mnt/sda1/mysql/
 
-sudo sed -i 's|home/tc/|home/|g' /usr/local/etc/mysql/my.cnf
+sudo sed -i 's|home/tc|mnt/sda1|g' /usr/local/etc/mysql/my.cnf
 sudo /usr/local/etc/init.d/mysql start
 ```
 

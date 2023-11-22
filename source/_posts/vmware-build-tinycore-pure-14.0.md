@@ -261,7 +261,7 @@ APPEND quiet host=tinycore-14 waitusb=5:UUID="3e9b31a9-4cbb-403e-9c9c-27e0beb0f7
 
 ### 1.2 方式二
 
-编辑`/opt/bootsync.sh` 文件, 修改指令为：
+编辑`sudo vi /opt/bootsync.sh` 文件, 修改指令为：
 ```bash
 /usr/bin/sethostname tinycore-pure-14
 ```
