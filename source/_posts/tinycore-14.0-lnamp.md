@@ -222,7 +222,7 @@ sudo /usr/local/etc/init.d/mysql start
 sudo /usr/local/mysql/bin/mysqladmin -u root password 你的密码
 ```
 
-### 5.1 方式二
+### 5.1 方式二(推荐)
 
 ```bash
 sudo /usr/local/mysql/bin/mysql_secure_installation
@@ -582,8 +582,8 @@ Include /usr/local/etc/httpd/conf.d/*.conf
 添加httpd配置文件，`sudo vi /usr/local/etc/httpd/conf.d/phpmyadmin.conf`
 ```text
 <Directory "/usr/local/html/phpmyadmin">
-     DirectoryIndex index.html
-     Options Indexes FollowSymLinks
+     DirectoryIndex index.php index.html
+     #Options Indexes FollowSymLinks
      AllowOverride None
      Require all granted
 </Directory>
@@ -680,7 +680,6 @@ filetool.sh -b
 ```bash
 sudo mkdir -p /mnt/sda1/www
 sudo mv /usr/local/html/phpmyadmin /mnt/sda1/www/phpmyadmin
-sudo rm -r /usr/local/html
 sudo chown -R tc:staff /mnt/sda1/www/
 
 sudo sed -i 's|/usr/local/html|/mnt/sda1/www|g' /usr/local/etc/nginx/conf.d/phpmyadmin.conf
