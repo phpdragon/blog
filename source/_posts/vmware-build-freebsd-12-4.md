@@ -671,21 +671,16 @@ ls /mnt/hgfs
 -----------------
 
 
-# 七、参考
+# 七、参考资料
 
-[# 官方安装手册-安装FreeBSD](https://docs.freebsd.org/zh-cn/books/handbook/bsdinstall/)
-
-[# FreeBSD镜像使用帮助](https://debian.bjtu.edu.cn/help/freebsd/)
-
-[# FreeBSD修改为国内源](https://blog.csdn.net/qu6zhi/article/details/122439153)
-
-[# FreeBSD更换国内源](https://blog.csdn.net/xie__peng/article/details/129280246)
-
-[# FreeBSD 换源方法 2021 非官方镜像站](https://zhuanlan.zhihu.com/p/359251674)
-
-[# FreeBSD系统配置](https://www.chinafreebsd.cn/article/59da60970cb81)
+- [官方安装手册-安装FreeBSD](https://docs.freebsd.org/zh-cn/books/handbook/bsdinstall/)
+- [FreeBSD镜像使用帮助](https://debian.bjtu.edu.cn/help/freebsd/)
+- [FreeBSD修改为国内源](https://blog.csdn.net/qu6zhi/article/details/122439153)
+- [FreeBSD更换国内源](https://blog.csdn.net/xie__peng/article/details/129280246)
+- [FreeBSD 换源方法 2021 非官方镜像站](https://zhuanlan.zhihu.com/p/359251674)
+- [FreeBSD系统配置](https://www.chinafreebsd.cn/article/59da60970cb81)
 
 
 # 八、附件
 
-本文使用到的软件包已上传网盘：[BlogDocs->files->juejin->7301224822733897768](https://pan.baidu.com/s/1PilxMDxpeAbL92M6zJnFtA?pwd=6666#list/path=%2FBlogDocs%2Ffiles%2Fjuejin%2F7301224822733897768)
+本文使用到的软件包已上传网盘：[BlogDocs->files->vmware-build-freebsd-12-4](https://pan.baidu.com/s/1yEbHDQBzy43uV8gIYXqbnw?pwd=6666#list/path=%2FBlogDocs%2Ffiles%2Fvmware-build-freebsd-12-4)

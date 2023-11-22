@@ -354,8 +354,7 @@ nginx -V
 ```
 
 
-# 参考资料: 
+# 参考资料
 
-[0] [从源代码构建nginx-编译配置参数](http://nginx.org/en/docs/configure.html)
-
-[1] [如何给NGINX安装ngx_http_geoip2_module模块](https://www.azio.me/how-to-install-ngx_http_geoip2_module/)
+- [从源代码构建nginx-编译配置参数](http://nginx.org/en/docs/configure.html)
+- [如何给NGINX安装ngx_http_geoip2_module模块](https://www.azio.me/how-to-install-ngx_http_geoip2_module/)

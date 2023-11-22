@@ -453,13 +453,12 @@ yum -y groupinstall base --skip-broken
 ```
 
 
-# 六、参考：
+# 六、参考资料
 
-[Centos7安装open-vm-tools和设置共享文件夹](https://zhuanlan.zhihu.com/p/151666020)
-
-[CentOS 7 VMware-Tools Mount Shared Folder](https://simukti.net/blog/2016/09/10/centos-7-vmware-tools-mount-shared-folder/ "CentOS 7 VMware-Tools Mount Shared Folder")
+- [Centos7安装open-vm-tools和设置共享文件夹](https://zhuanlan.zhihu.com/p/151666020)
+- [CentOS 7 VMware-Tools Mount Shared Folder](https://simukti.net/blog/2016/09/10/centos-7-vmware-tools-mount-shared-folder/ "CentOS 7 VMware-Tools Mount Shared Folder")
 
 
 # 七、附件
 
-本文使用到的软件包已上传网盘：[BlogDocs->files->juejin->7301909180225437731](https://pan.baidu.com/s/1PilxMDxpeAbL92M6zJnFtA?pwd=6666#list/path=%2FBlogDocs%2Ffiles%2Fjuejin%2F7301909180225437731)
+本文使用到的软件包已上传网盘：[BlogDocs->files->vmware-build-small-centos-7.x](https://pan.baidu.com/s/1yEbHDQBzy43uV8gIYXqbnw?pwd=6666#list/path=%2FBlogDocs%2Ffiles%2Fvmware-build-small-centos-7.x)

@@ -156,12 +156,12 @@ service httpd restart
 
 {% asset_img 11.png 管理功能 %}
 
-# 六、参考
+# 六、参考资料
 
-[GitHub - USVN Installation ](https://github.com/usvn/usvn/wiki/Installation)
+- [GitHub - USVN Installation ](https://github.com/usvn/usvn/wiki/Installation)
 
 
 # 七、附件
 
-本文使用到的软件包已上传网盘：[BlogDocs->files->juejin->7301574373789007907](https://pan.baidu.com/s/1PilxMDxpeAbL92M6zJnFtA?pwd=6666#list/path=%2FBlogDocs%2Ffiles%2Fjuejin%2F7301574373789007907)
+本文使用到的软件包已上传网盘：[BlogDocs->files->centos6-lamp-usvn](https://pan.baidu.com/s/1yEbHDQBzy43uV8gIYXqbnw?pwd=6666#list/path=%2FBlogDocs%2Ffiles%2Fcentos6-lamp-usvn)
 

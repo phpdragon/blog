@@ -964,12 +964,12 @@ service php-fpm reload
 ------------
 
 
-# 四、参考：
-[LNMP平台搭建-Centos6.x](https://blog.csdn.net/Liang_GaRy/article/details/128410909)
+# 四、参考资料
 
-[CentOS 6, 编译安装lamp (php-fpm)](https://blog.csdn.net/weixin_30727835/article/details/98349275)
+- [LNMP平台搭建-Centos6.x](https://blog.csdn.net/Liang_GaRy/article/details/128410909)
+- [CentOS 6, 编译安装lamp (php-fpm)](https://blog.csdn.net/weixin_30727835/article/details/98349275)
 
 
 # 五、附件
 
-本文使用到的软件包已上传网盘：[BlogDocs->files->juejin->7300825244704063488](https://pan.baidu.com/s/1PilxMDxpeAbL92M6zJnFtA?pwd=6666#list/path=%2FBlogDocs%2Ffiles%2Fjuejin%2F7300825244704063488)
+本文使用到的软件包已上传网盘：[BlogDocs->files->centos6-lnmp](https://pan.baidu.com/s/1yEbHDQBzy43uV8gIYXqbnw?pwd=6666#list/path=%2FBlogDocs%2Ffiles%2Fcentos6-lnmp)

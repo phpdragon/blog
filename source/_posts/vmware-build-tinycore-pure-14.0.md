@@ -507,16 +507,14 @@ filetool.sh -b
 
 # 六、参考资料
 
-[Frugal Install Tiny Core Linux](http://www.tinycorelinux.net/install.html)
+- [Frugal Install Tiny Core Linux](http://www.tinycorelinux.net/install.html)
+- [Tiny Core Linux 安装配置](https://blog.csdn.net/stevenldj/article/details/112852507)
+- [TinyCore Linux - Initial steps](https://tiagojsilva.github.io/en/unixlike/meme/2021-10-29_tinycorelinux-install/#installation)
+- [将TinyCore安装到硬盘](https://www.jianshu.com/p/3f87fc24e2f6)
+- [Tiny Core Linux 安装配置](https://www.cnblogs.com/mq0036/p/13749661.html)
+- [Tinycore Linux基本配置及讲解](https://zhuanlan.zhihu.com/p/566463712?utm_id=0)
+- [Tiny Core Linux 的安装和使用](https://alenliu.blog.csdn.net/article/details/120319651)
 
-[Tiny Core Linux 安装配置](https://blog.csdn.net/stevenldj/article/details/112852507)
+# 七、附件
 
-[TinyCore Linux - Initial steps](https://tiagojsilva.github.io/en/unixlike/meme/2021-10-29_tinycorelinux-install/#installation)
-
-[将TinyCore安装到硬盘](https://www.jianshu.com/p/3f87fc24e2f6)
-
-[Tiny Core Linux 安装配置](https://www.cnblogs.com/mq0036/p/13749661.html)
-
-[Tinycore Linux基本配置及讲解](https://zhuanlan.zhihu.com/p/566463712?utm_id=0)
-
-[Tiny Core Linux 的安装和使用](https://alenliu.blog.csdn.net/article/details/120319651)
+本文使用到的软件包已上传网盘：[BlogDocs->files->tinycore-14.0](https://pan.baidu.com/s/1yEbHDQBzy43uV8gIYXqbnw?pwd=6666#list/path=%2FBlogDocs%2Ffiles%2Ftinycore-14.0)

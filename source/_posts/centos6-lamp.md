@@ -500,23 +500,17 @@ service httpd restart
 -----------
 
 
-# 四、参考
+# 四、参考资料
 
-[linux编译安装时常见错误解决办法](https://blog.csdn.net/m0_38004619/article/details/88598702)
-
-[LSWS PHP/LSAPI Build troubleshooting guide (Archive Only)](https://www.litespeedtech.com/support/wiki/doku.php/archive:php:lsapi-troubleshooting)
-
-[PHP编译安装时常见错误解决办法，PHP编译常见错误](https://www.jianshu.com/p/075e8e035bf5)
-
-[# 源码编译安装php出现的错误汇总](https://www.cnbugs.com/post-1285.html)
-
-[centos 安装 libmcrypt](https://blog.csdn.net/nianyixiaotian/article/details/82706927)
-
-[Linux下php安装mcrypt扩展](https://blog.csdn.net/ichen820/article/details/114693310)
-
-[PHP新增扩展方法](https://www.php.cn/faq/476567.html)
+- [linux编译安装时常见错误解决办法](https://blog.csdn.net/m0_38004619/article/details/88598702)
+- [LSWS PHP/LSAPI Build troubleshooting guide (Archive Only)](https://www.litespeedtech.com/support/wiki/doku.php/archive:php:lsapi-troubleshooting)
+- [PHP编译安装时常见错误解决办法，PHP编译常见错误](https://www.jianshu.com/p/075e8e035bf5)
+- [# 源码编译安装php出现的错误汇总](https://www.cnbugs.com/post-1285.html)
+- [centos 安装 libmcrypt](https://blog.csdn.net/nianyixiaotian/article/details/82706927)
+- [Linux下php安装mcrypt扩展](https://blog.csdn.net/ichen820/article/details/114693310)
+- [PHP新增扩展方法](https://www.php.cn/faq/476567.html)
 
 
 # 五、附件
 
-本文使用到的软件包已上传网盘：[BlogDocs->files->juejin->7300592516759044147](https://pan.baidu.com/s/1PilxMDxpeAbL92M6zJnFtA?pwd=6666#list/path=%2FBlogDocs%2Ffiles%2Fjuejin%2F7300592516759044147)
+本文使用到的软件包已上传网盘：[BlogDocs->files->centos6-lamp](https://pan.baidu.com/s/1yEbHDQBzy43uV8gIYXqbnw?pwd=6666#list/path=%2FBlogDocs%2Ffiles%2Fcentos6-lamp)

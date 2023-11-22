@@ -653,11 +653,11 @@ ll ./openssl-1.0.1e.tar.gz && unlink ./openssl-1.0.1e.tar.gz
 ```
 
 
-# 六、参考：
+# 六、参考资料
 
-[离线更新centos系统的openssh，升级到9.3p1](https://blog.csdn.net/qq_43913213/article/details/131510476)
+- [离线更新centos系统的openssh，升级到9.3p1](https://blog.csdn.net/qq_43913213/article/details/131510476)
 
 
 # 七、附件
 
-本文使用到的软件包已上传网盘：[BlogDocs->files->juejin->7300564263345618995](https://pan.baidu.com/s/1PilxMDxpeAbL92M6zJnFtA?pwd=6666#list/path=%2FBlogDocs%2Ffiles%2Fjuejin%2F7300564263345618995)
+本文使用到的软件包已上传网盘：[BlogDocs->files->vmware-build-small-centos-6.x](https://pan.baidu.com/s/1yEbHDQBzy43uV8gIYXqbnw?pwd=6666#list/path=%2FBlogDocs%2Ffiles%2Fvmware-build-small-centos-6.x)

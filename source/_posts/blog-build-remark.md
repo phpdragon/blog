@@ -304,6 +304,8 @@ jobs:
 
 点击查看 https://github.com/<GitHub用户名>/<你的项目名>/actions， 部署完成后，前往 https://<GitHub用户名>.github.io 查看网站。
 
-# 七、参考资料
+# 六、参考资料
+
 - Hexo Docs：https://hexo.io/zh-cn/docs/
 - Hexo Fluid 用户手册：https://fluid-dev.github.io/hexo-fluid-docs/
+- [白嫖 GitHub Pages，轻松搭建个人博客](https://my.oschina.net/u/5057806/blog/5602898)
