@@ -474,7 +474,142 @@ echo '/etc/init.d/rc.shutdown' >> /opt/.filetool.lst
 filetool.sh -b
 ```
 
-# 五、系统目录说明
+# 五、系统加固 
+
+> 提示: 你可以使用" tce-ab "命令来搜索和安装Tiny Core包。
+
+## 1. 安装iptables防火墙
+
+### 1.1. 安装iptables
+```bash
+tce-load -wi iptables.tcz
+```
+
+### 1.2. 添加防火墙规则
+
+```bash
+# 允许已建立的链接通行
+sudo iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+
+# 允许所有本机向外的访问
+sudo iptables -A OUTPUT -j ACCEPT
+
+# 允许本地回环接口(即允许本机访问本机)
+sudo iptables -A INPUT -i lo -j ACCEPT
+sudo iptables -A OUTPUT -o lo -j ACCEPT
+
+# 允许内网机器可以访问
+# iptables -A INPUT -p all -s X.X.X.0/24 -j ACCEPT 
+sudo iptables -A INPUT -p all -s 192.168.168.0/24 -j ACCEPT
+
+# 拒绝被Ping
+# 语法：iptables -A INPUT [-i 网卡名] -p icmp --icmp-type 8 -j DROP
+#sudo iptables -A INPUT -p icmp --icmp-type 8 -j DROP
+#sudo iptables -A INPUT -i eth0 -p icmp --icmp-type 8 -j DROP
+
+# 允许被ping
+# 语法：iptables -A INPUT [-i 网卡名] -p icmp --icmp-type 8 -j ACCEPT
+sudo iptables -A INPUT -p icmp --icmp-type 8 -j ACCEPT
+#sudo iptables -A INPUT -i eth0 -p icmp --icmp-type 8 -j ACCEPT
+
+# 允许访问SSH服务的22端口
+sudo iptables -A INPUT -p tcp --dport 22 -j ACCEPT
+# 允许访问Web服务的80端口
+sudo iptables -A INPUT -p tcp --dport 80 -j ACCEPT
+
+# 禁止其他未允许的规则访问
+sudo iptables -A FORWARD -j REJECT
+# 禁止其他未允许的规则访问
+sudo iptables -A INPUT -j REJECT
+```
+
+查看已添加规则：
+```bash
+sudo iptables --line-numbers -nv -L
+#
+sudo iptables -S
+```
+
+回显如下：
+```text
+tc@tc-pure-14:~$ sudo iptables -S
+-P INPUT ACCEPT
+-P FORWARD ACCEPT
+-P OUTPUT ACCEPT
+-A INPUT -i lo -j ACCEPT
+-A INPUT -p icmp -m icmp --icmp-type 8 -j ACCEPT
+-A INPUT -p tcp -m tcp --dport 22 -j ACCEPT
+-A INPUT -p tcp -m tcp --dport 80 -j ACCEPT
+-A INPUT -s 192.168.168.0/24 -j ACCEPT
+-A INPUT -j REJECT --reject-with icmp-port-unreachable
+-A FORWARD -j REJECT --reject-with icmp-port-unreachable
+-A OUTPUT -j ACCEPT
+-A OUTPUT -o lo -j ACCEPT
+```
+
+> 注意：因为之前添加了禁止其他未允许的规则访问规则，所以添加新规则之前请删除这个规则再补上。
+> 原因：iptables规则是按照规则链的顺序进行匹配的。如果在规则链中的某个位置有一个匹配到的规则，则之后的规则将不会生效。
+
+添加其他端口：
+```bash
+sudo iptables --line-numbers -nv -L
+
+#删除之前禁止其他未允许的规则访问
+sudo iptables -D INPUT 规则序号
+
+#添加你想要的端口
+sudo iptables -A INPUT -p tcp --dport 端口号 -j ACCEPT
+# 禁止其他未允许的规则访问
+sudo iptables -A INPUT -j REJECT
+```
+
+### 1.2. 配置加入持久化
+
+配置加入持久化：
+```bash
+cat /opt/iptables.sh <<EOF
+# 允许所有本机向外的访问
+sudo iptables -A OUTPUT -j ACCEPT
+
+# 允许本地回环接口(即允许本机访问本机)
+sudo iptables -A INPUT -i lo -j ACCEPT
+sudo iptables -A OUTPUT -o lo -j ACCEPT
+
+# 允许内网机器可以访问
+# iptables -A INPUT -p all -s X.X.X.0/24 -j ACCEPT 
+sudo iptables -A INPUT -p all -s 192.168.168.0/24 -j ACCEPT
+
+# 拒绝被Ping
+# 语法：iptables -A INPUT [-i 网卡名] -p icmp --icmp-type 8 -j DROP
+#sudo iptables -A INPUT -p icmp --icmp-type 8 -j DROP
+#sudo iptables -A INPUT -i eth0 -p icmp --icmp-type 8 -j DROP
+
+# 允许被ping
+# 语法：iptables -A INPUT [-i 网卡名] -p icmp --icmp-type 8 -j ACCEPT
+sudo iptables -A INPUT -p icmp --icmp-type 8 -j ACCEPT
+#sudo iptables -A INPUT -i eth0 -p icmp --icmp-type 8 -j ACCEPT
+
+# 允许访问SSH服务的22端口
+sudo iptables -A INPUT -p tcp --dport 22 -j ACCEPT
+# 允许访问Web服务的80端口
+sudo iptables -A INPUT -p tcp --dport 80 -j ACCEPT
+
+# 禁止其他未允许的规则访问
+sudo iptables -A FORWARD -j REJECT
+# 禁止其他未允许的规则访问
+sudo iptables -A INPUT -j REJECT
+EOF
+
+chmod 777 /opt/iptables.sh
+sudo chown root:staff /opt/bootlocal.sh
+echo "/opt/iptables.sh &" >> /opt/bootlocal.sh
+filetool.sh -b
+```
+
+
+参考： [iptables 命令详解和举例_](/blog/2023/11/24/iptables-usage-details/)
+
+# 六、系统目录说明
 
 ```text
 /bin              二进制可执行命令
@@ -505,7 +640,7 @@ filetool.sh -b
 
 参考： [TinyCore Linux文件结构说明](https://www.kancloud.cn/dlover/linux/1634235)
 
-# 六、参考资料
+# 七、参考资料
 
 - [Frugal Install Tiny Core Linux](http://www.tinycorelinux.net/install.html)
 - [Tiny Core Linux 安装配置](https://blog.csdn.net/stevenldj/article/details/112852507)
@@ -514,7 +649,8 @@ filetool.sh -b
 - [Tiny Core Linux 安装配置](https://www.cnblogs.com/mq0036/p/13749661.html)
 - [Tinycore Linux基本配置及讲解](https://zhuanlan.zhihu.com/p/566463712?utm_id=0)
 - [Tiny Core Linux 的安装和使用](https://alenliu.blog.csdn.net/article/details/120319651)
+- [configure-microcore-tiny-linux-as-nat-p-nat-router-using-iptables](https://iotbytes.wordpress.com/configure-microcore-tiny-linux-as-nat-p-nat-router-using-iptables/)
 
-# 七、附件
+# 八、附件
 
 本文使用到的软件包已上传网盘：[BlogDocs->files->vmware-build-tinycore-pure-14.0](https://pan.baidu.com/s/1yEbHDQBzy43uV8gIYXqbnw?pwd=6666#list/path=%2FBlogDocs%2Ffiles%2Fvmware-build-tinycore-pure-14.0)

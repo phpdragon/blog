@@ -229,9 +229,6 @@ sudo iptables -A INPUT -m conntrack --ctstate INVALID -j DROP
 ## 1.3. 开放指定的端口
 
 ```bash
-# 允许已建立的链接通行
-sudo iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
-
 # 允许访问SSH服务的22端口
 sudo iptables -A INPUT -p tcp --dport 22 -j ACCEPT
 # 允许访问FTP服务的21端口
