@@ -261,7 +261,7 @@ $ iptables -I INPUT -s 123.45.6.0/24 -j DROP
 
 ### 1.5.1. 命令语法：
 
-> 提示： IP/mask： 表示该IP的子网段1~254的地址都匹配
+> 提示： ip/mask： 表示该IP的子网段1~254的地址都匹配
 
 ```bash
 #内部局域网端口映射
@@ -269,7 +269,7 @@ iptables -t nat -A PREROUTING [-s 访客IP/mask] [-i 网卡名] -p [tcp/udp] --d
 
 #iptables -t nat -A POSTROUTING [-d 转发目标IP/mask] -p [tcp/udp] [--dport 转发目标端口] -j SNAT --to 防火墙主机IP
 # 或者改用动态地址伪装(推荐)
-iptables -t nat -A POSTROUTING [-d 转发目标IP/mask] [-p [tcp/udp]] [--dport 转发目标端口] -j MASQUERADE
+iptables -t nat -A POSTROUTING [-d 转发目标IP/mask] [-o 网卡名] [-p [tcp/udp]] [--dport 转发目标端口] -j MASQUERADE
 ```
 
 ### 1.5.2. 端口映射示例：
@@ -294,7 +294,7 @@ iptables -t nat -F
 
 # 限定访客ip、网卡版本
 iptables -t nat -A PREROUTING -s 192.168.168.150 -i eth0 -p tcp --dport 1234 -j DNAT --to 172.16.1.71:8080
-iptables -t nat -A POSTROUTING -d 172.16.1.71 -p tcp --dport 8080 -j SNAT --to 192.168.168.153
+iptables -t nat -A POSTROUTING -d 172.16.1.71 -o eth0 -p tcp --dport 8080 -j SNAT --to 192.168.168.153
 
 # 不限定IP、网卡版本(推荐)
 iptables -t nat -A PREROUTING -p tcp --dport 1234 -j DNAT --to 172.16.1.71:8080
@@ -307,9 +307,50 @@ iptables -t nat -A POSTROUTING -j MASQUERADE
 
 ## 1.6. 启动网络转发规则
 
-公网 210.14.67.7 让内网 192.168.188.0/24 上网
+### 1.6.1. 命令语法
+
+> 提示： ip/mask： 表示该IP的子网段1~254的地址都匹配
+
+```text
+iptables -t nat -A POSTROUTING -s 需要访问网络的ip[/mask] -j SNAT --to-source 防火墙ip
+```
+
+### 1.6.2. 环境准备
+
+**目标：让内网网段 10.0.0.0/24 通过 192.168.168.153 上网**
+
+- 虚拟机器1(防火墙主机)：
+1、NAT网：192.168.168.153 (可上外网)
+2、LAN网：10.0.0.1
+
+- 虚拟机器2：
+LAN网：10.0.0.100
+
+- 虚拟机器3：
+LAN网：10.0.0.200
+
+### 1.6.3. 通过iptables进行SNAT(源地址转换)实现共享上网
+
+1.在虚拟机器2和3上，默认网关指向机器1(防火墙主机)：
 ```bash
-iptables -t nat -A POSTROUTING -s 192.168.188.0/24 -j SNAT --to-source 210.14.67.127
+# 设置默认网关，也可以在后面加上dev ens33
+ip route add default via 10.0.0.1
+```
+
+2.在虚拟机器1(防火墙主机)上，开启Linux主机的核心转发功能：
+```bash
+sysctl -w net.ipv4.ip_forward=1
+```
+
+3.在虚拟机器1(防火墙主机)上，配置防火墙规则：
+```bash
+# 方法1：适合于有固定外网地址的：
+iptables -t nat -A POSTROUTING -s 10.0.0.0/24 -o eth0 -j SNAT --to-source 192.168.168.153
+# 方法2：适合变化外网地址（拨号上网）：
+iptables -t nat -A POSTROUTING -s 10.0.0.0/24 -j MASQUERADE   ##伪装
+
+# 保存规则
+iptables-save > /etc/sysconfig/iptables
 ```
 
 ## 1.7. 字符串匹配
