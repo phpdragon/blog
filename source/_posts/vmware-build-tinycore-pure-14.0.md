@@ -488,10 +488,12 @@ tce-load -wi iptables.tcz
 
 ### 1.2. 添加防火墙规则
 
+添加防火墙脚本：
 ```bash
-# 允许已建立的链接通行
-sudo iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
-
+sudo touch /opt/iptables.sh
+sudo chmod 777 /opt/iptables.sh
+sudo chown root:staff /opt/iptables.sh
+cat > /opt/iptables.sh <<EOF
 # 允许所有本机向外的访问
 sudo iptables -A OUTPUT -j ACCEPT
 
@@ -522,6 +524,9 @@ sudo iptables -A INPUT -p tcp --dport 80 -j ACCEPT
 sudo iptables -A FORWARD -j REJECT
 # 禁止其他未允许的规则访问
 sudo iptables -A INPUT -j REJECT
+EOF
+
+sudo sh /opt/iptables.sh
 ```
 
 查看已添加规则：
@@ -566,42 +571,7 @@ sudo iptables -A INPUT -j REJECT
 
 ### 1.2. 配置加入持久化
 
-配置加入持久化：
 ```bash
-cat /opt/iptables.sh <<EOF
-# 允许所有本机向外的访问
-sudo iptables -A OUTPUT -j ACCEPT
-
-# 允许本地回环接口(即允许本机访问本机)
-sudo iptables -A INPUT -i lo -j ACCEPT
-sudo iptables -A OUTPUT -o lo -j ACCEPT
-
-# 允许内网机器可以访问
-# iptables -A INPUT -p all -s X.X.X.0/24 -j ACCEPT 
-sudo iptables -A INPUT -p all -s 192.168.168.0/24 -j ACCEPT
-
-# 拒绝被Ping
-# 语法：iptables -A INPUT [-i 网卡名] -p icmp --icmp-type 8 -j DROP
-#sudo iptables -A INPUT -p icmp --icmp-type 8 -j DROP
-#sudo iptables -A INPUT -i eth0 -p icmp --icmp-type 8 -j DROP
-
-# 允许被ping
-# 语法：iptables -A INPUT [-i 网卡名] -p icmp --icmp-type 8 -j ACCEPT
-sudo iptables -A INPUT -p icmp --icmp-type 8 -j ACCEPT
-#sudo iptables -A INPUT -i eth0 -p icmp --icmp-type 8 -j ACCEPT
-
-# 允许访问SSH服务的22端口
-sudo iptables -A INPUT -p tcp --dport 22 -j ACCEPT
-# 允许访问Web服务的80端口
-sudo iptables -A INPUT -p tcp --dport 80 -j ACCEPT
-
-# 禁止其他未允许的规则访问
-sudo iptables -A FORWARD -j REJECT
-# 禁止其他未允许的规则访问
-sudo iptables -A INPUT -j REJECT
-EOF
-
-chmod 777 /opt/iptables.sh
 sudo chown root:staff /opt/bootlocal.sh
 echo "/opt/iptables.sh &" >> /opt/bootlocal.sh
 filetool.sh -b
