@@ -68,7 +68,6 @@ THIS=\$(basename \$0)
 [ -e /lib64 ] || [ "\$(uname -m)" != "x86_64" ] || ln -s /lib /lib64
 EOF
 chmod -R 775 jdk8/usr/local/tce.installed/jdk8
-chown -R tc:staff jdk8/usr/local/tce.installed/
 ```
 
 ### 1.5. 构建tcz文件
@@ -76,6 +75,8 @@ chown -R tc:staff jdk8/usr/local/tce.installed/
 构建jdk8.tcz文件：
 ```bash
 tce-load -wi squashfs-tools
+
+chown -R tc:staff jdk8
 mksquashfs jdk8 jdk8.tcz
 md5sum jdk8.tcz > jdk8.tcz.md5.txt
 find jdk8 -not -type d | sed 's|^jdk8/|./|g' > jdk8.tcz.list
