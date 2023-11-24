@@ -95,9 +95,10 @@ ifconfig eth0 | grep "inet addr"
 
 ## 3. 开机自动启动
 
-`sudo vi /opt/bootlocal.sh`，加入启动命令：
-```text
-/usr/local/etc/init.d/nginx start &
+加入启动命令：
+```bash
+sudo chown root:staff /opt/bootlocal.sh
+echo "/usr/local/etc/init.d/nginx start &" >> /opt/bootlocal.sh
 ```
 
 ## 4. 持久化Nginx的配置与网页
@@ -148,9 +149,10 @@ sudo /usr/local/etc/init.d/httpd start
 
 ## 3. 开机自动启动
 
-`sudo vi /opt/bootlocal.sh`，加入启动命令：
-```text
-/usr/local/etc/init.d/httpd start &
+加入启动命令：
+```bash
+sudo chown root:staff /opt/bootlocal.sh
+echo "/usr/local/etc/init.d/httpd start &" >> /opt/bootlocal.sh
 ```
 
 ## 4. 持久化httpd的配置与网页
@@ -305,9 +307,10 @@ sudo /usr/local/mysql/bin/mysql -uroot -p -e 'select version();'
 
 ## 6. 开机自动启动
 
-`sudo vi /opt/bootlocal.sh`，加入启动命令：
+加入启动命令：
 ```bash
-/usr/local/etc/init.d/mysql start &
+sudo chown root:staff /opt/bootlocal.sh
+echo "/usr/local/etc/init.d/mysql start &" >> /opt/bootlocal.sh
 ```
 
 ## 7. my.cnf加入持久化

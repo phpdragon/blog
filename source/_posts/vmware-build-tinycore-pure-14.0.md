@@ -366,9 +366,10 @@ sudo /usr/local/etc/init.d/openssh start
 sudo /usr/local/etc/init.d/openssh status
 ```
 
-编辑开启启动配置文件， `sudo vi /opt/bootlocal.sh` , 加入开机启动配置：
-```text
-/usr/local/etc/init.d/openssh start &
+加入开机启动配置：
+```bash
+sudo chown root:staff /opt/bootlocal.sh
+echo "/usr/local/etc/init.d/openssh start &" >> /opt/bootlocal.sh
 ```
 
 查看客户机IP
@@ -394,9 +395,9 @@ sudo /usr/local/etc/init.d/open-vm-tools status
 ps -fU root | grep vmtoolsd
 ```
 
-编辑开机启动配置文件， `sudo vi /opt/bootlocal.sh` , 加入开机启动配置：
-```text
-/usr/local/etc/init.d/open-vm-tools start &
+加入开机启动配置：
+```bash
+echo "/usr/local/etc/init.d/open-vm-tools start &" >> /opt/bootlocal.sh
 ```
 
 ## 7. 开启cron
