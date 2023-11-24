@@ -467,48 +467,48 @@ cd /home/tc/
 ldd --version
 
 #选择合适的版本下载
-wget https://download.oracle.com/otn_software/linux/instantclient/2112000/instantclient-basic-linux.x64-21.12.0.0.0dbru.zip
+#wget https://download.oracle.com/otn_software/linux/instantclient/2112000/instantclient-basic-linux.x64-21.12.0.0.0dbru.zip
+cp /mnt/hgfs/shared-folder/instantclient-basic-linux.x64-21.12.0.0.0dbru.zip ./
 unzip instantclient*.zip
 
-mkdir /home/tc/oracle
-cp instantclient_21_12/libclntsh.so.21.1 /home/tc/oracle/
-cp instantclient_21_12/libclntshcore.so.21.1 /home/tc/oracle/
-cp instantclient_21_12/libnnz21.so /home/tc/oracle/
-cp instantclient_21_12/libocci.so.21.1 /home/tc/oracle/
-cd /home/tc/oracle && ln -s libclntsh.so.21.1 libclntsh.so.12.1 && cd /home/tc
-
-sudo mv /home/tc/oracle/ /usr/local/
+mkdir -p /home/tc/oracle/usr/local/oracle
+cp instantclient_21_12/libclntsh.so.21.1 /home/tc/oracle/usr/local/oracle
+cp instantclient_21_12/libclntshcore.so.21.1 /home/tc/oracle/usr/local/oracle
+cp instantclient_21_12/libnnz21.so /home/tc/oracle/usr/local/oracle
+cp instantclient_21_12/libocci.so.21.1 /home/tc/oracle/usr/local/oracle
+cd /home/tc/oracle/usr/local/oracle && ln -s libclntsh.so.21.1 libclntsh.so.12.1 && cd /home/tc
 
 rm -rf instantclient_21_12
 unlink instantclient*.zip
 ```
 
 ### 5.2 配置安装脚本
-`sudo vi /usr/local/tce.installed/oracle`，添加如下内容：
-```text
+
+添加如下内容：
+```bash
+mkdir -p /home/tc/oracle/usr/local/tce.installed
+cat > /home/tc/oracle/usr/local/tce.installed/oracle <<EOF
 #!/bin/sh
-[ $(grep oracle /etc/ld.so.conf) ] || echo /usr/local/oracle >> /etc/ld.so.conf
+[ \$(grep oracle /etc/ld.so.conf) ] || echo "/usr/local/oracle" >> /etc/ld.so.conf
 ldconfig -q
+EOF
+
+chmod 775 /home/tc/oracle/usr/local/tce.installed/oracle
 ```
 
 ### 5.3 打包oracle动态库包
 
 ```bash
-cd /home/tc
-
 tce-load -wi squashfs-tools
 
-sudo chmod 777 /usr/local/tce.installed/oracle
-sudo chown tc:staff /usr/local/tce.installed/oracle
-sudo chmod -R 777 /usr/local/oracle
-sudo chown root:root /usr/local/oracle
-mksquashfs /usr/local/oracle /usr/local/tce.installed/oracle oracle.tcz -no-strip
+cd /home/tc
+chown -R tc:staff /home/tc/oracle/
+mksquashfs oracle oracle.tcz
 
-cp oracle.tcz /mnt/sda1/tce/optional
-echo 'oracle.tcz' >> /mnt/sda1/tce/onboot.lst
-#sudo sh /usr/local/tce.installed/oracle
+mv -f oracle.tcz /etc/sysconfig/tcedir/optional/
+echo 'oracle.tcz' >> /etc/sysconfig/tcedir/onboot.lst
 
-unlink oracle.tcz
+rm -rf /home/tc/oracle/
 sudo reboot
 ``` 
 
