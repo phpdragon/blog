@@ -142,7 +142,7 @@ apt-get install iptables
 tce-load -wi iptables.tcz
 ```
 
-#三、管理 iptables 服务
+# 三、管理 iptables 服务
 
 CentOS 6
 ```bash
