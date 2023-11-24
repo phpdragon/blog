@@ -37,10 +37,13 @@ tags:
 - 5.POSTROUTING（路由后）
 
 这是NetFilter规定的五个规则链，任何一个数据包，只要经过本机，必将经过这五个链中的其中一个链：
-- 对于 raw表，只能做在2个链上：PREROUTING、OUTPUT。
-- 对于 filter表，只能做在3个链上：INPUT ，FORWARD ，OUTPUT。
-- 对于 nat表，只能做在3个链上：PREROUTING ，OUTPUT ，POSTROUTING。
-- 而 mangle表，则是5个链都可以做：PREROUTING，INPUT，FORWARD，OUTPUT，POSTROUTING。
+- 对于 raw 表，只能做在2个链上：PREROUTING、OUTPUT。
+- 对于 filter 表，只能做在3个链上：INPUT ，FORWARD ，OUTPUT。
+- 对于 nat 表，只能做在3个链上：PREROUTING ，OUTPUT ，POSTROUTING。
+- 而 mangle 表，则是5个链都可以做：PREROUTING，INPUT，FORWARD，OUTPUT，POSTROUTING。
+
+表的处理优先级：raw>mangle>nat>filter :
+{% asset_img 2.png iptables流程图 %}
 
 
 ## 3. 命令参数说明
@@ -62,18 +65,18 @@ iptables v1.8.2
     iptables -h (打印帮助信息)
 
 命令:  允许使用长或短参数
-    --append        -A  链名                   在[链名]规则链的最后新增一个规则
-    --delete        -D  链名                   删除[链名]规则链中的所有规则
-    --delete        -D  链名    序号           明确指定删除[链名]规则链中序号是[序号]的规则(第一个序号是1)
-    --insert        -I  链名    [序号]         在规则链的头部加入新规则 (默认规则序号从1开始)
-    --replace       -R  链名    序号           替换/修改[链名]规则链中序号是[序号]的规则(第一个序号是1)
-    --list          -L  [链名   [序号]]        列出[链名]规则链中的所有规则 或者 序号是[序号]的规则
+    --append        -A  链名                   在[链名]规则链的末尾添加一条新的规则
+    --delete        -D  链名                   删除指定[链名]中的所有规则
+    --delete        -D  链名    序号           删除指定[链名]中的某一条规则，可删除指定[序号](第一个序号是1)
+    --insert        -I  链名    [序号]         在指定[链名]的头部加入新规则 (未指定序号时默认作为第一条规则)
+    --replace       -R  链名    序号           修改、替换指定[链名]中的某一条规则，可指定规则[序号](第一个序号是1)
+    --list          -L  [链名   [序号]]        列出指定[链名]中的所有规则,如指定序号,则只列出指定[序号]规则。未指定链名，则列出表中的所有链
     --list-rules    -S  [链名   [序号]]        打印出[链名]规则链中的所有规则 或者 序号是[序号]的规则
-    --flush         -F  [链名]                 清空所有链的规则 或者 明确指定清空[链名]的所有规则
+    --flush         -F  [链名]                 清空指定[链名]中的所有规则，未指定链名，则清空表中的所有链
     --zero          -Z  [链名  [序号]]         清空所有链的计数器 或者 明确指定清空[链名]的计数器
     --new           -N  链名                   创建一个新的用户定义链
     --delete-chain  -X  [链名]                 删除用户自定义链
-    --policy        -P  链名    目标           将[链名]规则链的策略更改为目标策略
+    --policy        -P  链名    目标           设置指定[链名]的默认策略
     --rename-chain  -E  旧链名  新链名          更改链名(移动任何引用)，主要是用来给用户自定义的链重命名
 
 参数: (加一个“!”表示除了哪个IP之外)
@@ -102,7 +105,7 @@ iptables v1.8.2
     --verbose       -v                         详细模式，例如： -vv | -vvv ，越多越详细
     --wait          -w  [秒数]                 在放弃之前等待获取xtables锁的最大时间
     --wait-interval -W  [秒数]                 尝试获取xtables锁的等待时间，默认为1秒
-    --line-numbers                             列出时打印行号
+    --line-numbers                             列出规则列表时，同时显示规则在链中的顺序号
     --exact         -x                         展开数字(显示精确值)
 [!] --fragment      -f                         只匹配第二个或更多的片段
     --modprobe=<command>                       尝试使用此命令插入模块
@@ -177,64 +180,64 @@ iptables 使用三个不同的链来允许或阻止流量：输入(INPUT)、输�
 
 ```bash
 # 允许本地回环接口(即允许本机访问本机)
-sudo iptables -A INPUT -i lo -j ACCEPT
-sudo iptables -A OUTPUT -o lo -j ACCEPT
+iptables -A INPUT -i lo -j ACCEPT
+iptables -A OUTPUT -o lo -j ACCEPT
 
 # 允许所有本机向外的访问
-sudo iptables -A OUTPUT -j ACCEPT
+iptables -A OUTPUT -j ACCEPT
 
 # 允许内网机器可以访问
 # iptables -A INPUT -p all -s X.X.X.0/24 -j ACCEPT 
-sudo iptables -A INPUT -p all -s 192.168.168.0/24 -j ACCEPT 
+iptables -A INPUT -p all -s 192.168.168.0/24 -j ACCEPT 
 
 # 拒绝被Ping
 # 语法：iptables -A INPUT [-i 网卡名] -p icmp --icmp-type 8 -j DROP
-#sudo iptables -A INPUT -p icmp --icmp-type 8 -j DROP
-#sudo iptables -A INPUT -i eth0 -p icmp --icmp-type 8 -j DROP
+#iptables -A INPUT -p icmp --icmp-type 8 -j DROP
+#iptables -A INPUT -i eth0 -p icmp --icmp-type 8 -j DROP
 
 # 允许被ping
 # 语法：iptables -A INPUT [-i 网卡名] -p icmp --icmp-type 8 -j ACCEPT
-sudo iptables -A INPUT -p icmp --icmp-type 8 -j ACCEPT
-#sudo iptables -A INPUT -i eth0 -p icmp --icmp-type 8 -j ACCEPT
+iptables -A INPUT -p icmp --icmp-type 8 -j ACCEPT
+#iptables -A INPUT -i eth0 -p icmp --icmp-type 8 -j ACCEPT
 
 # 允许已建立的链接通行
-sudo iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
 
 # 禁止其他未允许的规则访问
-sudo iptables -A INPUT -j REJECT
+iptables -A INPUT -j REJECT
 # 禁止其他未允许的规则访问
-sudo iptables -A FORWARD -j REJECT
+iptables -A FORWARD -j REJECT
 ```
 
 ## 1.2. 连接管理
 
 ```bash
 # 允许环回连接
-sudo iptables -A INPUT -i lo -j ACCEPT 
-sudo iptables -A OUTPUT -o lo -j ACCEPT
+iptables -A INPUT -i lo -j ACCEPT 
+iptables -A OUTPUT -o lo -j ACCEPT
 
 # 允许已建立和相关的传入连接
-sudo iptables -A INPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+iptables -A INPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
 
 # 允许已建立的传出连接
-sudo iptables -A OUTPUT -m conntrack --ctstate ESTABLISHED -j ACCEPT
+iptables -A OUTPUT -m conntrack --ctstate ESTABLISHED -j ACCEPT
 
 # 网卡eth1转发到网卡eth0
-sudo iptables -A FORWARD -i eth1 -o eth0 -j ACCEPT
+iptables -A FORWARD -i eth1 -o eth0 -j ACCEPT
 
 # 丢弃无效数据包
-sudo iptables -A INPUT -m conntrack --ctstate INVALID -j DROP
+iptables -A INPUT -m conntrack --ctstate INVALID -j DROP
 ```
 
 ## 1.3. 开放指定的端口
 
 ```bash
 # 允许访问SSH服务的22端口
-sudo iptables -A INPUT -p tcp --dport 22 -j ACCEPT
+iptables -A INPUT -p tcp --dport 22 -j ACCEPT
 # 允许访问FTP服务的21端口
-sudo iptables -A INPUT -p tcp --dport 21 -j ACCEPT
+iptables -A INPUT -p tcp --dport 21 -j ACCEPT
 # 允许访问Web服务的80端口
-sudo iptables -A INPUT -p tcp --dport 80 -j ACCEPT
+iptables -A INPUT -p tcp --dport 80 -j ACCEPT
 ```
 
 ## 1.4. 屏蔽 IP/IP段
@@ -242,10 +245,10 @@ sudo iptables -A INPUT -p tcp --dport 80 -j ACCEPT
 ```bash
 # 屏蔽单个IP
 # iptables -I INPUT [-i 网卡名] -s xxxx.xxxx.xxxx.xxxx -j DROP
-sudo iptables -I INPUT -s 123.45.6.7 -j DROP
+iptables -I INPUT -s 123.45.6.7 -j DROP
 
 # 屏蔽整个IP段，即从 123.0.0.1 到 123.255.255.254
-sudo iptables -I INPUT -s 123.0.0.0/8 -j DROP
+iptables -I INPUT -s 123.0.0.0/8 -j DROP
 
 # 屏蔽IP区段，即从 123.45.0.1 到 123.45.255.254
 $ iptables -I INPUT -s 124.45.0.0/16 -j DROP
@@ -256,25 +259,65 @@ $ iptables -I INPUT -s 123.45.6.0/24 -j DROP
 
 ## 1.5. 端口映射
 
-转发本机的 2222 端口 到 内网机器 192.168.168.154 的 22 端口
+### 1.5.1. 命令语法：
+
+> 提示： IP/mask： 表示该IP的子网段1~254的地址都匹配
+
 ```bash
-# 语法：iptables -t nat -A PREROUTING [-d 本机IP] -p tcp --dport [本机端口] -j DNAT --to-dest [目标IP]:[目标端口]
-sudo iptables -t nat -A PREROUTING -d 192.168.168.153 -p tcp --dport 2222 -j DNAT --to-dest 192.168.168.154:22
+#内部局域网端口映射
+iptables -t nat -A PREROUTING [-s 访客IP/mask] [-i 网卡名] -p [tcp/udp] --dport 监听端口 -j DNAT --to 转发目标IP:转发目标端口
+
+#iptables -t nat -A POSTROUTING [-d 转发目标IP/mask] -p [tcp/udp] [--dport 转发目标端口] -j SNAT --to 防火墙主机IP
+# 或者改用动态地址伪装(推荐)
+iptables -t nat -A POSTROUTING [-d 转发目标IP/mask] [-p [tcp/udp]] [--dport 转发目标端口] -j MASQUERADE
 ```
+
+### 1.5.2. 端口映射示例：
+
+> 如果想要NAT功能够正常使用，需要开启Linux主机的核心转发功能：
+> `sysctl -w net.ipv4.ip_forward=1`
+> 或者
+> `echo 1 > /proc/sys/net/ipv4/ip_forward`
+
+**示例：转发防火墙 192.168.168.153 的 1234 端口到内网机器 172.16.1.71 的 8080 端口**
+
+> 访客IP： 192.168.168.150 （192.168.168.150/mask： 表示子网段1~254的地址都匹配）
+> 内部局域网服务IP/端口： 172.16.1.71:8080
+> 防火墙主机IP： 192.168.168.153
+
+```bash
+# 开启Linux主机的核心转发功能
+sysctl -w net.ipv4.ip_forward=1
+
+# 清空nat表规则
+iptables -t nat -F
+
+# 限定访客ip、网卡版本
+iptables -t nat -A PREROUTING -s 192.168.168.150 -i eth0 -p tcp --dport 1234 -j DNAT --to 172.16.1.71:8080
+iptables -t nat -A POSTROUTING -d 172.16.1.71 -p tcp --dport 8080 -j SNAT --to 192.168.168.153
+
+# 不限定IP、网卡版本(推荐)
+iptables -t nat -A PREROUTING -p tcp --dport 1234 -j DNAT --to 172.16.1.71:8080
+iptables -t nat -A POSTROUTING -j MASQUERADE
+```
+
+访问 http://防火墙主机ip:1234 验证。
+
+参考：[linux端口映射的几种方法](https://laoyublog.com/zhide/9158.html)
 
 ## 1.6. 启动网络转发规则
 
 公网 210.14.67.7 让内网 192.168.188.0/24 上网
 ```bash
-sudo iptables -t nat -A POSTROUTING -s 192.168.188.0/24 -j SNAT --to-source 210.14.67.127
+iptables -t nat -A POSTROUTING -s 192.168.188.0/24 -j SNAT --to-source 210.14.67.127
 ```
 
 ## 1.7. 字符串匹配
 
 比如，我们要过滤所有 TCP 连接中的字符串test，一旦出现它我们就终止这个连接，我们可以这么做：
 ```bash
-sudo iptables -A INPUT -p tcp -m string --algo kmp --string "test" -j REJECT --reject-with tcp-reset
-sudo iptables -L
+iptables -A INPUT -p tcp -m string --algo kmp --string "test" -j REJECT --reject-with tcp-reset
+iptables -L
 ```
 
 回显如下：
@@ -294,45 +337,45 @@ target     prot opt source               destination
 
 ```bash
 # 阻止 Windows 蠕虫的攻击
-sudo iptables -I INPUT -j DROP -p tcp -s 0.0.0.0/0 -m string --algo kmp --string "cmd.exe"
+iptables -I INPUT -j DROP -p tcp -s 0.0.0.0/0 -m string --algo kmp --string "cmd.exe"
 
 # 防止 SYN 洪水攻击
-sudo iptables -A INPUT -p tcp --syn -m limit --limit 5/second -j ACCEPT
+iptables -A INPUT -p tcp --syn -m limit --limit 5/second -j ACCEPT
 
 # 防止端口扫描
-sudo iptables -N port-scanningiptables -A port-scanning -p tcp --tcp-flags SYN,ACK,FIN,RST RST -m limit --limit 1/s --limit-burst 2 -j RETURNiptables -A port-scanning -j DROP
+iptables -N port-scanningiptables -A port-scanning -p tcp --tcp-flags SYN,ACK,FIN,RST RST -m limit --limit 1/s --limit-burst 2 -j RETURNiptables -A port-scanning -j DROP
 
 # SSH 暴力破解保护
-sudo iptables -A INPUT -p tcp --dport ssh -m conntrack --ctstate NEW -m recent --setiptables -A INPUT -p tcp --dport ssh -m conntrack --ctstate NEW -m recent --update --seconds 60 --hitcount 10 -j DROP
+iptables -A INPUT -p tcp --dport ssh -m conntrack --ctstate NEW -m recent --setiptables -A INPUT -p tcp --dport ssh -m conntrack --ctstate NEW -m recent --update --seconds 60 --hitcount 10 -j DROP
 
 # 同步泛洪保护
-sudo iptables -N syn_floodiptables -A INPUT -p tcp --syn -j syn_floodiptables -A syn_flood -m limit --limit 1/s --limit-burst 3 -j RETURN
-sudo iptables -A syn_flood -j DROPiptables -A INPUT -p icmp -m limit --limit  1/s --limit-burst 1 -j ACCEPT
-sudo iptables -A INPUT -p icmp -m limit --limit 1/s --limit-burst 1 -j LOG --log-prefix PING-DROP:
-sudo iptables -A INPUT -p icmp -j DROPiptables -A OUTPUT -p icmp -j ACCEPT
+iptables -N syn_floodiptables -A INPUT -p tcp --syn -j syn_floodiptables -A syn_flood -m limit --limit 1/s --limit-burst 3 -j RETURN
+iptables -A syn_flood -j DROPiptables -A INPUT -p icmp -m limit --limit  1/s --limit-burst 1 -j ACCEPT
+iptables -A INPUT -p icmp -m limit --limit 1/s --limit-burst 1 -j LOG --log-prefix PING-DROP:
+iptables -A INPUT -p icmp -j DROPiptables -A OUTPUT -p icmp -j ACCEPT
 
 # 使用 SYNPROXY 缓解 SYN 泛洪
-sudo iptables -t raw -A PREROUTING -p tcp -m tcp --syn -j CT --notrack
-sudo iptables -A INPUT -p tcp -m tcp -m conntrack --ctstate INVALID,UNTRACKED -j SYNPROXY --sack-perm --timestamp --wscale 7 --mss 1460
-sudo iptables -A INPUT -m conntrack --ctstate INVALID -j DROP
+iptables -t raw -A PREROUTING -p tcp -m tcp --syn -j CT --notrack
+iptables -A INPUT -p tcp -m tcp -m conntrack --ctstate INVALID,UNTRACKED -j SYNPROXY --sack-perm --timestamp --wscale 7 --mss 1460
+iptables -A INPUT -m conntrack --ctstate INVALID -j DROP
 
 # 阻止非 SYN 的新数据包
-sudo iptables -A INPUT -p tcp ! --syn -m state --state NEW -j DROP
+iptables -A INPUT -p tcp ! --syn -m state --state NEW -j DROP
 
 # 阻止带有虚假 TCP 标志的数据包
-sudo iptables -t mangle -A PREROUTING -p tcp --tcp-flags FIN,SYN,RST,PSH,ACK,URG NONE -j DROP
-sudo iptables -t mangle -A PREROUTING -p tcp --tcp-flags FIN,SYN FIN,SYN -j DROP
-sudo iptables -t mangle -A PREROUTING -p tcp --tcp-flags SYN,RST SYN,RST -j DROP
-sudo iptables -t mangle -A PREROUTING -p tcp --tcp-flags FIN,RST FIN,RST -j DROP
-sudo iptables -t mangle -A PREROUTING -p tcp --tcp-flags FIN,ACK FIN -j DROP
-sudo iptables -t mangle -A PREROUTING -p tcp --tcp-flags ACK,URG URG -j DROP
-sudo iptables -t mangle -A PREROUTING -p tcp --tcp-flags ACK,FIN FIN -j DROP
-sudo iptables -t mangle -A PREROUTING -p tcp --tcp-flags ACK,PSH PSH -j DROP
-sudo iptables -t mangle -A PREROUTING -p tcp --tcp-flags ALL ALL -j DROP
-sudo iptables -t mangle -A PREROUTING -p tcp --tcp-flags ALL NONE -j DROP
-sudo iptables -t mangle -A PREROUTING -p tcp --tcp-flags ALL FIN,PSH,URG -j DROP
-sudo iptables -t mangle -A PREROUTING -p tcp --tcp-flags ALL SYN,FIN,PSH,URG -j DROP
-sudo iptables -t mangle -A PREROUTING -p tcp --tcp-flags ALL SYN,RST,ACK,FIN,URG -j DROP
+iptables -t mangle -A PREROUTING -p tcp --tcp-flags FIN,SYN,RST,PSH,ACK,URG NONE -j DROP
+iptables -t mangle -A PREROUTING -p tcp --tcp-flags FIN,SYN FIN,SYN -j DROP
+iptables -t mangle -A PREROUTING -p tcp --tcp-flags SYN,RST SYN,RST -j DROP
+iptables -t mangle -A PREROUTING -p tcp --tcp-flags FIN,RST FIN,RST -j DROP
+iptables -t mangle -A PREROUTING -p tcp --tcp-flags FIN,ACK FIN -j DROP
+iptables -t mangle -A PREROUTING -p tcp --tcp-flags ACK,URG URG -j DROP
+iptables -t mangle -A PREROUTING -p tcp --tcp-flags ACK,FIN FIN -j DROP
+iptables -t mangle -A PREROUTING -p tcp --tcp-flags ACK,PSH PSH -j DROP
+iptables -t mangle -A PREROUTING -p tcp --tcp-flags ALL ALL -j DROP
+iptables -t mangle -A PREROUTING -p tcp --tcp-flags ALL NONE -j DROP
+iptables -t mangle -A PREROUTING -p tcp --tcp-flags ALL FIN,PSH,URG -j DROP
+iptables -t mangle -A PREROUTING -p tcp --tcp-flags ALL SYN,FIN,PSH,URG -j DROP
+iptables -t mangle -A PREROUTING -p tcp --tcp-flags ALL SYN,RST,ACK,FIN,URG -j DROP
 ```
 
 ## 1.9. 删除已添加的规则
@@ -349,38 +392,40 @@ sudo iptables -t mangle -A PREROUTING -p tcp --tcp-flags ALL SYN,RST,ACK,FIN,URG
 ```bash
 # 查看现有规则(带序号)
 # 语法：iptables --line-numbers [-t 表名] -L [链名]
-sudo iptables --line-numbers -t filter -L
-sudo iptables --line-numbers -L
+iptables --line-numbers -t filter -L
+iptables --line-numbers -L
 
 # 删除规则
 # 语法：iptables [-t 表名] -D [链名 [序号]]
 # 比如要删除 PREROUTING 里序号为 2 的规则，执行：
-sudo iptables -t nat -D PREROUTING 2
+iptables -t nat -D PREROUTING 2
 
 # 比如要删除 INPUT 里序号为 8 的规则，执行：
-sudo iptables -D INPUT 8
+iptables -D INPUT 8
 ```
 
 ## 1.10. 其他管理命令
 
 ```bash
 # 详细查看已添加的规则-INPUT
-sudo iptables -nv --line-numbers -L INPUT
+iptables -nv --line-numbers -L INPUT
 
 # 清空所有的防火墙规则
-sudo iptables -F
+iptables -F
 
 # 清空所有INPUT的防火墙规则
-sudo iptables -F INPUT
+iptables -F INPUT
 
 # 清空计数
-sudo iptables -Z
+iptables -Z
 
 # 删除用户自定义链
-sudo iptables -X
+iptables -X
 ```
 
 # 五、参考资料
 
 - [iptables命令详解和举例（完整版）](https://blog.csdn.net/wangquan1992/article/details/100534543) 
+- [iptables的四表五链与NAT工作原理](https://zhuanlan.zhihu.com/p/347754874)
 - [iptables 常用使用命令](https://blog.csdn.net/hietech/article/details/132550445)
+- [linux端口映射的几种方法](https://laoyublog.com/zhide/9158.html)
