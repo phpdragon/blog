@@ -63,7 +63,6 @@ cd /home/tc
 mkdir -p jdk8/usr/local/tce.installed
 cat > jdk8/usr/local/tce.installed/jdk8 <<EOF
 #!/bin/sh
-THIS=\$(basename \$0)
 . /etc/profile.d/jdk8.sh
 [ -e /lib64 ] || [ "\$(uname -m)" != "x86_64" ] || ln -s /lib /lib64
 EOF
