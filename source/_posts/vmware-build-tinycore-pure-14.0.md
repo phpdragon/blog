@@ -481,6 +481,8 @@ filetool.sh -b
 
 ## 1. 安装iptables防火墙
 
+> 可使用脚本化管理iptables，项目地址: [tinycore-ext-repository](https://github.com/phpdragon/tinycore-ext-repository/tree/main/14.x/x86_64/tcz)
+
 ### 1.1. 安装iptables
 ```bash
 tce-load -wi iptables.tcz
@@ -584,7 +586,7 @@ echo "/opt/iptables.sh &" >> /opt/bootlocal.sh
 filetool.sh -b
 ```
 
-参考： [iptables 命令详解和举例_](/blog/2023/11/24/iptables-usage-details/)
+参考： [iptables 命令详解和举例](/blog/2023/11/24/iptables-usage-details/)
 
 # 六、系统目录说明
 
