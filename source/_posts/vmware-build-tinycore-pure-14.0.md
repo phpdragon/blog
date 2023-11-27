@@ -568,7 +568,7 @@ sudo iptables -A INPUT -p tcp --dport 端口号 -j ACCEPT
 sudo iptables -A INPUT -j REJECT
 ```
 
-### 1.2. 配置加入持久化
+### 1.3. 配置加入持久化
 
 ```bash
 sudo chown tc:staff /opt/.filetool.lst
@@ -576,7 +576,7 @@ echo "/opt/iptables.sh" >> /opt/.filetool.lst
 filetool.sh -b
 ```
 
-### 1.3. 添加防火墙自启动服务：
+### 1.4. 添加防火墙自启动服务：
 
 ```bash
 sudo chown tc:staff /opt/bootlocal.sh
