@@ -97,7 +97,7 @@ ifconfig eth0 | grep "inet addr"
 
 加入启动命令：
 ```bash
-sudo chown root:staff /opt/bootlocal.sh
+sudo chown tc:staff /opt/bootlocal.sh
 echo "/usr/local/etc/init.d/nginx start &" >> /opt/bootlocal.sh
 ```
 
@@ -151,7 +151,7 @@ sudo /usr/local/etc/init.d/httpd start
 
 加入启动命令：
 ```bash
-sudo chown root:staff /opt/bootlocal.sh
+sudo chown tc:staff /opt/bootlocal.sh
 echo "/usr/local/etc/init.d/httpd start &" >> /opt/bootlocal.sh
 ```
 
@@ -309,7 +309,7 @@ sudo /usr/local/mysql/bin/mysql -uroot -p -e 'select version();'
 
 加入启动命令：
 ```bash
-sudo chown root:staff /opt/bootlocal.sh
+sudo chown tc:staff /opt/bootlocal.sh
 echo "/usr/local/etc/init.d/mysql start &" >> /opt/bootlocal.sh
 ```
 

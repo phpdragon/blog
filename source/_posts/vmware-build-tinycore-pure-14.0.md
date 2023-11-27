@@ -368,7 +368,7 @@ sudo /usr/local/etc/init.d/openssh status
 
 加入开机启动配置：
 ```bash
-sudo chown root:staff /opt/bootlocal.sh
+sudo chown tc:staff /opt/bootlocal.sh
 echo "/usr/local/etc/init.d/openssh start &" >> /opt/bootlocal.sh
 ```
 
@@ -488,11 +488,10 @@ tce-load -wi iptables.tcz
 
 ### 1.2. 添加防火墙规则
 
-添加防火墙脚本：
 ```bash
 sudo touch /opt/iptables.sh
 sudo chmod 777 /opt/iptables.sh
-sudo chown root:staff /opt/iptables.sh
+sudo chown tc:staff /opt/iptables.sh
 cat > /opt/iptables.sh <<EOF
 # 允许所有本机向外的访问
 sudo iptables -A OUTPUT -j ACCEPT
@@ -572,11 +571,18 @@ sudo iptables -A INPUT -j REJECT
 ### 1.2. 配置加入持久化
 
 ```bash
-sudo chown root:staff /opt/bootlocal.sh
-echo "/opt/iptables.sh &" >> /opt/bootlocal.sh
+sudo chown tc:staff /opt/.filetool.lst
+echo "/opt/iptables.sh" >> /opt/.filetool.lst
 filetool.sh -b
 ```
 
+### 1.3. 添加防火墙自启动服务：
+
+```bash
+sudo chown tc:staff /opt/bootlocal.sh
+echo "/opt/iptables.sh &" >> /opt/bootlocal.sh
+filetool.sh -b
+```
 
 参考： [iptables 命令详解和举例_](/blog/2023/11/24/iptables-usage-details/)
 
