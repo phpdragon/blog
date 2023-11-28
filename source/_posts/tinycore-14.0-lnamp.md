@@ -460,6 +460,8 @@ tce-load -wi libmcrypt.tcz mhash.tcz
 
 ## 5. 安装oci8、pdo_oci扩展
 
+> 可使用脚本安装oracle oci8依赖库，项目地址: [tinycore-tcz-repository](https://github.com/phpdragon/tinycore-tcz-repository/tree/main/14.x/x86_64/tcz)
+
 ### 5.1 下载安装包
 前往Oracle官网[Instant Client for Linux x86-64 (64-bit)](https://www.oracle.com/database/technologies/instant-client/linux-x86-64-downloads.html)
 下载instantclient以支持 oci8、pdo_oci扩展：
@@ -472,16 +474,12 @@ ldd --version
 #选择合适的版本下载
 #wget https://download.oracle.com/otn_software/linux/instantclient/2112000/instantclient-basic-linux.x64-21.12.0.0.0dbru.zip
 cp /mnt/hgfs/shared-folder/instantclient-basic-linux.x64-21.12.0.0.0dbru.zip ./
-unzip instantclient*.zip
 
-mkdir -p /home/tc/oracle/usr/local/oracle
-cp instantclient_21_12/libclntsh.so.21.1 /home/tc/oracle/usr/local/oracle
-cp instantclient_21_12/libclntshcore.so.21.1 /home/tc/oracle/usr/local/oracle
-cp instantclient_21_12/libnnz21.so /home/tc/oracle/usr/local/oracle
-cp instantclient_21_12/libocci.so.21.1 /home/tc/oracle/usr/local/oracle
-cd /home/tc/oracle/usr/local/oracle && ln -s libclntsh.so.21.1 libclntsh.so.12.1 && cd /home/tc
+mkdir -p /home/tc/oracle-oci8/usr/local/
+unzip -o instantclient*.zip -d /home/tc/oracle-oci8/usr/local/
 
-rm -rf instantclient_21_12
+mv -f /home/tc/oracle-oci8/usr/local/instantclient* /home/tc/oracle-oci8/usr/local/oracle-oci8
+
 unlink instantclient*.zip
 ```
 
@@ -489,14 +487,14 @@ unlink instantclient*.zip
 
 添加如下内容：
 ```bash
-mkdir -p /home/tc/oracle/usr/local/tce.installed
-cat > /home/tc/oracle/usr/local/tce.installed/oracle <<EOF
+mkdir -p /home/tc/oracle-oci8/usr/local/tce.installed
+cat > /home/tc/oracle-oci8/usr/local/tce.installed/oracle-oci8 <<EOF
 #!/bin/sh
-[ \$(grep oracle /etc/ld.so.conf) ] || echo "/usr/local/oracle" >> /etc/ld.so.conf
+[ \$(grep "oracle-oci8" /etc/ld.so.conf) ] || echo "/usr/local/oracle-oci8" >> /etc/ld.so.conf
 ldconfig -q
 EOF
 
-chmod 775 /home/tc/oracle/usr/local/tce.installed/oracle
+chmod 775 /home/tc/oracle-oci8/usr/local/tce.installed/oracle-oci8
 ```
 
 ### 5.3 打包oracle动态库包
@@ -505,13 +503,13 @@ chmod 775 /home/tc/oracle/usr/local/tce.installed/oracle
 tce-load -wi squashfs-tools
 
 cd /home/tc
-chown -R tc:staff /home/tc/oracle/
-mksquashfs oracle oracle.tcz
+chown -R tc:staff /home/tc/oracle-oci8/
+mksquashfs oracle-oci8 oracle-oci8.tcz
 
-mv -f oracle.tcz /etc/sysconfig/tcedir/optional/
-echo 'oracle.tcz' >> /etc/sysconfig/tcedir/onboot.lst
+mv -f oracle-oci8.tcz /etc/sysconfig/tcedir/optional/
+echo 'oracle-oci8.tcz' >> /etc/sysconfig/tcedir/onboot.lst
 
-rm -rf /home/tc/oracle/
+rm -rf /home/tc/oracle-oci8/
 sudo reboot
 ``` 
 

@@ -16,7 +16,7 @@ tags:
 
 > 本文选择安装版本为 jdk-8u201-linux-x64.tar.gz
 >
-> 以下脚本已打包在github项目：[tinycore-ext-repository](https://github.com/phpdragon/tinycore-ext-repository/tree/main/14.x/x86_64/tcz)
+> 以下脚本已打包在github项目：[tinycore-tcz-repository](https://github.com/phpdragon/tinycore-tcz-repository/tree/main/14.x/x86_64/tcz)
 
 ### 1.1. 拷贝文件
 
