@@ -492,6 +492,16 @@ php -i | grep 'Thread Safety'
 Thread Safety => enabled
 ```
 
+记下当前php的编译参数
+```bash
+php -i | grep 'Configure Command'
+```
+回显大致如下：
+```text
+'./configure'  '--prefix=/usr/local' ...其他参数
+```
+记下prefix参数的路径，下文需要。
+
 ### 4.2 使用Centos系统编译同版本PHP
 
 使用Centos6|7 系统，下载相同的php版本源码包，使用如下编译参数进行编译：
@@ -499,7 +509,7 @@ Thread Safety => enabled
 > 使用 `./configure --help | grep zts` 查看开启线程安全的参数，得到参数是： `--enable-maintainer-zts`
 
 ```bash
-# 编译一个最小的php版本
+# prefix参数请使用上一节中TinyCoreLinux系统的值，然后编译一个最小的php版本
 ./configure  \
 --prefix=/usr/local \
 --without-pear \
@@ -519,11 +529,11 @@ make install
 php -i | grep 'Thread Safety'
 ```
 
-### 4.3 安装libmcrypt库
+### 4.3 在CentOS系统中安装libmcrypt库
 
 前往官网下载libmcrypt源码，[libmcrypt-2.5.8.tar.gz](https://sourceforge.net/projects/mcrypt/files/Libmcrypt/2.5.8/libmcrypt-2.5.8.tar.gz).
 
-编译安装：
+在CentOS系统中编译安装：
 ```bash
 cd ~/
 wget https://sourceforge.net/projects/mcrypt/files/Libmcrypt/2.5.8/libmcrypt-2.5.8.tar.gz
@@ -534,16 +544,19 @@ make -j64
 make install
 ```
 
-### 4.3 安装mcrypt扩展
+### 4.4 在CentOS系统中安装mcrypt扩展
 
 前往官网下载mcrypt源码，[mcrypt-1.0.6.tgz](https://pecl.php.net/get/mcrypt-1.0.6.tgz)
 
+在CentOS系统中编译安装：
 ```bash
 cd ~/
 wget https://pecl.php.net/get/mcrypt-1.0.6.tgz
 tar zxvf mcrypt-1.0.6.tgz
 cd mcrypt-1.0.6
+
 phpize
+
 ./configure
 make -j64
 make install
@@ -554,7 +567,7 @@ Installing shared extensions:     /usr/local/lib/php/extensions/no-debug-zts-201
 ```
 进入扩展目录 `/usr/local/lib/php/extensions/no-debug-zts-20190902/`， 拷贝好生成的mcrypt.so文件到 TinyCore 系统下。
 
-### 4.4 TinyCoreLinux安装mcrypt扩展
+### 4.5 TinyCoreLinux安装mcrypt扩展
 
 登录TinyCore系统，安装mcrypt需要的依赖库：
 ```bash
@@ -568,11 +581,11 @@ php -i | grep 'Loaded Configuration File'
 # 获取扩展文件的存放目录
 cat /usr/local/etc/php7/php.ini | grep 'extension_dir'
 
-# 拷贝mcrypt动态库文件
+# 拷贝从CentOS系统中编译得到的mcrypt动态库文件
 cp ~/mcrypt.so /usr/local/lib/php/extensions
 ```
 
-编辑 /usr/local/etc/php7/php.ini 文件，再其他扩展的配置后面增加下面的内容：
+编辑 /usr/local/etc/php7/php.ini 文件，在其他扩展的配置后面增加如下内容：
 ```text
 extension=mcrypt
 ```
@@ -618,7 +631,11 @@ php -f ~/mcrypt.php
 tc@tc-pure-14:~$ php -f mcrypt.php 
 encrypt str:HESz0Zxl3afIhK15OWZMi5oGTnNGRDOZEpY1LMLXuZg=
 ```
+说明得到正确的mcrypt.so动态库文件。
 
+### 4.6 小结
+
+在CentOS中编译PHP，一定要同版本，同线上安全类型，prefix 参数要一致，才能得到兼容的动态库文件。
 
 ## 5. 安装oci8、pdo_oci扩展
 
