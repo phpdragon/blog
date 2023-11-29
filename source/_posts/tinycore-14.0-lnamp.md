@@ -482,9 +482,143 @@ filetool.sh -b
 
 ## 4. 安装扩展mcrypt
 
+### 4.1 判断PHP是否开启线程安全
 ```bash
-tce-load -wi libmcrypt.tcz mhash.tcz
+#查看TinyCore的PHP版本是否开启线程安全
+php -i | grep 'Thread Safety'
 ```
+回显：
+```text
+Thread Safety => enabled
+```
+
+### 4.2 使用Centos系统编译PHP
+
+使用Centos6|7 系统，下载相同的php版本源码包，使用如下编译参数进行编译：
+
+> 使用 `./configure --help | grep zts` 查看开启线程安全的参数，得到参数是： `--enable-maintainer-zts`
+
+```bash
+# 编译一个最小的php版本
+./configure  \
+--prefix=/usr/local \
+--without-pear \
+--with-openssl-dir \
+--without-iconv \
+--without-sqlite3 \
+--without-pdo-sqlite \
+--without-libxml \
+--disable-all \
+--enable-shared \
+--enable-maintainer-zts
+
+make -j64
+make install
+
+#验证是否开启线程安全
+php -i | grep 'Thread Safety'
+```
+
+### 4.3 安装libmcrypt库
+
+前往官网下载libmcrypt源码，[libmcrypt-2.5.8.tar.gz](https://sourceforge.net/projects/mcrypt/files/Libmcrypt/2.5.8/libmcrypt-2.5.8.tar.gz).
+
+编译安装：
+```bash
+cd ~/
+wget https://sourceforge.net/projects/mcrypt/files/Libmcrypt/2.5.8/libmcrypt-2.5.8.tar.gz
+tar zxvf libmcrypt-2.5.8.tgz
+cd libmcrypt-2.5.8
+./configure
+make -j64
+make install
+```
+
+### 4.3 安装mcrypt扩展
+
+前往官网下载mcrypt源码，[mcrypt-1.0.6.tgz](https://pecl.php.net/get/mcrypt-1.0.6.tgz)
+
+```bash
+cd ~/
+wget https://pecl.php.net/get/mcrypt-1.0.6.tgz
+tar zxvf mcrypt-1.0.6.tgz
+cd mcrypt-1.0.6
+phpize
+./configure
+make -j64
+make install
+```
+回显如下：
+```text
+Installing shared extensions:     /usr/local/lib/php/extensions/no-debug-zts-20190902/
+```
+进入扩展目录 `/usr/local/lib/php/extensions/no-debug-zts-20190902/`， 拷贝好生成的mcrypt.so文件到 TinyCore 系统下。
+
+### 4.4 TinyCoreLinux安装mcrypt扩展
+
+登录TinyCore系统，安装mcrypt需要的依赖库：
+```bash
+tce-load -wi libmcrypt.tcz
+```
+
+#查看PHP的配置文件路径
+```bash
+php -i | grep 'Loaded Configuration File'
+
+# 获取扩展文件的存放目录
+cat /usr/local/etc/php7/php.ini | grep 'extension_dir'
+
+# 拷贝mcrypt动态库文件
+cp ~/mcrypt.so /usr/local/lib/php/extensions
+```
+
+编辑 /usr/local/etc/php7/php.ini 文件，再其他扩展的配置后面增加下面的内容：
+```text
+extension=mcrypt
+```
+
+验证：
+```bash
+php -m | grep 'mcrypt'
+```
+
+编写PHP脚本测试:
+```bash
+cat > ~/mcrypt.php <<EOF
+<?php
+
+echo 'encrypt str:' . encrypt('1234') . PHP_EOL;
+
+function encrypt( \$string ) {
+    \$algorithm = 'rijndael-128'; // You can use any of the available
+    \$key = md5( "mypassword", true); // bynary raw 16 byte dimension.
+    \$iv_length = mcrypt_get_iv_size( \$algorithm, MCRYPT_MODE_CBC );
+    \$iv = mcrypt_create_iv( \$iv_length, MCRYPT_RAND );
+    \$encrypted = mcrypt_encrypt( \$algorithm, \$key, \$string, MCRYPT_MODE_CBC, \$iv );
+    \$result = base64_encode( \$iv . \$encrypted );
+    return \$result;
+}
+
+function decrypt( \$string ) {
+    \$algorithm =  'rijndael-128';
+    \$key = md5( "mypassword", true );
+    \$iv_length = mcrypt_get_iv_size( \$algorithm, MCRYPT_MODE_CBC );
+    \$string = base64_decode( \$string );
+    \$iv = substr( \$string, 0, \$iv_length );
+    \$encrypted = substr( \$string, \$iv_length );
+    \$result = mcrypt_decrypt( \$algoritmo, \$key, \$encrypted, MCRYPT_MODE_CBC, \$iv );
+    return \$result;
+}
+EOF
+
+php -f ~/mcrypt.php
+```
+回显如下：
+```text
+tc@tc-pure-14:~$ php -f mcrypt.php 
+encrypt str:HESz0Zxl3afIhK15OWZMi5oGTnNGRDOZEpY1LMLXuZg=
+```
+
 
 ## 5. 安装oci8、pdo_oci扩展
 
