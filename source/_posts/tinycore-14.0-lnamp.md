@@ -911,6 +911,8 @@ sudo /usr/local/etc/init.d/mysql start
 - [轻量化Tiny Core Linux硬盘安装nginx+php+mysql](https://www.ssdlsoft.com/other/144)
 - [LNAMP(Linux+Nginx+Apache+Mysql+PHP)高性能架构配置实战版](https://blog.51cto.com/hao360/1652709)
 - [centos 安装 libmcrypt](https://blog.csdn.net/nianyixiaotian/article/details/82706927)
+- [Instant Client Installation for Linux x86-64 (64-bit)](https://www.oracle.com/database/technologies/instant-client/linux-x86-64-downloads.html)
+
 
 # 八、附件
 
