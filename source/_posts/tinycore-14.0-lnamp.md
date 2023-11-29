@@ -492,7 +492,7 @@ php -i | grep 'Thread Safety'
 Thread Safety => enabled
 ```
 
-### 4.2 使用Centos系统编译PHP
+### 4.2 使用Centos系统编译同版本PHP
 
 使用Centos6|7 系统，下载相同的php版本源码包，使用如下编译参数进行编译：
 
@@ -893,6 +893,7 @@ sudo /usr/local/etc/init.d/mysql start
 
 - [轻量化Tiny Core Linux硬盘安装nginx+php+mysql](https://www.ssdlsoft.com/other/144)
 - [LNAMP(Linux+Nginx+Apache+Mysql+PHP)高性能架构配置实战版](https://blog.51cto.com/hao360/1652709)
+- [centos 安装 libmcrypt](https://blog.csdn.net/nianyixiaotian/article/details/82706927)
 
 # 八、附件
 
