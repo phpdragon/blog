@@ -582,7 +582,7 @@ php -i | grep 'Loaded Configuration File'
 cat /usr/local/etc/php7/php.ini | grep 'extension_dir'
 
 # 拷贝从CentOS系统中编译得到的mcrypt动态库文件
-cp ~/mcrypt.so /usr/local/lib/php/extensions
+cp ~/mcrypt.so /usr/local/lib/php/extensions/
 ```
 
 编辑 /usr/local/etc/php7/php.ini 文件，在其他扩展的配置后面增加如下内容：
@@ -635,7 +635,7 @@ encrypt str:HESz0Zxl3afIhK15OWZMi5oGTnNGRDOZEpY1LMLXuZg=
 
 ### 4.6 小结
 
-在CentOS中编译PHP，一定要同版本，同线上安全类型，prefix 参数要一致，才能得到兼容的动态库文件。
+在CentOS中编译PHP，一定要同版本，同线程安全类型，prefix 参数要一致，才能得到兼容的动态库文件。
 
 ## 5. 安装oci8、pdo_oci扩展
 
