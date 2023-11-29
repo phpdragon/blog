@@ -39,8 +39,9 @@ sudo mkdir -p /usr/local/html
 sudo cp /usr/local/lib/nginx/html/index.html /usr/local/html
 ```
 
-添加nginx配置文件，`sudo vi /usr/local/etc/nginx/nginx.conf`，添加如下内容：
-```text
+添加nginx配置文件：
+```bash
+cat > ~/nginx.conf <<EOF
 worker_processes  1;
 
 events {
@@ -59,10 +60,15 @@ http {
 
     include conf.d/*.conf;
 }
+EOF
+
+sudo install -b -m 644 -o root -g staff ~/nginx.conf /usr/local/etc/nginx/
+unlink ~/nginx.conf
 ```
 
-添加vhost配置文件，`sudo vi /usr/local/etc/nginx/conf.d/default.conf`，添加如下内容：
-```text
+添加vhost配置文件：
+```bash
+cat > ~/default.conf <<EOF
 server {
     listen          80;
     server_name     localhost;
@@ -78,20 +84,11 @@ server {
     }
 
 }
-```
+EOF
 
-启动Nginx：
-```bash
-sudo /usr/local/etc/init.d/nginx start
-sudo /usr/local/etc/init.d/nginx reload
-sudo /usr/local/etc/init.d/nginx status
+sudo install -b -m 644 -o root -g staff ~/default.conf /usr/local/etc/nginx/conf.d/
+unlink ~/default.conf
 ```
-
-查看客户机ip：
-```bash
-ifconfig eth0 | grep "inet addr" 
-```
-打开浏览器，使用 IP 地址浏览，可以看到nginx的欢迎网页，说明nginx已经正常工作了。
 
 ## 3. 开机自动启动
 
@@ -109,6 +106,32 @@ echo '/usr/local/etc/nginx' >> /opt/.filetool.lst
 echo '/usr/local/html' >> /opt/.filetool.lst
 
 filetool.sh -b
+```
+
+## 5. 启动Nginx：
+
+```bash
+sudo /usr/local/etc/init.d/nginx start
+sudo /usr/local/etc/init.d/nginx reload
+sudo /usr/local/etc/init.d/nginx status
+```
+
+查看客户机ip：
+```bash
+ifconfig eth0 | grep "inet addr" 
+```
+打开浏览器，使用 IP 地址浏览，可以看到nginx的欢迎网页，说明nginx已经正常工作了。
+
+> 如果无法访问，请打开防火墙80端口:
+```bash
+# 查看防火墙配置
+sudo iptables -nv -L
+
+# 头部追加规则，开发80端口
+sudo iptables -I INPUT -p tcp --dport 80 -j ACCEPT
+
+# 保存配置
+sudo /usr/local/etc/init.d/iptables save
 ```
 
 # 三、安装Apache2.4 
@@ -194,8 +217,9 @@ sudo unlink my.cnf
 sudo touch my.cnf
 ```
 
-`sudo vi /usr/local/etc/mysql/my.cnf`，添加如下内容：
-```text
+添加MySQL配置文件，添加如下内容：
+```bash
+cat > ~/my.cnf <<EOF
 [mysqld]
 bind-address=0.0.0.0
 port=3306
@@ -208,6 +232,10 @@ pid-file=/var/run/mysql.pid
 character_set_server=utf8mb4
 symbolic-links=0
 innodb_log_file_size = 5M
+EOF
+
+sudo install -b -m 644 -o root -g staff ~/my.cnf /usr/local/etc/mysql/
+unlink ~/my.cnf
 ```
 
 ## 4. 启动mysql服务
@@ -429,7 +457,7 @@ sudo sed -i 's|^extension=hash|;extension=hash|g' php.ini
 验证
 ```bash
 php -m | grep 'Warning'
-php -r "echo hash('md5','1234');"
+php -r 'echo hash("md5","1234").PHP_EOL;'
 ```
 
 ### 3.2. 重启服务
@@ -460,7 +488,7 @@ tce-load -wi libmcrypt.tcz mhash.tcz
 
 ## 5. 安装oci8、pdo_oci扩展
 
-> 可使用脚本安装oracle oci8依赖库，项目地址: [tinycore-tcz-repository](https://github.com/phpdragon/tinycore-tcz-repository/tree/main/14.x/x86_64/tcz)
+> 可使用脚本安装oracle oci8依赖库，项目地址: [install oracle-oci8](https://github.com/phpdragon/tinycore-tcz-repository/tree/main/14.x/x86_64/tcz/oracle-oci8)
 
 ### 5.1 下载安装包
 前往Oracle官网[Instant Client for Linux x86-64 (64-bit)](https://www.oracle.com/database/technologies/instant-client/linux-x86-64-downloads.html)
@@ -535,10 +563,12 @@ php -m | grep PDO_OCI
 
 ## 6. 配置httpd支持php
 
-`sudo vi /usr/local/etc/httpd/httpd.conf`，在文件的末尾追加：
-```text
-LoadModule php7_module modules/mod_php7.so
-AddType application/x-httpd-php .php
+编辑配置文件 /usr/local/etc/httpd/httpd.conf，在文件的末尾追加：
+```bash
+sudo chown root:staff /usr/local/etc/httpd/httpd.conf
+sudo chmod 664 /usr/local/etc/httpd/httpd.conf
+echo "LoadModule php7_module modules/mod_php7.so" >> /usr/local/etc/httpd/httpd.conf
+echo "AddType application/x-httpd-php .php" >> /usr/local/etc/httpd/httpd.conf
 ```
 
 重启httpd服务：
@@ -547,13 +577,23 @@ sudo /usr/local/etc/init.d/httpd stop
 sudo /usr/local/etc/init.d/httpd start
 ```
 
-添加测试脚本，`sudo vi /usr/local/apache2/htdocs/index.php`，添加内容：
-```php
-<?php phpinfo();
+添加测试脚本：
+```bash
+echo "<?php phpinfo();" >> ~/index.php
+sudo install -b -m 644 -o root -g root ~/index.php /usr/local/apache2/htdocs/
+unlink ~/index.php
 ```
 
 访问页面index.php， 打开浏览器，使用 http://IP:8080/index.php 地址浏览，可以看到经典的PHP info详情，说明已经配置完毕。
 
+> 如果无法访问，请打开防火墙8080端口:
+```bash
+# 查看防火墙配置
+sudo iptables -nv -L
+
+# 头部追加规则，开发80端口
+sudo iptables -I INPUT -p tcp --dport 8080 -j ACCEPT
+```
 
 # 五、安装phpMyAdmin
 
@@ -575,13 +615,14 @@ unlink /home/tc/phpMyAdmin-*.tar.gz
 
 ## 2. 添加httpd配置
 
-修改httpd配置，`sudo vi /usr/local/etc/httpd/httpd.conf`，末尾添加如下内容：
-```text
-Include /usr/local/etc/httpd/conf.d/*.conf
+修改httpd配置，末尾添加如下内容：
+```bash
+echo "Include /usr/local/etc/httpd/conf.d/*.conf" >> /usr/local/etc/httpd/httpd.conf
 ```
 
-添加httpd配置文件，`sudo vi /usr/local/etc/httpd/conf.d/phpmyadmin.conf`
-```text
+添加httpd配置文件 phpmyadmin.conf：
+```bash
+cat > ~/phpmyadmin.conf <<EOF
 <Directory "/usr/local/html/phpmyadmin">
      DirectoryIndex index.php index.html
      #Options Indexes FollowSymLinks
@@ -595,6 +636,10 @@ Include /usr/local/etc/httpd/conf.d/*.conf
     ServerName test.phpmydmin.com
     ServerAlias test.phpmydmin.com
 </VirtualHost>
+EOF
+
+sudo install -b -m 644 -o root -g root ~/phpmyadmin.conf /usr/local/etc/httpd/conf.d/
+unlink ~/phpmyadmin.conf
 ```
 
 重启服务：
@@ -607,8 +652,9 @@ sudo /usr/local/etc/init.d/httpd restart
 
 ## 3. 配置nginx代理转发至httpd
 
-添加nginx配置文件，`sudo vi /usr/local/etc/nginx/conf.d/phpmyadmin.conf`，添加如下内容：
-```text
+添加nginx配置文件 phpmyadmin.conf：
+```bash
+cat > ~/phpmyadmin.conf <<EOF
 upstream app-lamp{
     server 127.0.0.1:8080 weight=1 max_fails=2 fail_timeout=30s;
 }
@@ -623,11 +669,11 @@ server {
     }
 
     #放开前端接口
-    location ~ .*\.(php|jsp|cgi)?$ {
+    location ~ .*\.(php|jsp|cgi)?\$ {
         proxy_redirect off;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header Host $http_host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header Host \$http_host;
 
         proxy_pass http://app-lamp;
     }
@@ -638,6 +684,10 @@ server {
     }
 
 }
+EOF
+
+sudo install -b -m 644 -o root -g root ~/phpmyadmin.conf /usr/local/etc/nginx/conf.d/
+unlink ~/phpmyadmin.conf
 ```
 
 重载Nginx配置
@@ -690,8 +740,6 @@ sudo sed -i 's|/usr/local/html|/mnt/sda1/www|g' /usr/local/etc/httpd/conf.d/phpm
 sudo /usr/local/etc/init.d/nginx reload
 sudo /usr/local/etc/init.d/httpd restart
 
-#删除备份目录
-sudo sed -i 's|/usr/local/html||g' /opt/.filetool.lst
 filetool.sh -b
 ```
 
