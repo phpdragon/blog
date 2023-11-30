@@ -5,9 +5,9 @@ categories: ['OS', 'Linux', 'CentOS', 'LAMP', 'SVN']
 tags: ['CentOs','CentOS6.X', 'Linux', 'Nginx', 'PHP', 'MySQL', 'SVN', 'USVN']
 ---
 
-# 一． Subversion 简介   
+# 一．Subversion 简介
 
-Subversion是一个自由，开源的版本控制系统。在Subversion管理下，文件和目录可以超越时空。Subversion将文件存放在中心版本库里。这个版本库很像一个普通的文件服务器，不同的是，它可以记录每一次文件和目录的修改情况。这样就可以借此将数借此复到以前的版本，并可以查看数据的更改细节。正因为如此，许多人将版本控制系统当作一种神奇的“时间机器”。 
+Subversion是一个自由，开源的版本控制系统。在Subversion管理下，文件和目录可以超越时空。Subversion将文件存放在中心版本库里。这个版本库很像一个普通的文件服务器，不同的是，它可以记录每一次文件和目录的修改情况。这样就可以借此将数借此复到以前的版本，并可以查看数据的更改细节。正因为如此，许多人将版本控制系统当作一种神奇的“时间机器”。
 
 # 二、系统版本
 
@@ -15,12 +15,12 @@ Subversion是一个自由，开源的版本控制系统。在Subversion管理下
 
 # 三．安装USVN环境
 
-## 1. 安装所需软件
+## 1.安装所需软件
 ```bash
 yum -y install subversion mod_dav_svn mod_auth_mysql
 ```
 
-查看 subversion 是否安装成功：
+查看 subversion 是否安装成功：
 ```text
 [root@centos-6 ~]# svnserve --version | grep 1.6
 svnserve，版本 1.6.11 (r934486)
@@ -28,7 +28,7 @@ svnserve，版本 1.6.11 (r934486)
 
 ## 2. 下载USVN源码包
 
-```shell
+```bash
 cd /usr/local/src
 wget https://github.com/usvn/usvn/archive/refs/tags/1.0.7.tar.gz
 tar zxvf usvn-1.0.7.tar.gz
@@ -52,13 +52,13 @@ EOF
 ```
 
 ## 4. 开启PHP的短标签
-```shell
+```bash
 sed -i 's|^short_open_tag = Off|short_open_tag = On|g' /etc/php.ini
 ```
 
 ## 5. 配置完后重启Httpd
-```shell
-service httpd restart
+```bash
+service httpd restart
 ```
 
 # 五．安装USVN
@@ -73,7 +73,7 @@ service httpd restart
 
 出现上面的提示，请尝试关闭SElinux看能否解决。
 
-```shell
+```bash
 setenforce 0
 ```
 
@@ -105,7 +105,7 @@ setenforce 0
 
 请根据你的实际情况创建仓库目录, 本文使用默认路径：
 
-```shell
+```bash
 mkdir -p /var/www/usvn/files/
 chown -R apache:apache /var/www/usvn/files/
 ```
@@ -146,7 +146,7 @@ cat >> /etc/httpd/conf.d/subversion.conf <<EOF
 EOF
 ```
 重启httpd服务
-```shell
+```bash
 service httpd restart
 ```
 
