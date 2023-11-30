@@ -509,15 +509,19 @@ php -i | grep 'Configure Command'
 > 使用 `./configure --help | grep zts` 查看开启线程安全的参数，得到参数是： `--enable-maintainer-zts`
 
 ```bash
-# prefix参数请使用上一节中TinyCoreLinux系统的值，然后编译一个最小的php版本
+tar zxvf php-7.4.30.tar.gz 
+cd php-7.4.30
+
+# prefix参数的值请使用上一节中TinyCoreLinux系统的值，然后编译一个最小的php版本
 ./configure  \
 --prefix=/usr/local \
 --without-pear \
+--without-libxml \
+--without-sqlite3 \
+--without-cdb \
 --with-openssl-dir \
 --without-iconv \
---without-sqlite3 \
 --without-pdo-sqlite \
---without-libxml \
 --disable-all \
 --enable-shared \
 --enable-maintainer-zts
@@ -546,7 +550,7 @@ make install
 
 ### 4.4 在CentOS系统中安装mcrypt扩展
 
-前往官网下载mcrypt源码，[mcrypt-1.0.6.tgz](https://pecl.php.net/get/mcrypt-1.0.6.tgz)
+前往php官网下载mcrypt源码，[mcrypt-1.0.6.tgz](https://pecl.php.net/get/mcrypt-1.0.6.tgz)
 
 在CentOS系统中编译安装：
 ```bash
@@ -556,7 +560,29 @@ tar zxvf mcrypt-1.0.6.tgz
 cd mcrypt-1.0.6
 
 phpize
+```
 
+执行报错如下，提示需要更高的Autoconf版本：
+```text
+configure.ac:12: error: Autoconf version 2.68 or higher is required
+```
+
+如果是在CentOS 7中，请执行升级或安装 `yum install autoconf; yum upgrade autoconf` 。
+如果是在CentOS 6中，请前往官网[autoconf](https://www.gnu.org/software/autoconf/#downloading)下载更高版本的源码进行编译安装：
+```bash
+wget https://alpha.gnu.org/pub/gnu/autoconf/autoconf-2.69e.tar.gz
+# 或者
+#wget http://mirrors.kernel.org/gnu/autoconf/autoconf-latest.tar.gz
+tar zxvf autoconf-2.69e.tar.gz
+cd autoconf-2.69e
+./configure
+make -j64
+make install
+```
+
+继续编译mcrypt：
+```bash
+phpize
 ./configure
 make -j64
 make install
@@ -565,9 +591,10 @@ make install
 ```text
 Installing shared extensions:     /usr/local/lib/php/extensions/no-debug-zts-20190902/
 ```
-进入扩展目录 `/usr/local/lib/php/extensions/no-debug-zts-20190902/`， 拷贝好生成的mcrypt.so文件到 TinyCore 系统下。
 
-### 4.5 TinyCoreLinux安装mcrypt扩展
+进入扩展目录 `/usr/local/lib/php/extensions/no-debug-zts-20190902/`， 拷贝好生成的mcrypt.so文件到 TinyCoreLinux 系统下。
+
+### 4.5 TinyCoreLinux安装php-mcrypt扩展
 
 登录TinyCore系统，安装mcrypt需要的依赖库：
 ```bash
