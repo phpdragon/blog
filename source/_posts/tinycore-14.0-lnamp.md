@@ -101,7 +101,7 @@ echo "/usr/local/etc/init.d/nginx start &" >> /opt/bootlocal.sh
 ## 4. 持久化Nginx的配置与网页
 
 ```bash
-echo '/opt/bootlocal.sh' >> /opt/.filetool.lst
+grep -q '^/opt/bootlocal.sh' /opt/.filetool.lst || echo '/opt/bootlocal.sh' >> /opt/.filetool.lst
 echo '/usr/local/etc/nginx' >> /opt/.filetool.lst
 echo '/usr/local/html' >> /opt/.filetool.lst
 
@@ -611,7 +611,9 @@ php -i | grep 'Loaded Configuration File'
 cat /usr/local/etc/php7/php.ini | grep 'extension_dir'
 
 # 拷贝从CentOS系统中编译得到的mcrypt动态库文件
-cp ~/mcrypt.so /usr/local/lib/php/extensions/
+sudo cp ~/mcrypt.so /usr/local/lib/php/extensions/
+
+echo "/usr/local/lib/php/extensions/mcrypt.so" >> /opt/.filetool.lst
 ```
 
 编辑 /usr/local/etc/php7/php.ini 文件，在其他扩展的配置后面增加如下内容：
@@ -798,6 +800,8 @@ unlink /home/tc/phpMyAdmin-*.tar.gz
 
 修改httpd配置，末尾添加如下内容：
 ```bash
+sudo chown root:staff /usr/local/etc/httpd/httpd.conf
+sudo chmod 664 /usr/local/etc/httpd/httpd.conf
 echo "Include /usr/local/etc/httpd/conf.d/*.conf" >> /usr/local/etc/httpd/httpd.conf
 ```
 
@@ -912,7 +916,7 @@ filetool.sh -b
 ```bash
 sudo mkdir -p /mnt/sda1/www
 sudo mv /usr/local/html/phpmyadmin /mnt/sda1/www/phpmyadmin
-sudo chown -R tc:staff /mnt/sda1/www/
+chown -R tc:staff /mnt/sda1/www/
 chmod -R 777 /mnt/sda1/www/phpmyadmin/tmp/
 
 sudo sed -i 's|/usr/local/html|/mnt/sda1/www|g' /usr/local/etc/nginx/conf.d/phpmyadmin.conf

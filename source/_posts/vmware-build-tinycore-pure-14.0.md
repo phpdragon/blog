@@ -293,7 +293,7 @@ ps -fU root | grep udhcpc
 APPEND quiet nodhcp 其他参数...
 ```
 
-#### 3.1.2 静态IP
+#### 3.1.2 静态IP(推荐)
 
 模板如下(一般虚拟机中网关和DNS是同一个地址)：
 ```text
@@ -305,12 +305,14 @@ echo nameserver DNS地址 > /etc/resolv.conf
 ```
 
 添加网卡配置文件`/opt/eth0.sh`，添加如下内容：
-```text
+```bash
+cat > /opt/eth0.sh <<EOF
 #!/bin/sh
 pkill udhcpc
-ifconfig eth0 192.168.168.153 netmask 255.255.255.0
+ifconfig eth0 192.168.168.111 netmask 255.255.255.0
 route add default gw 192.168.168.2
 echo nameserver 192.168.168.2 > /etc/resolv.conf
+EOF
 ```
 
 #### 3.1.3 动态IP
@@ -326,20 +328,23 @@ udhcpc -b -i eth0 -x hostname:box -p /var/run/udhcpc.eth0.pid
 
 
 ### 3.2 配置可执行
-增加可执行权限，并执行
+
+增加可执行权限，并执行生效设置：
 ```bash
 sudo chmod 755 /opt/eth0.sh
 sudo /opt/eth0.sh
 ```
 
 ### 3.3 开机启动
-设置开机启动及永久生效
+
+设置开机启动及永久生效：
 ```bash
 sudo echo "/opt/eth0.sh" >> /opt/.filetool.lst
 sudo chmod 775 /opt/bootlocal.sh
 sudo echo "/opt/eth0.sh &" >> /opt/bootlocal.sh
 filetool.sh -b
 ```
+
 
 ## 3. 修改软件源
 

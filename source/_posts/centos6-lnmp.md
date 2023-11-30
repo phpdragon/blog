@@ -761,11 +761,10 @@ chown -R php:www /usr/local/php
 ```
 
 #### 3.6.3. 设置时区
-```text
-vi /usr/local/php/etc/php.ini
 
+```bash
 #设置时区为上海
-date.timezone = Asia/Shanghai
+sudo sed -i 's|^;date.timezone =|date.timezone = Asia/Shanghai|g' /etc/php.ini
 ```
 
 ### 3.7 启动PHP-FPM

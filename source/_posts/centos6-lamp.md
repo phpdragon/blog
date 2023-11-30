@@ -262,10 +262,8 @@ service httpd restart
 ### 3.5 设置PHP时区
 
 ```bash
-vi /etc/php.ini
-
 #设置时区为上海
-date.timezone = Asia/Shanghai
+sudo sed -i 's|^;date.timezone =|date.timezone = Asia/Shanghai|g' /etc/php.ini
 ```
 然后重启
 ```bash
