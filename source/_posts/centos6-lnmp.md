@@ -178,6 +178,7 @@ make install
 ### 1.5 设置启动项
 ```bash
 #数据库设置初始化
+unlink /etc/my.cnf
 cp /usr/local/mysql/support-files/my-small.cnf /etc/my.cnf
 chown mysql:www /etc/my.cnf
 
@@ -295,10 +296,9 @@ mysql -V
 
 文章参考：
 
-[Centos7下源码编译安装mysql](https://www.cnblogs.com/aaron911/p/8370575.html)、
-[CentOS5.5下编译安装Mysql5.5](https://www.cnblogs.com/huake/p/3469986.html)、
-[Centos7下源码编译安装mysql](https://blog.csdn.net/huz1Vn/article/details/130976885)
-
+- [Centos7下源码编译安装mysql](https://www.cnblogs.com/aaron911/p/8370575.html)
+- [CentOS5.5下编译安装Mysql5.5](https://www.cnblogs.com/huake/p/3469986.html)
+- [Centos7下源码编译安装mysql](https://blog.csdn.net/huz1Vn/article/details/130976885)
 
 
 ---------------
@@ -392,7 +392,7 @@ make -j64 && make install
 
 ### 2.4 设置启动项
 
-编写引导启动脚本 /etc/init.d/nginx , 内容如下：
+编写引导启动脚本 `vi /etc/init.d/nginx` , 内容如下：
 ```text
 #!/bin/bash
 ### BEGIN INIT INFO
@@ -488,14 +488,7 @@ chmod +x /etc/init.d/nginx
 chkconfig --add nginx           #添加启动项
 chkconfig --del nginx           #删除启动项
 chkconfig --list | grep nginx   #查看启动项
-
-service nginx status            #查看进程状态
-service nginx reload            #重置配置
-service nginx restart           #重启
-service nginx start             #启动
-service nginx stop              #停止
 ```
-
 
 ### 2.5 创建运行目录、环境变量：
 ```bash
@@ -532,6 +525,11 @@ nginx -t
 #启动nginx
 service nginx start
 
+service nginx status            #查看进程状态
+service nginx reload            #重置配置
+service nginx restart           #重启
+service nginx stop              #停止
+
 #查看端口监听
 ss -antu | grep 80 | column -t
 ```
@@ -541,12 +539,9 @@ ss -antu | grep 80 | column -t
 
 ### 2.8 参考博文
 
-[一文搞定nginx 从安装到高可用](https://zhuanlan.zhihu.com/p/620406883)
-
-[在 Linux 下源码编译安装 nginx](https://www.cnblogs.com/inslog/p/17584550.html)
-
-[CentOS 6/7 下使用yum安装nginx](http://blog.sway.com.cn/?p=412)
-
+- [一文搞定nginx 从安装到高可用](https://zhuanlan.zhihu.com/p/620406883)
+- [在 Linux 下源码编译安装 nginx](https://www.cnblogs.com/inslog/p/17584550.html)
+- [CentOS 6/7 下使用yum安装nginx](http://blog.sway.com.cn/?p=412)
 
 
 ------------------
@@ -953,6 +948,11 @@ vi /usr/local/php/etc/php.d/mcrypt.ini
 #加入如下内容
 ; Enable mcrypt extension module
 extension=mcrypt.so
+```
+
+验证:
+```bash
+php -m | grep mcrypt
 ```
 
 ### 5.4. 重载php-fpm
