@@ -523,7 +523,6 @@ cd php-7.4.30
 --without-iconv \
 --without-pdo-sqlite \
 --disable-all \
---enable-shared \
 --enable-maintainer-zts
 
 make -j64

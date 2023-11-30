@@ -487,9 +487,9 @@ echo '#每分钟同步internet时间
 */1 * * * * /usr/sbin/ntpdate cn.pool.ntp.org && /usr/sbin/hwclock -w' >> /var/spool/cron/root
 ```
 
-## 12. 升级支持TLS1.2协议
+# 六、升级支持TLS1.2协议
 
-### 12.1 背景：
+## 1. 背景
 
 > 为何要升级？
 > 
@@ -499,7 +499,7 @@ echo '#每分钟同步internet时间
 > 所以意味着还在使用TLS 1.2以下协议的软件无法正常访问HTTPS协议服务了，所以才需要升级。
 
 
-### 12.2 问题现状：
+## 2. 问题现状
 ```
 [root@centos-6 ~]# curl https://www.openssl.org/source/old/1.0.1/openssl-1.0.1e.tar.gz
 curl: (35) SSL connect error
@@ -512,7 +512,7 @@ OpenSSL: error:1407742E:SSL routines:SSL23_GET_SERVER_HELLO:tlsv1 alert protocol
 Unable to establish SSL connection。
 ```
 
-### 12.3 问题分析：
+## 3. 问题分析
 
 > wget、curl、openssh等依赖OpenSSL的动态链接库, 其依赖版本低于1.0.1的都不支持TLS1.2协议，所以存量老机器需要更新openssl用于支撑TLS1.2协议。
 > [Can not download from an HTTPS site (ssl) with wget?](https://unix.stackexchange.com/questions/479823/can-not-download-from-an-https-site-ssl-with-wget)
@@ -520,7 +520,7 @@ Unable to establish SSL connection。
 
 诚然，博主已经知道问题是出在哪，所以下面的分析是以结果反推答案。
 
-#### 12.3-1. 分析curl的依赖关系：
+### 3.1. 分析curl的依赖关系：
 
 ```text
 [root@centos-6 ~]# yum deplist curl | grep libssh2
@@ -534,7 +534,7 @@ Unable to establish SSL connection。
 显示有依赖libssh2, libssh2  又依赖 libssl.so.10 这个动态链接库。
 
 
-#### 12.3-2. 分析依赖wget的关系：
+### 3.2. 分析依赖wget的关系：
 
 ```text
 [root@centos-6 ~]# yum deplist wget | grep libssl
@@ -556,7 +556,7 @@ Unable to establish SSL connection。
 所以证明结论，需要升级Openssl便可解决。
 
 
-### 12.4 升级Openssl版本不低于1.0.1
+## 4. 升级Openssl版本不低于1.0.1
 
 本文选择升级openssl至1.0.1e，为何不使用更新的版本？
 
@@ -595,7 +595,7 @@ mv ./openssl.tar ~/
 yum -y install zlib zlib-devel
 
 cd /usr/local/src
-tar zxvf openssl-*.tar.gz
+tar zxvf openssl-1.0.1e.tar.gz
 cd openssl-1.0.1e
 
 #./config --help 查看其他参数
@@ -612,7 +612,7 @@ openssl version -a
 升级完毕后请不要断开远程登录，继续升级Openssh
 
 
-### 12.5 升级Openssh-8.5p1
+## 5. 升级Openssh-8.5p1
 
 > 如果升级了Openssl不升级Openssh， 断开远程登录后将无法再远程上客户机
 > 
@@ -637,7 +637,13 @@ cd /usr/local/src
 tar zxvf openssh-8.5p1.tar.gz
 cd openssh-8.5p1
 
-./configure --prefix=/usr --sysconfdir=/etc/ssh --with-pam --with-zlib --with-md5-passwords --with-ssl-dir=/usr
+./configure \
+--prefix=/usr \
+--sysconfdir=/etc/ssh \
+--with-pam \
+--with-zlib \
+--with-md5-passwords \
+--with-ssl-dir=/usr
 
 make && make install
 
@@ -656,7 +662,7 @@ service sshd restart
 ```
 
 
-### 12.6 升级curl-8.4.0
+## 6. 升级curl-8.4.0
 
 前往官网[curl.se](https://curl.se/download) 下载 [curl-8.4.0.tar.gz](https://curl.se/download/curl-8.4.0.tar.gz)：
 
@@ -692,7 +698,7 @@ ll /tmp/test.tar.gz && unlink /tmp/test.tar.gz
 ```
 
 
-### 12.7 升级wget-1.20.1
+## 7. 升级wget-1.20.1
 
 前往下载版本 [wget-1.20.1.tar.gz](https://ftp.gnu.org/gnu/wget/wget-1.20.1.tar.gz) 
 
@@ -725,11 +731,11 @@ ll ./openssl-1.0.1e.tar.gz && unlink ./openssl-1.0.1e.tar.gz
 ```
 
 
-# 六、参考资料
+# 七、参考资料
 
 - [离线更新centos系统的openssh，升级到9.3p1](https://blog.csdn.net/qq_43913213/article/details/131510476)
 
 
-# 七、附件
+# 八、附件
 
 本文使用到的软件包已上传网盘：[BlogDocs->files->vmware-build-small-centos-6.x](https://pan.baidu.com/s/1yEbHDQBzy43uV8gIYXqbnw?pwd=6666#list/path=%2FBlogDocs%2Ffiles%2Fvmware-build-small-centos-6.x)

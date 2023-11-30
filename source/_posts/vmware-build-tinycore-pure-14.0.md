@@ -276,8 +276,8 @@ filetool.sh -b
 
 ## 3. 配置网络
 
-> DNS多少请查询宿主机的【控制面板】->【网络和Internet】->【网络连接】, 点击【VMware Network Adapter VMnetX】, 属性中双机击IPv4。
-> 其中的局域网地址即是宿主机主IP【192.168.168.1】， 然后IP地址尾段加1即可【192.168.168.2】， 如果可以ping通就是正确的DNS地址。
+> DNS多少请查询 VMware Workstation 的【编辑】->【虚拟网络编辑器】->【VMnet8】->【NAT设置】, 获取其中的子网掩码，网关IP。
+> 本文的DNS也就是网关IP【192.168.168.2】
 
 ### 3.1 配置IP
 
