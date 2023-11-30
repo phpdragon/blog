@@ -127,35 +127,65 @@ ifconfig eth0 | grep "inet addr"
 # 查看防火墙配置
 sudo iptables -nv -L
 
-# 头部追加规则，开发80端口
+# 头部追加规则，开放80端口
 sudo iptables -I INPUT -p tcp --dport 80 -j ACCEPT
 
 # 保存配置
 sudo /usr/local/etc/init.d/iptables save
 ```
 
-# 三、安装Apache2.4 
+# 三、安装Apache2.4.57
 
 ## 1. 安装httpd
+
 ```bash
 tce-load -wi apache2.4  #请打开http://tinycorelinux.net/14.x/x86/tcz/搜索apache具体版本
 ```
+
+验证：
+```bash
+httpd -V
+```
+回显如下：
+```text
+tc@tc-pure-14:~$ httpd -V
+Server version: Apache/2.4.57 (Unix)
+Server built:   Apr 17 2023 15:13:33
+Server's Module Magic Number: 20120211:127
+Server loaded:  APR 1.7.3, APR-UTIL 1.6.3, PCRE 8.44 2020-02-12
+Compiled using: APR 1.7.3, APR-UTIL 1.6.3, PCRE 8.44 2020-02-12
+Architecture:   64-bit
+Server MPM:     event
+  threaded:     yes (fixed thread count)
+    forked:     yes (variable process count)
+Server compiled with....
+ -D APR_HAS_SENDFILE
+ -D APR_HAS_MMAP
+ -D APR_HAVE_IPV6 (IPv4-mapped addresses enabled)
+ -D APR_USE_PROC_PTHREAD_SERIALIZE
+ -D APR_USE_PTHREAD_SERIALIZE
+ -D SINGLE_LISTEN_UNSERIALIZED_ACCEPT
+ -D APR_HAS_OTHER_CHILD
+ -D AP_HAVE_RELIABLE_PIPED_LOGS
+ -D DYNAMIC_MODULE_LIMIT=256
+ -D HTTPD_ROOT="/usr/local/apache2"
+ -D SUEXEC_BIN="/usr/local/sbin/suexec"
+ -D DEFAULT_PIDLOG="/var/run/httpd.pid"
+ -D DEFAULT_SCOREBOARD="/var/log/httpd/apache_runtime_status"
+ -D DEFAULT_ERRORLOG="/var/log/httpd/error_log"
+ -D AP_TYPES_CONFIG_FILE="/usr/local/etc/httpd/mime.types"
+ -D SERVER_CONFIG_FILE="/usr/local/etc/httpd/httpd.conf"
+```
+
 
 ## 2. 配置httpd
 
 > Tiny Core Linux是加载到内存运行的，如果我们不做持久化配置，当你重启系统后，所有修改都会丢失。
 
+修改httpd.conf配置文件：
 ```bash
 cd /usr/local/etc/httpd
-sudo cp original/httpd.conf-sample httpd.conf
-
-sudo mkdir -p /usr/local/etc/httpd/conf.d/
-sudo mkdir -p /usr/local/html
-```
-
-修改配置：
-```bash
-cd /usr/local/etc/httpd
+sudo cp -f original/httpd.conf-sample httpd.conf
 
 sudo sed -i 's|^User daemon|User nobody|g' httpd.conf
 sudo sed -i 's|^Group daemon|Group nogroup|g' httpd.conf
@@ -166,9 +196,16 @@ sudo sed -i 's|^Listen 80|Listen 8080|g' httpd.conf
 启动httpd：
 ```bash
 sudo /usr/local/etc/init.d/httpd start
+
+sudo netstat -antp|grep 8080
+
+# 头部追加规则，开放8080端口
+sudo iptables -I INPUT -p tcp --dport 8080 -j ACCEPT
+# 保存配置
+sudo /usr/local/etc/init.d/iptables save
 ```
 
-打开浏览器，使用 IP:8080 地址浏览，可以看到Apache的工作网页，说明Apache已经正常工作了。
+打开浏览器，使用 http://IP:8080 地址浏览，可以看到Apache的工作网页，说明Apache已经正常工作了。
 
 ## 3. 开机自动启动
 
@@ -209,16 +246,10 @@ sudo rm -rf /auth_pam_tool_dir
 
 ## 3. 配置my.cnf
 
-编写 my.cnf 文件，设置好数据库的配置参数：
-先删除原来的 my.cnf 文件
+添加MySQL配置文件，设置好数据库的配置参数：
 ```bash
 cd /usr/local/etc/mysql/
-sudo unlink my.cnf
-sudo touch my.cnf
-```
 
-添加MySQL配置文件，添加如下内容：
-```bash
 cat > ~/my.cnf <<EOF
 [mysqld]
 bind-address=0.0.0.0
@@ -353,7 +384,15 @@ filetool.sh -b
 
 ## 1. 安装PHP
 ```bash
-tce-load -wi php-7.4-cli php-7.4-cgi php-7.4-dev.tcz php-7.4-ext.tcz php-7.4-mod.tcz php-7.4-fpm.tcz
+#tce-load -wi php-7.4-cgi
+#tce-load -wi php-7.4-fpm
+tce-load -wi php-7.4-cli
+
+# 安装phpize、php-config命令
+tce-load -wi php-7.4-dev.tcz
+# php的扩展类库
+tce-load -wi php-7.4-ext.tcz
+# 其他依赖库
 tce-load -wi libxml2 readline liblzma bzip2 libffi pcre2 curl libgd gdbm sqlite3
 ```
 
@@ -390,10 +429,10 @@ tce-load -wi libzip                 #支持zip扩展
 cd /usr/local/etc/php7/
 sudo cp php.ini-sample-7.4 php.ini
 
-#配置时区
+# 配置时区
 sudo sed -i 's|^;date.timezone =|date.timezone = Asia/Shanghai|g' php.ini
 
-#开启扩展
+# 开启扩展
 sudo sed -i 's|^;extension=openssl|extension=openssl|g' php.ini
 sudo sed -i 's|^;extension=bcmath|extension=bcmath|g' php.ini
 sudo sed -i 's|^;extension=bz2|extension=bz2|g' php.ini
@@ -438,7 +477,7 @@ sudo sed -i 's|^;extension=xsl|extension=xsl|g' php.ini
 sudo sed -i 's|^;extension=zip|extension=zip|g' php.ini
 sudo sed -i 's|^;extension=zlib|extension=zlib|g' php.ini
 
-#复核已开启模块
+# 复核已开启模块
 cat php.ini | grep 'extension='
 
 php -m
@@ -603,22 +642,30 @@ Installing shared extensions:     /usr/local/lib/php/extensions/no-debug-zts-201
 tce-load -wi libmcrypt.tcz
 ```
 
-#查看PHP的配置文件路径
+#拷贝mcrypt.so到PHP的扩展存放目录：
 ```bash
-php -i | grep 'Loaded Configuration File'
-
-# 获取扩展文件的存放目录
-cat /usr/local/etc/php7/php.ini | grep 'extension_dir'
+# 获取PHP扩展文件的存放目录
+php -i | grep 'extension_dir'
 
 # 拷贝从CentOS系统中编译得到的mcrypt动态库文件
-sudo cp ~/mcrypt.so /usr/local/lib/php/extensions/
+sudo cp ~/mcrypt.so /usr/local/lib/php/extensions
 
+# 加入持久化
 echo "/usr/local/lib/php/extensions/mcrypt.so" >> /opt/.filetool.lst
 ```
 
-编辑 /usr/local/etc/php7/php.ini 文件，在其他扩展的配置后面增加如下内容：
-```text
+```bash
+cat > ~/mcrypt.ini <<EOF
+; Enable mcrypt extension module
 extension=mcrypt
+EOF
+
+# 获取PHP扩展配置扫描目录
+php -i | grep 'additional'
+
+#拷贝配置到PHP扩展配置扫描目录
+sudo install -m 644 -o root -g root ~/mcrypt.ini /usr/local/etc/php7/extensions/
+unlink ~/mcrypt.ini
 ```
 
 验证：
@@ -655,12 +702,12 @@ function decrypt( \$string ) {
 }
 EOF
 
-php -f ~/mcrypt.php
+php -f ~/mcrypt.php && unlink ~/mcrypt.php
 ```
 回显如下：
 ```text
-tc@tc-pure-14:~$ php -f mcrypt.php 
-encrypt str:HESz0Zxl3afIhK15OWZMi5oGTnNGRDOZEpY1LMLXuZg=
+tc@tc-pure-14:~$ php -f mcrypt.php && unlink ~/mcrypt.php
+encrypt str:woClr7UF9BtwnudNb8xCHJnTGkXh1WhnhRtj/Dzvl54=
 ```
 说明得到正确的mcrypt.so动态库文件。
 
@@ -672,7 +719,20 @@ encrypt str:HESz0Zxl3afIhK15OWZMi5oGTnNGRDOZEpY1LMLXuZg=
 
 > 可使用脚本安装oracle oci8依赖库，项目地址: [install oracle-oci8](https://github.com/phpdragon/tinycore-tcz-repository/tree/main/14.x/x86_64/tcz/oracle-oci8)
 
-### 5.1 下载安装包
+### 5.1 脚本化安装(推荐)
+
+```bash
+tce-load -wi git
+cd ~/
+git clone https://github.com/phpdragon/tinycore-tcz-repository.git
+cd ~/tinycore-tcz-repository/14.x/x86_64/tcz/oracle-oci8/
+cp ~/instantclient-basic-linux.x64-21.12.0.0.0dbru.zip ./
+./install.sh
+```
+
+### 5.2 手动安装
+
+#### 5.2.1 下载安装包
 
 前往Oracle官网[Instant Client for Linux x86-64 (64-bit)](https://www.oracle.com/database/technologies/instant-client/linux-x86-64-downloads.html)
 下载instantclient以支持 oci8、pdo_oci扩展：
@@ -694,7 +754,7 @@ mv -f /home/tc/oracle-oci8/usr/local/instantclient* /home/tc/oracle-oci8/usr/loc
 unlink instantclient*.zip
 ```
 
-### 5.2 配置安装脚本
+#### 5.2.2 配置安装脚本
 
 添加如下内容：
 ```bash
@@ -708,7 +768,7 @@ EOF
 chmod 775 /home/tc/oracle-oci8/usr/local/tce.installed/oracle-oci8
 ```
 
-### 5.3 打包oracle动态库包
+#### 5.2.3 打包oracle动态库包
 
 ```bash
 tce-load -wi squashfs-tools
@@ -722,20 +782,24 @@ echo 'oracle-oci8.tcz' >> /etc/sysconfig/tcedir/onboot.lst
 
 rm -rf /home/tc/oracle-oci8/
 sudo reboot
-``` 
+```
 
-验证是否加载oracle动态库
+### 5.3 验证是否加载oracle动态库
+
 ```bash
-cat /etc/ld.so.conf | grep oracle
+cat /etc/ld.so.conf | grep oracle-oci8
 ```
 
 ### 5.4 开启oci8、pdo_oci扩展
 ```bash
+# 安装依赖
 tce-load -wi libaio
 
+# 开启扩展
 sudo sed -i 's|^;extension=oci8|extension=oci8|g' /usr/local/etc/php7/php.ini
 sudo sed -i 's|^;extension=pdo_oci|extension=pdo_oci|g' /usr/local/etc/php7/php.ini
 
+# 验证
 php -m | grep oci8
 php -m | grep PDO_OCI
 ```
@@ -748,16 +812,22 @@ php -m | grep PDO_OCI
 
 编辑配置文件 /usr/local/etc/httpd/httpd.conf，在文件的末尾追加：
 ```bash
-sudo chown root:staff /usr/local/etc/httpd/httpd.conf
-sudo chmod 664 /usr/local/etc/httpd/httpd.conf
-echo "LoadModule php7_module modules/mod_php7.so" >> /usr/local/etc/httpd/httpd.conf
-echo "AddType application/x-httpd-php .php" >> /usr/local/etc/httpd/httpd.conf
-```
+# 开启apache支持php解析
+tce-load -wi php-7.4-mod.tcz libnghttp2.tcz
 
-重启httpd服务：
-```bash
-sudo /usr/local/etc/init.d/httpd stop
-sudo /usr/local/etc/init.d/httpd start
+cd /usr/local/etc/httpd/
+
+sudo chmod 664 httpd.conf
+sudo chown root:staff httpd.conf
+cat >> httpd.conf <<EOF
+
+# Include config files
+Include /usr/local/etc/httpd/conf.d/*.conf
+EOF
+sudo cp -f original/conf.d/httpd-php7-mod.conf conf.d/httpd-php7-mod.conf
+
+# 重启httpd服务
+sudo /usr/local/etc/init.d/httpd restart
 ```
 
 添加测试脚本：
@@ -783,7 +853,7 @@ sudo iptables -I INPUT -p tcp --dport 8080 -j ACCEPT
 ## 1.下载安装包
 
 ```bash
-cd /home/tc
+cd ~/
 wget https://files.phpmyadmin.net/phpMyAdmin/5.2.1/phpMyAdmin-5.2.1-all-languages.tar.gz
 tar zxvf phpMyAdmin-5.2.1-all-languages.tar.gz
 sudo mv phpMyAdmin-5.2.1-all-languages /usr/local/html/phpmyadmin
@@ -798,16 +868,9 @@ unlink /home/tc/phpMyAdmin-*.tar.gz
 
 ## 2. 添加httpd配置
 
-修改httpd配置，末尾添加如下内容：
+添加httpd配置文件 httpd-vhosts-phpmyadmin.conf：
 ```bash
-sudo chown root:staff /usr/local/etc/httpd/httpd.conf
-sudo chmod 664 /usr/local/etc/httpd/httpd.conf
-echo "Include /usr/local/etc/httpd/conf.d/*.conf" >> /usr/local/etc/httpd/httpd.conf
-```
-
-添加httpd配置文件 phpmyadmin.conf：
-```bash
-cat > ~/phpmyadmin.conf <<EOF
+cat > ~/httpd-vhosts-phpmyadmin.conf <<EOF
 <Directory "/usr/local/html/phpmyadmin">
      DirectoryIndex index.php index.html
      #Options Indexes FollowSymLinks
@@ -823,8 +886,8 @@ cat > ~/phpmyadmin.conf <<EOF
 </VirtualHost>
 EOF
 
-sudo install -b -m 644 -o root -g root ~/phpmyadmin.conf /usr/local/etc/httpd/conf.d/
-unlink ~/phpmyadmin.conf
+sudo install -b -m 644 -o root -g root ~/httpd-vhosts-phpmyadmin.conf /usr/local/etc/httpd/conf.d/
+unlink ~/httpd-vhosts-phpmyadmin.conf
 ```
 
 重启服务：
@@ -878,6 +941,11 @@ unlink ~/phpmyadmin.conf
 重载Nginx配置
 ```bash
 sudo /usr/local/etc/init.d/nginx reload
+
+# 删除8080防火墙配置
+sudo iptables -t filter -D INPUT $(sudo iptables -n -L --line-numbers|grep 8080|awk '{print $1}')
+# 保存配置
+sudo /usr/local/etc/init.d/iptables save
 ```
 
 修改宿主机hosts文件： C:\Windows\System32\drivers\etc\hosts，添加如下映射：
@@ -916,11 +984,11 @@ filetool.sh -b
 ```bash
 sudo mkdir -p /mnt/sda1/www
 sudo mv /usr/local/html/phpmyadmin /mnt/sda1/www/phpmyadmin
-chown -R tc:staff /mnt/sda1/www/
-chmod -R 777 /mnt/sda1/www/phpmyadmin/tmp/
+sudo chown -R tc:staff /mnt/sda1/www/
+sudo chmod -R 777 /mnt/sda1/www/phpmyadmin/tmp/
 
 sudo sed -i 's|/usr/local/html|/mnt/sda1/www|g' /usr/local/etc/nginx/conf.d/phpmyadmin.conf
-sudo sed -i 's|/usr/local/html|/mnt/sda1/www|g' /usr/local/etc/httpd/conf.d/phpmyadmin.conf
+sudo sed -i 's|/usr/local/html|/mnt/sda1/www|g' /usr/local/etc/httpd/conf.d/httpd-vhosts-phpmyadmin.conf
 
 sudo /usr/local/etc/init.d/nginx reload
 sudo /usr/local/etc/init.d/httpd restart
