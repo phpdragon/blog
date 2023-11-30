@@ -262,7 +262,7 @@ APPEND quiet host=tinycore-14 waitusb=5:UUID="3e9b31a9-4cbb-403e-9c9c-27e0beb0f7
 ### 1.2 方式二
 
 编辑`sudo vi /opt/bootsync.sh` 文件, 修改指令为：
-```bash
+```text
 /usr/bin/sethostname tinycore-pure-14
 ```
 
@@ -289,7 +289,7 @@ ps -fU root | grep udhcpc
 
 禁止系统默认启动DHCP。
 编辑引导配置文件, `vi /mnt/sda1/tce/boot/extlinux/extlinux.conf`, 在 `APPEND quiet` 的末尾添加参数`nodhcp`，示例：
-```bash
+```text
 APPEND quiet nodhcp 其他参数...
 ```
 
@@ -403,7 +403,7 @@ echo "/usr/local/etc/init.d/open-vm-tools start &" >> /opt/bootlocal.sh
 ## 7. 开启cron
 
 编辑引导配置文件, `vi /mnt/sda1/tce/boot/extlinux/extlinux.conf`, 在 `APPEND quiet` 的末尾添加参数`cron`，示例：
-```bash
+```text
 APPEND quiet cron 其他参数...
 ```
 

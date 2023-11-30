@@ -278,6 +278,7 @@ service httpd restart
 
 首先前往官方网站下载：[phpMyAdmin-4.0.3-all-languages.zip](https://files.phpmyadmin.net/phpMyAdmin/4.0.3/phpMyAdmin-4.0.3-all-languages.zip)，然后上传解压到/usr/share/目录下
 ```bash
+cd /usr/local/src
 wget https://files.phpmyadmin.net/phpMyAdmin/4.0.3/phpMyAdmin-4.0.3-all-languages.zip
 unzip phpMyAdmin-4.0.3-all-languages.zip
 mv phpMyAdmin-4.0.3-all-languages /usr/share/phpmyadmin
@@ -285,9 +286,10 @@ mv phpMyAdmin-4.0.3-all-languages /usr/share/phpmyadmin
 
 ### 4.2 配置httpd alias
 
-编辑配置文件，vi /etc/httpd/conf.d/phpmyadmin.conf，内容如下：
+编辑配置文件 /etc/httpd/conf.d/phpmyadmin.conf ，内容如下：
 
-```text
+```bash
+cat > /etc/httpd/conf.d/phpmyadmin.conf <<EOF
 #
 #   Web application to manage llySQL
 #
@@ -300,6 +302,7 @@ mv phpMyAdmin-4.0.3-all-languages /usr/share/phpmyadmin
 Alias /phpmyadmin /usr/share/phpmyadmin
 Alias /phplyAdmin /usr/share/phpmyadmin
 Alias /mysqladmin /usr/share/phpmyadmin
+EOF
 ```
 
 重启httpd
@@ -355,10 +358,10 @@ phpize
 make -j64 && make install                  #这里的32对应你的CPU核心倍数，加快编译
 
 
-vi /etc/php.d/mcrypt.ini
-#加入内容
+cat > /etc/php.d/mcrypt.ini <<EOF
 ; Enable mcrypt extension module
 extension=mcrypt.so
+EOF
 
 service httpd restart                      #重启服务
 ```
@@ -388,10 +391,10 @@ mcrypt
 
 ### 6.2 安装扩展
 ```bash
-cd /usr/local/src                 #进入软件包存放目录
+cd /usr/local/src
 wget https://pecl.php.net/get/redis-4.3.0.tgz
-tar xvf redis-4.3.0.tar.gz       #解压
-cd redis-4.3.0                    #进入安装目录
+tar xvf redis-4.3.0.tgz
+cd redis-4.3.0
 
 phpize
 ./configure
@@ -405,18 +408,16 @@ Installing shared extensions:     /usr/lib64/php/modules/
 ```
 
 ### 6.3 配置php支持redis扩展
-```bash
-vi /etc/php.d/redis.ini               #编辑配置文件，在最后一行添加以下内容
 
-#添加下面内容
+```bash
+cat > /etc/php.d/redis.ini <<EOF
 ; Enable redis extension module
 extension=redis.so
+EOF
 
 #重启
 service httpd restart
 ```
-
-
 
 ### 6.4 观察效果
 
@@ -479,16 +480,20 @@ php -i | grep extension_dir | grep lib64
 extension_dir => /usr/lib64/php/modules => /usr/lib64/php/modules
 ```
 
-添加扩展 vi /etc/php.ini (php.ini路径可以通过命令 `php -i | grep 'Loaded Configuration'` 获得)
-```text
+添加扩展 (php.ini路径可以通过命令 `php -i | grep 'Loaded Configuration'` 获得)：
+```bash
+cat > /etc/php.ini <<EOF
 ; Enable 扩展名称 extension module
 extension=/usr/lib64/php/modules/扩展名称.so
+EOF
 ```
 
 如果有 /etc/php.d 目录，则生成 /etc/php.d/扩展名称.ini 文件, 写入如下内容：
-```text
+```bash
+cat > /etc/php.d/扩展名称.ini <<EOF
 ; Enable 扩展名称 extension module
 extension=扩展.so
+EOF
 ```
 
 ### 7.7 重启httpd、php-fpm

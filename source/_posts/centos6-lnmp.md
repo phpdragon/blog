@@ -647,7 +647,6 @@ make -j64 && make install
 ### 3.4 设置启动项
 
 编写引导启动脚本 `vi /etc/init.d/php-fpm` , 内容如下：
-
 ```bash
 #!/bin/bash
 ### BEGIN INIT INFO
@@ -942,12 +941,11 @@ make -j64 && make install
 
 ### 5.3. 配置mcrypt扩展
 
-```text
-vi /usr/local/php/etc/php.d/mcrypt.ini
-
-#加入如下内容
+```bash
+cat > /usr/local/php/etc/php.d/mcrypt.ini <<EOF
 ; Enable mcrypt extension module
 extension=mcrypt.so
+EOF
 ```
 
 验证:

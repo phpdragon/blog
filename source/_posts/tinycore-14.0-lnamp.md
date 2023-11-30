@@ -509,6 +509,8 @@ php -i | grep 'Configure Command'
 > 使用 `./configure --help | grep zts` 查看开启线程安全的参数，得到参数是： `--enable-maintainer-zts`
 
 ```bash
+cd /usr/local/src
+wget https://www.php.net/distributions/php-7.4.33.tar.gz
 tar zxvf php-7.4.30.tar.gz 
 cd php-7.4.30
 
@@ -538,7 +540,7 @@ php -i | grep 'Thread Safety'
 
 在CentOS系统中编译安装：
 ```bash
-cd ~/
+cd /usr/local/src
 wget https://sourceforge.net/projects/mcrypt/files/Libmcrypt/2.5.8/libmcrypt-2.5.8.tar.gz
 tar zxvf libmcrypt-2.5.8.tgz
 cd libmcrypt-2.5.8
@@ -553,7 +555,7 @@ make install
 
 在CentOS系统中编译安装：
 ```bash
-cd ~/
+cd /usr/local/src
 wget https://pecl.php.net/get/mcrypt-1.0.6.tgz
 tar zxvf mcrypt-1.0.6.tgz
 cd mcrypt-1.0.6
@@ -569,6 +571,7 @@ configure.ac:12: error: Autoconf version 2.68 or higher is required
 如果是在CentOS 7中，请执行升级或安装 `yum install autoconf; yum upgrade autoconf` 。
 如果是在CentOS 6中，请前往官网[autoconf](https://www.gnu.org/software/autoconf/#downloading)下载更高版本的源码进行编译安装：
 ```bash
+cd /usr/local/src
 wget https://alpha.gnu.org/pub/gnu/autoconf/autoconf-2.69e.tar.gz
 # 或者
 #wget http://mirrors.kernel.org/gnu/autoconf/autoconf-latest.tar.gz
@@ -668,6 +671,7 @@ encrypt str:HESz0Zxl3afIhK15OWZMi5oGTnNGRDOZEpY1LMLXuZg=
 > 可使用脚本安装oracle oci8依赖库，项目地址: [install oracle-oci8](https://github.com/phpdragon/tinycore-tcz-repository/tree/main/14.x/x86_64/tcz/oracle-oci8)
 
 ### 5.1 下载安装包
+
 前往Oracle官网[Instant Client for Linux x86-64 (64-bit)](https://www.oracle.com/database/technologies/instant-client/linux-x86-64-downloads.html)
 下载instantclient以支持 oci8、pdo_oci扩展：
 ```bash

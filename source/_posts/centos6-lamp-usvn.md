@@ -38,17 +38,17 @@ chown -R apache:apache /var/www/usvn/
 ```
 
 ## 3. 配置Httpd Alias
-```shell
-vi /etc/httpd/conf.d/subversion.conf
+```bash
+cat >> /etc/httpd/conf.d/subversion.conf <<EOF
 
-#在文件最末尾添加内容如下
 Alias /usvn "/var/www/usvn/public"
 <Directory "/var/www/usvn/public">
-        Options +SymLinksIfOwnerMatch
-        AllowOverride All
-        Order allow,deny
-        Allow from all
+    Options +SymLinksIfOwnerMatch
+    AllowOverride All
+    Order allow,deny
+    Allow from all
 </Directory>
+EOF
 ```
 
 ## 4. 开启PHP的短标签
@@ -128,19 +128,22 @@ chown -R apache:apache /var/www/usvn/files/
 
 {% asset_img 9.png 检查新版本 %}
 
-复制“Apache设置”下的代码到配置文件 `vi /etc/httpd/conf.d/subversion.conf` 的末尾
-```text
+复制“Apache设置”下的代码到配置文件 /etc/httpd/conf.d/subversion.conf 的末尾
+```bash
+cat >> /etc/httpd/conf.d/subversion.conf <<EOF
+
 <Location /usvn/svn/>
-	ErrorDocument 404 default
-	DAV svn
-	Require valid-user
-	SVNParentPath /var/www/usvn/files/svn
-	SVNListParentPath off
-	AuthType Basic
-	AuthName "USVN"
-	AuthUserFile /var/www/usvn/files/htpasswd
-	AuthzSVNAccessFile /var/www/usvn/files/authz
+    ErrorDocument 404 default
+    DAV svn
+    Require valid-user
+    SVNParentPath /var/www/usvn/files/svn
+    SVNListParentPath off
+    AuthType Basic
+    AuthName "USVN"
+    AuthUserFile /var/www/usvn/files/htpasswd
+    AuthzSVNAccessFile /var/www/usvn/files/authz
 </Location>
+EOF
 ```
 重启httpd服务
 ```shell
