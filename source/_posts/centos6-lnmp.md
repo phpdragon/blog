@@ -755,16 +755,15 @@ cp php-fpm.conf.default php-fpm.conf
 #### 3.6.2. php.ini
 复制源码包内的配置文件到安装目录下，并改名即可
 ```bash
-cp /usr/local/src/php-5.3.3/php.ini-production /usr/local/php/etc/php.ini                                                                         
+cp /usr/local/src/php-5.3.3/php.ini-production /usr/local/php/etc/php.ini
 mkdir -p /usr/local/php/etc/php.d
 chown -R php:www /usr/local/php
 ```
 
 #### 3.6.3. 设置时区
-
 ```bash
 #设置时区为上海
-sudo sed -i 's|^;date.timezone =|date.timezone = Asia/Shanghai|g' /etc/php.ini
+sudo sed -i 's|^;date.timezone =|date.timezone = Asia/Shanghai|g' /usr/local/php/etc/php.ini
 ```
 
 ### 3.7 启动PHP-FPM
