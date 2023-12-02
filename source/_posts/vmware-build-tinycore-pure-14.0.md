@@ -341,6 +341,7 @@ sudo /opt/eth0.sh
 ```bash
 sudo echo "/opt/eth0.sh" >> /opt/.filetool.lst
 sudo chmod 775 /opt/bootlocal.sh
+sudo chown tc:staff /opt/bootlocal.sh
 sudo echo "/opt/eth0.sh &" >> /opt/bootlocal.sh
 filetool.sh -b
 ```
@@ -402,14 +403,25 @@ ps -fU root | grep vmtoolsd
 
 加入开机启动配置：
 ```bash
+sudo chown tc:staff /opt/bootlocal.sh
 echo "/usr/local/etc/init.d/open-vm-tools start &" >> /opt/bootlocal.sh
 ```
 
 ## 7. 开启cron
 
+### 7.1. 方式一
+
 编辑引导配置文件, `vi /mnt/sda1/tce/boot/extlinux/extlinux.conf`, 在 `APPEND quiet` 的末尾添加参数`cron`，示例：
 ```text
 APPEND quiet cron 其他参数...
+```
+
+### 7.2. 方式二
+
+加入本地启动项：
+```bash
+sudo chown tc:staff /opt/bootlocal.sh
+echo "/etc/init.d/services/crond start &" >> /opt/bootlocal.sh
 ```
 
 ## 8. 配置修改持久化

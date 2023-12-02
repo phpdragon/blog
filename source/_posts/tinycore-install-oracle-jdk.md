@@ -105,7 +105,7 @@ df -h | grep jdk
 
 添加环境变量文件，'sudo vi /etc/profile.d/jdk8.sh', 添加如下内容:
 ```text
-TCEDIR=$(ls -l /etc/sysconfig/|grep tcedir|awk -F '-> ' '{print $2}')
+TCEDIR=$(readlink -f /etc/sysconfig/tcedir)
 JAVA_HOME_PARENT=$(cd ${TCEDIR};cd ..;pwd)
 
 export JAVA_HOME="${JAVA_HOME_PARENT}/jdk"
