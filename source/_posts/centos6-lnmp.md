@@ -14,7 +14,7 @@ tags: ['CentOs', 'CentOS6.X', 'Linux', 'Nginx', 'PHP', 'MySQL']
 查看系统版本
 ```text
 [root@localhost ~]# uname -a
-Linux centos-6 2.6.32-71.29.1.el6.x86_64 #1 SMP Mon Jun 27 19:49:27 BST 2011 x86_64 x86_64 x86_64 GNU/Linux
+Linux centos-6 2.6.32-71.el6.x86_64 #1 SMP Fri May 20 03:51:51 BST 2011 x86_64 x86_64 x86_64 GNU/Linux
 ```
 
 当前系统版本基于CentOS 6.0。
@@ -24,12 +24,15 @@ Linux centos-6 2.6.32-71.29.1.el6.x86_64 #1 SMP Mon Jun 27 19:49:27 BST 2011 x86
 # 二、准备工作
 
 ## 1. 关闭SELINUX
+
 修改selinux配置文件(/etc/sysconfig/selinux) 关闭防火墙
 
 ```bash
 sed -i 's|^SELINUX=enforcing|SELINUX=disabled|g' /etc/selinux/config
 ```
+
 ## 2. 开放80、3306端口
+
 修改防火墙开放80、3306端口号，配置文件(/etc/sysconfig/iptables) 
 
 ```sehll
@@ -530,7 +533,7 @@ service nginx reload            #重置配置
 service nginx restart           #重启
 service nginx stop              #停止
 
-#查看端口监听
+# 查看端口监听
 ss -antu | grep 80 | column -t
 ```
 访问 http://客户机IP/index.html

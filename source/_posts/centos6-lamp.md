@@ -14,7 +14,7 @@ tags: ['CentOs', 'CentOS6.X', 'Linux', 'Nginx', 'PHP', 'MySQL']
 查看系统版本
 ```text
 [root@localhost ~]# uname -a
-Linux centos-6 2.6.32-71.29.1.el6.x86_64 #1 SMP Mon Jun 27 19:49:27 BST 2011 x86_64 x86_64 x86_64 GNU/Linux
+Linux centos-6 2.6.32-71.el6.x86_64 #1 SMP Fri May 20 03:51:51 BST 2011 x86_64 x86_64 x86_64 GNU/Linux
 ```
 
 当前系统版本基于CentOS 6.0。
