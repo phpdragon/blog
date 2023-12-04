@@ -1,5 +1,5 @@
 ---
-title: Centos6.X 下使用 Tomcat-6.X 非root用户 部署 生产环境 端口转发方式
+title: Centos6.X下安装Tomcat-6.X，JSVC / 端口转发模式
 date: 2023-12-02 17:18:29
 categories: ['OS', 'Linux', 'CentOS', 'WebServer', 'Tomcat']
 tags: ['CentOs','CentOS6.X', 'Linux', 'WebServer', 'Tomcat']
