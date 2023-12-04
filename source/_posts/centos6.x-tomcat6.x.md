@@ -64,7 +64,7 @@ usermod -L tomcat
 
 # 三、安装JDK环境
 
-请参考博文：[CentOS6.x 安装 Oracle JDK](/blog/2023/12/04/centos6-x-install-oracle-jdk/)
+请参考博文：[CentOS6.x 安装 Oracle JDK](/blog/2023/12/02/centos6-x-install-oracle-jdk/)
 
 本文安装JDK版本1.7.0_71:
 
