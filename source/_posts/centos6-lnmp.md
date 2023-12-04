@@ -9,7 +9,7 @@ tags: ['CentOs', 'CentOS6.X', 'Linux', 'Nginx', 'PHP', 'MySQL']
 
 > 安装LAMP请查看：[CentOS 6.X下搭建LAMP服务器](/blog/2023/11/16/centos6-lamp/)
 > 
-> 当前系统基于博文安装：[虚拟机最小化安装CentOS 6.X系统](/blog/2023/11/16/vmware-build-small-centos-6x/)
+> 当前系统基于博文安装：[虚拟机最小化安装CentOS 6.X系统](/blog/2023/11/16/vmware-build-small-centos-6.x/)
 
 查看系统版本
 ```text
