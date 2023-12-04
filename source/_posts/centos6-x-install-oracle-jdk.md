@@ -1,7 +1,8 @@
 ---
 title: CentOS6.x 安装 Oracle JDK
 date: 2023-12-04 19:34:23
-tags:
+categories: ['OS', 'Linux', 'CentOS', 'Oracle', 'JDK']
+tags: ['CentOs','CentOS6.X', 'Linux', 'Oracle', 'JDK', 'JAVA']
 ---
 
 
