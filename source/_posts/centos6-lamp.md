@@ -44,8 +44,8 @@ echo '-A INPUT -p tcp -m state --state NEW -m tcp --dport 80 -j ACCEPT' >> /etc/
 ```bash
 yum -y install mysql mysql-devel mysql-server
 
-chkconfig --levels 235 mysqld on   #设置随机启动
-chkconfig mysqld off               #关闭随机启动
+chkconfig --levels 235 mysqld on   #设置开机自启
+chkconfig mysqld off               #关闭开机自启
 
 service mysqld start               #启动
 service mysqld restart             #重启
@@ -137,13 +137,13 @@ mysql -hlocalhost -uroot -p -e 'show databases;'     #输入密码,修改成功�
 
 ## 2、安装Apache
 
-### 2.1 安装、设置随机启动、启动服务
+### 2.1 安装、设置开机自启、启动服务
 
 ```bash
 yum -y install httpd              #yum安装
 
-chkconfig --levels 235 httpd on   #设置随机启动
-chkconfig httpd off               #关闭随机启动
+chkconfig --levels 235 httpd on   #设置开机自启
+chkconfig httpd off               #关闭开机自启
 
 service httpd start               #启动
 service httpd restart             #重启

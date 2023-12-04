@@ -70,7 +70,7 @@ https://www.oracle.com/java/technologies/javase/javase7-archive-downloads.html
 64位：jdk-7u71-linux-x64.tar.gz
 32位：jdk-7u71-linux-i586.tar.gz
 
-## 方法一、rpm包安装（推荐）
+## 方法一、rpm包安装(推荐)
 
 安装rpm包
 ```bash
@@ -78,6 +78,19 @@ cd /usr/local/src
 cp /mnt/hgfs/shared-folder/jdk-7u71-linux-x64.rpm ./
 rpm -ivh jdk-7u71-linux-x64.rpm
 ```
+在系统环境变量配置文件最后面，添加如下配置：
+```bash
+cat >> /etc/profile <<EOF
+
+export JAVA_HOME="/usr/java/default"
+export JRE_HOME="\${JAVA_HOME}/jre"
+export CLASSPATH=.:\${JAVA_HOME}/lib:\${JRE_HOME}/lib
+export PATH=\${JAVA_HOME}/bin:\$PATH
+EOF
+
+source  /etc/profile
+```
+
 
 ## 方法二、tar.gz包安装
 
@@ -92,16 +105,16 @@ mv jdk1.7.0_71 /usr/local/oracle-jdk7
 ```bash
 cat >> /etc/profile <<EOF 
 
-export JAVA_HOME="/usr/local/oracle-jdk7"
+export JAVA_HOME="/usr/java/default/"
 export JRE_HOME="\${JAVA_HOME}/jre"
 export CLASSPATH=.:\${JAVA_HOME}/lib:\${JRE_HOME}/lib
-export PATH=\${JAVA_HOME}/bin:$PATH
+export PATH=\${JAVA_HOME}/bin:\$PATH
 EOF
 
 source  /etc/profile
 ```
 
-验证：
+## 安装验证：
 ```bash
 java -version
 ```
@@ -118,8 +131,6 @@ Java HotSpot(TM) 64-Bit Server VM (build 24.71-b01, mixed mode)
 
 前往官网下载： [tomcat archive](https://archive.apache.org/dist/tomcat/), 下载链接[apache-tomcat-6.0.53.tar.gz](https://archive.apache.org/dist/tomcat/tomcat-6/v6.0.53/bin/apache-tomcat-6.0.53.tar.gz)
 
-## 1. 解压tar包安装
-
 上传下载好的tomcat包，解压并拷贝到你需要安装的目录下，同时新建软链接指向tomcat目录。
 ```bash
 cd /usr/local/src
@@ -131,14 +142,147 @@ ln -s  /usr/local/apache-tomcat-6.0.53 /usr/local/tomcat
 chown -R tomcat:www /usr/local/apache-tomcat-6.0.53
 ```
 
-## 2. 设置启动项
+# 五、启动管理
 
-### 2.1 rc.local启动
+## 1. JSVC模式(推荐)
+
+### 1.1. 编译jsvc文件：
+```bash
+# 安装编译器
+yum -y install gcc
+
+cd /usr/local/tomcat/bin
+tar zxvf commons-daemon-native.tar.gz
+cd commons-daemon-1.0.15-native-src/unix/
+
+./configure
+make
+
+cp jsvc /usr/local/tomcat/bin/jsvc
+```
+
+### 1.2. 添加启动项：
+
+添加启动shell：
+```bash
+cd /usr/local/tomcat/bin
+
+cat > ./tomcatd.sh <<EOF
+#!/bin/sh
+
+# Tomcat This shell script takes care of starting and stopping 
+# standalone tomcat 
+# chkconfig: 345 91 10 
+# description: tomcat service 
+# processname: tomcat6 
+# config file:
+# Source function library. 
+. /etc/rc.d/init.d/functions
+# Source networking configuration. 
+. /etc/sysconfig/network
+# Check that networking is up. 
+if [ "${NETWORKING}" = "no" ]; then
+    echo "Network is stoped! Please open the network!";
+    exit 0
+fi
+
+source /etc/profile
+
+case "\$1" in
+    status )
+         pid=\$(ps -u tomcat|grep jsvc|awk '{printf \$1}')
+         if [ \${pid} -gt 0 ]; then
+             echo -e "tomcatd ( pid \${pid} ) is running...\n"
+         else
+             echo -e "Tomcat is stopped\n"
+         fi
+         exit 0
+        ;;
+    *)
+        echo "Extended commands："
+        echo "  status            show tomcatd status"
+        echo ""
+        ;;
+esac
+
+/usr/local/tomcat/bin/daemon.sh \$1
+
+EOF
+```
+
+加入开机自启：
+```bash
+ln -s /usr/local/tomcat/bin/tomcatd.sh /etc/init.d/tomcatd
+chmod a+x /usr/local/tomcat/bin/*.sh
+chown -R tomcat:www /usr/local/tomcat/
+
+chkconfig tomcatd on
+# 验证配置
+chkconfig --list | grep tomcatd
+```
+
+
+脚本用法：
+```bash
+service tomcatd start
+service tomcatd status
+service tomcatd restart
+service tomcatd stop
+```
+
+### 1.3. 修改监听端口为80
+
+```bash
+sed -i'.bak' 's|port="8080"|port="80"|g' /usr/local/tomcat/conf/server.xml
+```
+
+### 1.4. 开放80端口
+
+```bash
+iptables -I INPUT -p tcp --dport 8080 -j ACCEPT
+service iptables save
+```
+
+### 1.5. 启动tomcat
+
+```bash
+service tomcatd start
+
+ss -antu | grep 80 | column -t
+```
+
+打开浏览器访问 http://ip， 浏览器显示tomcat欢迎界面。
+
+
+## 2. 端口转发模式
+
+非root用户其实没有绑定80端口的权限。在Linux下低于1024的端口是root专用，
+而Tomcat安装后默认使用用户 tomcat 启动 8080 端口，所以将端口改为80后启动，
+会产生错误：java.net.BindException: Permission denied:80。
+
+解决方法有两种：
+- 1.利用Nginx代理转发, 这个办法网上很多资料，本文不赘述。
+- 2.利用Iptables端口转发功能：
+
+设置防火墙转发80端口至8080端口，配置文件(/etc/sysconfig/iptables)
+```bash
+sysctl -w net.ipv4.ip_forward=1
+
+iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 8080
+iptables -t nat -A POSTROUTING -j MASQUERADE
+
+service iptables save
+```
+这样就实现了80端口转发至8080端口，然后我们配置开机自启。
+
+### 2.1. rc.local启动
 
 编辑引导启动脚本 /etc/rc.local , 内容如下：
 ```bash
+[ -e /etc/init.d/tomcatd ] && /etc/init.d/tomcatd stop && unlink /etc/init.d/tomcatd
+
 cat >> /etc/rc.local <<EOF
-# tomcat随机启动命令(su 空格 tomcat 空格 -c 空格 '路径')
+# tomcat开机自启命令(su 空格 tomcat 空格 -c 空格 '路径')
 su - tomcat -c '/usr/local/tomcat/bin/startup.sh'
 # 或者
 # su - tomcat -c '/usr/local/tomcat/bin/catalina.sh start'
@@ -156,16 +300,15 @@ ip addr | grep inet | grep eth
 # 查看端口监听
 ss -antu | grep 8080 | column -t
 
-# 开发8080端口
+# 开放8080端口
 iptables -I INPUT -p tcp --dport 8080 -j ACCEPT
 service iptables save
 ```
-使用 http://ip:8080 访问， 浏览器显示tomcat欢迎界面。
+使用 http://ip:8080 或 http://ip 访问， 浏览器显示tomcat欢迎界面。
 
+### 2.2. service启动
 
-### 2.2 服务化启动（推荐）
-
-#### 2.2.1 添加服务管理脚本
+#### 2.2.1. 添加服务管理脚本
 
 添加tomcat服务管理shell脚本 `vi /usr/local/tomcat/bin/tomcatd`，添加如下内容：
 ```text
@@ -258,9 +401,9 @@ esac
 exit $RETVAL
 ```
 
-#### 2.2.2 加入随机启动
+#### 2.2.2. 加入开机自启
 
-加入随机启动：
+加入开机自启：
 ```bash
 chmod a+x /usr/local/tomcat/bin/tomcatd
 ln -s /usr/local/tomcat/bin/tomcatd /etc/init.d/tomcatd
@@ -287,8 +430,7 @@ service tomcatd restart
 service tomcatd stop
 ```
 
-
-# 六、设置tomcat环境变量
+# 六、设置运行参数
 
 > 加大tomcat运行内存防止程序报异常[ java.lang.OutOfMemoryError: PermGen space ]
 
@@ -300,28 +442,41 @@ EOF
 ```
 请根据自己服务器的实际配置酌情增大或减小。
 
+# 七、日志定期切割
 
-# 七、端口转发
-
-非root用户其实没有绑定80端口的权限。在Linux下低于1024的端口是root专用，
-而Tomcat安装后默认使用用户 tomcat 启动的，所以将端口改为80后启动，
-会产生错误：java.net.BindException: Permission denied:80。
-
-解决方法有两种：
-- 1.利用Nginx代理转发, 这个办法网上很多资料，本文不赘述。
-- 2.利用Iptables端口转发功能：
-
-设置防火墙转发80端口至8080端口，配置文件(/etc/sysconfig/iptables)
 ```bash
-sysctl -w net.ipv4.ip_forward=1
+cd /usr/local/tomcat/bin/
+cat > clean_log.sh <<EOF
+#!/bin/bash
+PRE_DATE=\$(date +%Y-%m-%d --date="-1 day")
+DUE_DATE=\$(date +%Y-%m-%d --date="-8 day")
+LOG_DIR="/usr/local/tomcat/logs"
 
-iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 8080
-iptables -t nat -A POSTROUTING -j MASQUERADE
+OUT_FILE="\${LOG_DIR}/catalina-daemon.out"
+PRE_OUT_FILE="\${LOG_DIR}/catalina-daemon.\${PRE_DATE}.out"
+DUE_OUT_FILE="\${LOG_DIR}/catalina-daemon.\${DUE_DATE}.out"
 
-service iptables save
+FILE_LINE=\$(wc -l "\${OUT_FILE}"|awk '{print \$1}')
+
+# delete expired file
+if [ -f "\${DUE_OUT_FILE}" ];then
+   rm -f "\${DUE_OUT_FILE}"
+fi
+
+if [ -f \${OUT_FILE} ];then
+   head -n \${FILE_LINE} "\${OUT_FILE}" > "\${PRE_OUT_FILE}"
+   sed -i "1,\${FILE_LINE}d" "\${OUT_FILE}"
+fi
+
+exit 0
+EOF
 ```
-这样就实现了80端口转发至8080端口
 
+加入/etc/cron.d：
+```bash
+chmod a+x /usr/local/tomcat/bin/clean_log.sh
+echo "0 0 * * * root /usr/local/tomcat/bin/clean_log.sh" > /etc/cron.d/clean_tomcat_log
+```
 
 # 八、参考资料
 

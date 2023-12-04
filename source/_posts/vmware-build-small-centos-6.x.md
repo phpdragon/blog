@@ -368,7 +368,7 @@ yum makecache
 service iptables stop      #关闭防火墙
 service ip6tables stop
 
-chkconfig iptables off     #关闭随机启动
+chkconfig iptables off     #关闭开机自启
 chkconfig ip6tables off
 
 chkconfig --list iptables

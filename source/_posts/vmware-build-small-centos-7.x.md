@@ -312,9 +312,9 @@ systemctl status firewalld.service
 #关闭防火墙
 systemctl stop firewalld.service     
 
-#关闭随机启动
+#关闭开机自启
 systemctl disable firewalld.service
-#开启随机启动
+#开启开机自启
 systemctl enable firewalld.service
 
 #检查启动项开启状态

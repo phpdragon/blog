@@ -192,9 +192,9 @@ chmod +x ./mysql_install_db
 
 cp /usr/local/mysql/support-files/mysql.server /etc/init.d/mysqld
 chmod 755 /etc/init.d/mysqld
-#设置随机启动
+#设置开机自启
 chkconfig --levels 235 mysqld on
-#关闭随机启动
+#关闭开机自启
 chkconfig mysqld off
 ```
 
@@ -484,7 +484,7 @@ case "$1" in
 esac
 ```
 
-添加随机启动
+添加开机自启
 ```bash
 chmod +x /etc/init.d/nginx
 
@@ -716,7 +716,7 @@ case "$1" in
 esac
 ```
 
-添加随机启动
+添加开机自启
 ```bash
 chmod +x /etc/init.d/php-fpm
 
