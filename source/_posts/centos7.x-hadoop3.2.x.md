@@ -509,7 +509,7 @@ EOF
 
 ### 3.4. 配置环境变量
 
-覆盖之前的配置：
+覆盖之前的环境变量配置：
 ```bash
 cat > /etc/profile.d/hadoop.sh <<EOF
 export HADOOP_HOME="/usr/local/hadoop"
@@ -525,14 +525,29 @@ EOF
 
 ### 3.5. 配置core-site.xml
 
-配置core-site.xml配置文件，替换HDFS Master通信地址
+覆盖core-site.xml配置文件：
 ```bash
-sed -i 's|hdfs://localhost:9000|hdfs://hadoop-master:9000|g' ${HADOOP_HOME}/etc/hadoop/core-site.xml
+cat > ${HADOOP_HOME}/etc/hadoop/core-site.xml <<EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+<configuration>
+    <property>
+        <name>fs.defaultFS</name>
+        <value>hdfs://hadoop-master:9000</value>
+        <description>指定HDFS Master（namenode）的通信地址，默认端口</description>
+    </property>
+    <property>
+        <name>hadoop.tmp.dir</name>
+        <value>/usr/local/hadoop/tmp</value>
+        <description>指定hadoop运行时产生文件的存储路径</description>
+    </property>
+</configuration>
+EOF
 ```
 
 ### 3.6. 配置hdfs-site.xml
 
-覆盖core-site.xml配置文件
+覆盖hdfs-site.xml配置文件：
 ```bash
 cat > ${HADOOP_HOME}/etc/hadoop/hdfs-site.xml <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
@@ -570,8 +585,7 @@ EOF
 
 ### 3.7. 配置mapred-site.xml
 
-如果只是搭建hdfs,只需要配置core-site.xml和hdfs-site.xml文件就可以了，但是我们过两天要学习的MapReduce是需要YARN资源管理器的，因此，在这里，我们提前配置一下相关文件。
-
+覆盖hdfs-site.xml配置文件：
 ```bash
 cat > ${HADOOP_HOME}/etc/hadoop/mapred-site.xml <<EOF
 <?xml version="1.0"?>
@@ -690,29 +704,25 @@ echo 'hadoop-master' > /etc/hostname
 
 > *-site.xml > *-default.xml 
 
-在任何一台主机上执行：
+在master主机上执行：
 ```bash
 # 启动hadoop
 start-hadoop-all.sh
 
 # 关闭hadoop
 #stop-hadoop-all.sh
-```
 
-### 3.13. 在master主机上查看端口监听
-```bash
+# 查看端口监听
 ss -antu | grep 9000 | column -t
 ss -antu | grep 9870 | column -t
 ss -antu | grep 8088 | column -t
 ```
 
-查看Hadoop集群状态
-
+查看Hadoop集群状态:
 ```bash
 hdfs dfsadmin -report
 ```
 
 访问集群：
-
-http://192.168.168.200:9870/explorer.html#/
+http://192.168.168.200:9870
 
