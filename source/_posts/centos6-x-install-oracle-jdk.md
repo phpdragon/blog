@@ -34,8 +34,7 @@ rpm -ivh jdk-7u71-linux-x64.rpm
 ```
 在系统环境变量配置文件最后面，添加如下配置：
 ```bash
-cat >> /etc/profile <<EOF
-
+cat > /etc/profile.d/java.sh <<EOF 
 export JAVA_HOME="/usr/java/default"
 export JRE_HOME="\${JAVA_HOME}/jre"
 export CLASSPATH=.:\${JAVA_HOME}/lib:\${JRE_HOME}/lib
@@ -60,8 +59,7 @@ ln -s jdk1.7.0_71 oracle-jdk
 ```
 在系统环境变量配置文件最后面，添加如下配置：
 ```bash
-cat >> /etc/profile <<EOF 
-
+cat > /etc/profile.d/java.sh <<EOF 
 export JAVA_HOME="/usr/local/oracle-jdk/"
 export JRE_HOME="\${JAVA_HOME}/jre"
 export CLASSPATH=.:\${JAVA_HOME}/lib:\${JRE_HOME}/lib
