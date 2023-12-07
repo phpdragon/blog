@@ -190,7 +190,7 @@ hadoop-daemon.sh   --config   [start|stop]  command
     2. hdfs $command
 ```
 
-# 五、集群模式配置
+# 五、配置文件说明
 
 通过命令查找默认配置文件路径：
 ```bash
@@ -205,7 +205,7 @@ Hadoop的配置4个配置文件：
 
 属性的优先级： 代码中的属性 > xxx-site.xml > xxx-default.xml
 
-## 1. 本地模式
+# 六、本地模式
 
 本地模式介绍：
 
@@ -214,13 +214,13 @@ Hadoop的配置4个配置文件：
 2. 用途
 - 用于对MapReduce程序的逻辑进行调试，确保程序的正确。由于在本地模式下测试和调试MapReduce程序较为方便，因此，这种模式适宜用在开发阶段。
 
-### 1.1 添加hosts映射
+## 1. 添加hosts映射
 
 ```bash
 echo "127.0.0.1   `hostname`" >> /etc/hosts
 ```
 
-### 1.2 程序案例演示: grep
+## 2. 程序案例演示: grep
 
 使用hadoop自带的grep程序查找input目录下的文件是否有符合正则表达式'[a-z.]'的字符串
 
@@ -236,7 +236,7 @@ rm -rf ./input ./output
 ```
 
 
-## 2. 伪分布式模式
+# 七、伪分布式模式搭建
 
 伪分布式模式介绍：
 1. 特点
@@ -245,13 +245,13 @@ rm -rf ./input ./output
 2. 用途
 - 比本地模式多了代码调试功能，允许检查内存使用情况，HDFS输入输出，以及其他的守护进程交互。
 
-### 2.1. 添加host映射
+## 1. 添加host映射
 
 ```bash
 echo "127.0.0.1   `hostname`" >> /etc/hosts
 ```
 
-### 2.2. 免密互信
+## 2. 免密互信
 
 ```bash
 ssh-keygen -t rsa -P '' -f ~/.ssh/id_rsa
@@ -259,7 +259,7 @@ cat ~/.ssh/id_rsa.pub > ~/.ssh/authorized_keys
 chmod 0600 ~/.ssh/authorized_keys
 ```
 
-### 2.3. 配置root用户启动
+## 3. 配置root用户启动
 
 ```bash
 cat >> /etc/profile.d/hadoop.sh <<EOF
@@ -272,9 +272,9 @@ export YARN_NODEMANAGER_USER=root
 EOF
 ```
 
-### 2.4. 配置Hadoop
+## 4. 配置Hadoop
 
-#### 2.4.1. 配置core-site.xml
+### 4.1. 配置core-site.xml
 
 ```bash
 cat > ${HADOOP_HOME}/etc/hadoop/core-site.xml <<EOF
@@ -295,7 +295,7 @@ cat > ${HADOOP_HOME}/etc/hadoop/core-site.xml <<EOF
 EOF
 ```
 
-#### 2.4.2. 配置hdfs-site.xml
+### 4.2. 配置hdfs-site.xml
 
 ```bash
 cat > ${HADOOP_HOME}/etc/hadoop/hdfs-site.xml <<EOF
@@ -319,7 +319,7 @@ cat > ${HADOOP_HOME}/etc/hadoop/hdfs-site.xml <<EOF
 EOF
 ```
 
-#### 2.4.3. 配置mapred-site.xml
+### 4.3. 配置mapred-site.xml
 
 ```bash
 cat > ${HADOOP_HOME}/etc/hadoop/mapred-site.xml <<EOF
@@ -339,7 +339,7 @@ cat > ${HADOOP_HOME}/etc/hadoop/mapred-site.xml <<EOF
 EOF
 ```
 
-#### 2.4.4. 配置yarn-site.xml
+### 4.4. 配置yarn-site.xml
 
 ```bash
 cat > ${HADOOP_HOME}/etc/hadoop/yarn-site.xml <<EOF
@@ -358,7 +358,7 @@ cat > ${HADOOP_HOME}/etc/hadoop/yarn-site.xml <<EOF
 EOF
 ```
 
-### 2.5. 启动hadoop
+## 5. 启动hadoop
 ```bash
 chown -R hdfs:hadoop /usr/local/hadoop/
 
@@ -395,9 +395,9 @@ jps | grep -v Jps
 
 至此，hadoop启动成功；
 
-### 2.6. 访问WebUI
+## 6. 访问WebUI
 
-#### 2.6.1 访问Datanode Info
+### 6.1 访问Datanode Info
 
 可以在浏览器上输入：http://192.168.168.102:9870 来查看一下伪分布式集群的文件系统信息
 1. 浏览一下页面上提示的ClusterID,BlockPoolID
@@ -405,13 +405,13 @@ jps | grep -v Jps
 
 {% asset_img 1.png %}
 
-#### 2.6.2 访问cluster
+### 6.2 访问cluster
 
 再在浏览器上输入：http://192.168.168.102:8088 来查看一下伪分布式集群的指标信息
 
 {% asset_img 2.png %}
 
-### 2.7. 程序案例演示: wordcount
+## 7. 程序案例演示: wordcount
 下面运行一次经典的WorkCount程序来检查hadoop工作是否正常：
 创建input文件夹：
 ```bash
@@ -442,7 +442,7 @@ hdfs dfs -rm -r -f /input/ /output/ /tmp/
 
 --------------
 
-## 3. 分布式模式搭建
+# 八、分布式模式搭建
 
 > 生产环境基于上节的伪分布模式搭建
 
@@ -456,7 +456,7 @@ hdfs dfs -rm -r -f /input/ /output/ /tmp/
 stop-hadoop-all.sh 
 ```
 
-### 3.1. 添加hadoop用户
+## 1. 添加hadoop用户
 
 ```bash
 groupadd hadoop
@@ -469,7 +469,7 @@ useradd yarn -g hadoop -s /bin/bash
 useradd mapred -g hadoop -s /bin/bash
 ```
 
-### 3.2. 免密互信
+## 2. 免密互信
 
 ```bash
 # 如果已做过root免密互信则略过
@@ -500,7 +500,7 @@ Last login: Mon Dec  5 20:27:45 2023
 ```
 
 
-### 3.3. 添加hosts映射
+## 3. 添加hosts映射
 
 > 尽量清理之前配置的hosts映射。
 
@@ -513,7 +513,7 @@ EOF
 ```
 
 
-### 3.4. 配置环境变量
+## 4. 配置环境变量
 
 覆盖之前的环境变量配置， 使用hadoop用户组启动：
 ```bash
@@ -529,9 +529,9 @@ export YARN_NODEMANAGER_USER=yarn
 EOF
 ```
 
-### 3.5. 配置Hadoop
+## 5. 配置Hadoop
 
-#### 3.5.1. 配置core-site.xml
+### 5.1. 配置core-site.xml
 
 覆盖core-site.xml配置文件：
 ```bash
@@ -553,7 +553,7 @@ cat > ${HADOOP_HOME}/etc/hadoop/core-site.xml <<EOF
 EOF
 ```
 
-#### 3.5.2. 配置hdfs-site.xml
+### 5.2. 配置hdfs-site.xml
 
 覆盖hdfs-site.xml配置文件：
 ```bash
@@ -591,7 +591,7 @@ cat > ${HADOOP_HOME}/etc/hadoop/hdfs-site.xml <<EOF
 EOF
 ```
 
-#### 3.5.3. 配置mapred-site.xml
+### 5.3. 配置mapred-site.xml
 
 覆盖hdfs-site.xml配置文件：
 ```bash
@@ -638,7 +638,7 @@ cat > ${HADOOP_HOME}/etc/hadoop/mapred-site.xml <<EOF
 EOF
 ```
 
-#### 3.5.4. 配置yarn-site.xml
+### 5.4. 配置yarn-site.xml
 
 ```bash
 cat > ${HADOOP_HOME}/etc/hadoop/yarn-site.xml <<EOF
@@ -663,7 +663,7 @@ cat > ${HADOOP_HOME}/etc/hadoop/yarn-site.xml <<EOF
 EOF
 ```
 
-### 3.6. 配置workers
+## 6. 配置workers
 
 配置workers文件，此文件用于指定datanode守护进程所在的机器节点主机名
 ```bash
@@ -674,7 +674,7 @@ hadoop-slave2
 EOF
 ```
 
-### 3.7. 调整目录权限
+## 7. 调整目录权限
 
 ```bash
 chown -R hdfs:hadoop /usr/local/hadoop/
@@ -684,7 +684,7 @@ chmod 777 /usr/local/hadoop/tmp/
 chmod 700 /usr/local/hadoop/hdfs/name
 ```
 
-### 3.8. 克隆主机
+## 8. 克隆主机
 
 > UUID可以通过[在线生成uuid - UUID Online](https://www.uuid.online)
 
@@ -712,7 +712,7 @@ echo 'hadoop-master' > /etc/hostname
 
 重启生效。
 
-### 3.9. 启动hadoop集群
+## 9. 启动hadoop集群
 
 TODO: 在任意一台机器上执行启动都可
 
@@ -738,7 +738,7 @@ hdfs dfsadmin -report
 访问集群：
 http://192.168.168.200:9870
 
-### 3.10. 程序案例演示: wordcount
+## 10. 程序案例演示: wordcount
 下面运行一次经典的WorkCount程序来检查hadoop工作是否正常：
 创建input文件夹：
 ```bash
@@ -764,3 +764,11 @@ su hdfs -c 'hdfs dfs -cat /output/part-r-00000'
 su hdfs -c 'hdfs dfs -rm -r -f /input/ /output/ /tmp/'
 ```
 
+# 九、高可用模式搭建
+
+
+
+# 十、参考资料
+
+- [Hadoop3.2.1版本的环境搭建](https://zhuanlan.zhihu.com/p/91302446)
+- [HDFS High Availability Using the Quorum Journal Manager](https://hadoop.apache.org/docs/r3.2.1/hadoop-project-dist/hadoop-hdfs/HDFSHighAvailabilityWithQJM.html)
