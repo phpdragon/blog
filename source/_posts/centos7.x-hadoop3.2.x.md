@@ -1427,7 +1427,7 @@ hadoop-node3:8020                                 standby
 yarn rmadmin -getAllServiceState
 # 或者
 yarn rmadmin -getServiceState rm1
-yarn rmadmin -getServiceState rm3
+yarn rmadmin -getServiceState rm2
 ```
 
 回显如下：
