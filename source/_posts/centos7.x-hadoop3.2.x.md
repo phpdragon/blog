@@ -1051,7 +1051,7 @@ cat > ${HADOOP_HOME}/etc/hadoop/hdfs-site.xml <<EOF
     </property>
     <property>
         <name>dfs.ha.namenodes.mycluster</name>
-        <value>nn1,nn2</value>
+        <value>nn1,nn2,nn3</value>
         <description>所有的namenode列表，此处也只是逻辑名称，非namenode所在的主机名称</description>
     </property>
     <property>
@@ -1065,6 +1065,11 @@ cat > ${HADOOP_HOME}/etc/hadoop/hdfs-site.xml <<EOF
         <description>namenode之间用于RPC通信的地址。默认端口8020</description>
     </property>
     <property>
+        <name>dfs.namenode.rpc-address.mycluster.nn3</name>
+        <value>hadoop-node3:8020</value>
+        <description>namenode之间用于RPC通信的地址。默认端口8020</description>
+    </property>
+    <property>
         <name>dfs.namenode.http-address.mycluster.nn1</name>
         <value>hadoop-node1:9870</value>
         <description>namenode的web访问地址，默认端口9870</description>
@@ -1074,7 +1079,12 @@ cat > ${HADOOP_HOME}/etc/hadoop/hdfs-site.xml <<EOF
         <value>hadoop-node2:9870</value>
         <description>namenode的web访问地址，默认端口9870</description>
     </property>
-    
+    <property>
+        <name>dfs.namenode.http-address.mycluster.nn3</name>
+        <value>hadoop-node3:9870</value>
+        <description>namenode的web访问地址，默认端口9870</description>
+    </property>
+
     <!--journalnode主机地址，最少三台，默认端口8485-->
     <!--格式为 qjournal://jn1:port;jn2:port;jn3:port/\${dfs.nameservices}-->
     <property>
