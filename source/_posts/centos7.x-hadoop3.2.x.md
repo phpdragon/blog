@@ -448,7 +448,7 @@ hdfs dfs -rm -r -f /input/ /output/ /tmp/
 > 完全分布式(单点)模式环境基于上节的伪分布模式搭建
 
 
-集群规划：
+## 1. 集群规划：
 | 节点名称 | DN | NM | NN | RM |
 |:-- | :-- | :-- | :-- | :-- |
 | hadoop-node1 | DataNode | NodeManager |      NodeName     | ResourceManager |
@@ -461,7 +461,7 @@ hdfs dfs -rm -r -f /input/ /output/ /tmp/
 stop-hadoop-all.sh 
 ```
 
-## 1. 添加hadoop用户
+## 2. 添加hadoop用户
 
 ```bash
 groupadd hadoop
@@ -474,7 +474,7 @@ useradd yarn -g hadoop -s /bin/bash
 useradd mapred -g hadoop -s /bin/bash
 ```
 
-## 2. 免密互信
+## 3. 免密互信
 
 ```bash
 # 如果已做过root免密互信则略过
@@ -505,20 +505,20 @@ Last login: Mon Dec  5 20:27:45 2023
 ```
 
 
-## 3. 添加hosts映射
+## 4. 添加hosts映射
 
 > 尽量清理之前配置的hosts映射。
 
 ```bash
 cat >> /etc/hosts <<EOF
-192.168.168.200 hadoop-node1
-192.168.168.201 hadoop-node2
-192.168.168.202 hadoop-node3
+192.168.168.201 hadoop-node1
+192.168.168.202 hadoop-node2
+192.168.168.203 hadoop-node3
 EOF
 ```
 
 
-## 4. 配置环境变量
+## 5. 配置环境变量
 
 覆盖之前的环境变量配置， 使用hadoop用户组启动：
 ```bash
@@ -534,9 +534,9 @@ export YARN_NODEMANAGER_USER=yarn
 EOF
 ```
 
-## 5. 配置Hadoop
+## 6. 配置Hadoop
 
-### 5.1. 配置core-site.xml
+### 6.1. 配置core-site.xml
 
 覆盖core-site.xml配置文件：
 ```bash
@@ -558,7 +558,7 @@ cat > ${HADOOP_HOME}/etc/hadoop/core-site.xml <<EOF
 EOF
 ```
 
-### 5.2. 配置hdfs-site.xml
+### 6.2. 配置hdfs-site.xml
 
 覆盖hdfs-site.xml配置文件：
 ```bash
@@ -596,7 +596,7 @@ cat > ${HADOOP_HOME}/etc/hadoop/hdfs-site.xml <<EOF
 EOF
 ```
 
-### 5.3. 配置mapred-site.xml
+### 6.3. 配置mapred-site.xml
 
 覆盖hdfs-site.xml配置文件：
 ```bash
@@ -643,7 +643,7 @@ cat > ${HADOOP_HOME}/etc/hadoop/mapred-site.xml <<EOF
 EOF
 ```
 
-### 5.4. 配置yarn-site.xml
+### 6.4. 配置yarn-site.xml
 
 ```bash
 cat > ${HADOOP_HOME}/etc/hadoop/yarn-site.xml <<EOF
@@ -663,7 +663,7 @@ cat > ${HADOOP_HOME}/etc/hadoop/yarn-site.xml <<EOF
 EOF
 ```
 
-## 6. 配置workers
+## 7. 配置workers
 
 配置workers文件，此文件用于指定datanode守护进程所在的机器节点主机名
 ```bash
@@ -674,7 +674,7 @@ hadoop-node3
 EOF
 ```
 
-## 7. 调整目录权限
+## 8. 调整目录权限
 
 ```bash
 mkdir -p /usr/local/hadoop/logs/
@@ -686,16 +686,16 @@ chmod 775 /usr/local/hadoop/logs/
 chmod 777 /usr/local/hadoop/tmp/
 ```
 
-## 8. 克隆主机
+## 9. 克隆主机
 
 > UUID可以通过[在线生成uuid - UUID Online](https://www.uuid.online)
 
 克隆出master、slave1、slave2三台机器，然后编辑虚拟机设置->网络适配器->高级->生成MAC地址，拷贝生成的MAC地址(或按下面内容手动输入)。
 | 节点名称 | IP | MAC地址 | UUID |
 |:-- | :-- | :-- | :-- |
-| hadoop-node1 | 192.168.168.200 | 00:0C:29:18:1F:D3 | f0208bba-45e6-4b85-8104-39c3f9aaa513 |
-| hadoop-node2 | 192.168.168.201 | 00:0C:29:18:1F:D4 | f0208bba-45e6-4b85-8104-39c3f9aaa514 |
-| hadoop-node3 | 192.168.168.202 | 00:0C:29:18:1F:D5 | f0208bba-45e6-4b85-8104-39c3f9aaa515 |
+| hadoop-node1 | 192.168.168.201 | 00:0C:29:18:1F:D3 | f0208bba-45e6-4b85-8104-39c3f9aaa513 |
+| hadoop-node2 | 192.168.168.202 | 00:0C:29:18:1F:D4 | f0208bba-45e6-4b85-8104-39c3f9aaa514 |
+| hadoop-node3 | 192.168.168.203 | 00:0C:29:18:1F:D5 | f0208bba-45e6-4b85-8104-39c3f9aaa515 |
 
 分别登录三台机器，修改网络配置文件：
 编辑 `vi /etc/sysconfig/network-scripts/ifcfg-eno*`, 修改其中的UUID、MAC
@@ -712,7 +712,7 @@ echo '节点名称' > /etc/hostname
 
 重启生效。
 
-## 9. 启动hadoop集群
+## 10. 启动hadoop集群
 
 在master主机上执行：
 ```bash
@@ -770,7 +770,7 @@ ssh root@hadoop-node3 'jps | grep -v Jps'
 
 
 
-## 10. 案例演示: wordcount
+## 11. 案例演示: wordcount
 下面运行一次经典的WorkCount程序来检查hadoop工作是否正常：
 创建input文件夹：
 ```bash
@@ -1309,7 +1309,7 @@ About to bootstrap Standby ID nn1 from:
 =====================================================
 ```
 
-#### 4.6.4. 格式化zookeeper节点
+#### 4.6.3. 格式化zookeeper节点
 
 在任意一台机器上执行格式化，出现`Successfully created /hadoop-ha/mycluster in ZK.`信息即为执行成功。
 ```bash
@@ -1317,7 +1317,7 @@ hdfs zkfc -formatZK
 ```
 会在zookeeper上产生一个/hadoop-ha的目录。
 
-#### 4.6.3. 启动HDFS集群
+#### 4.6.4. 启动HDFS集群
 
 在任意一台机器上执行：
 ```bash
@@ -1494,3 +1494,8 @@ yarn --help
 - [Hadoop3.2.1集群搭建](http://blog.itpub.net/29956245/viewspace-2933087/)
 - [Hadoop集群搭建](https://blog.csdn.net/qq_41537880/article/details/129426222)
 - [HDFS High Availability Using the Quorum Journal Manager](https://hadoop.apache.org/docs/r3.2.1/hadoop-project-dist/hadoop-hdfs/HDFSHighAvailabilityWithQJM.html)
+
+
+# 十一、附件
+
+本文使用到的软件包已上传网盘：[BlogDocs->files->centos7.x-hadoop3.2.x](https://pan.baidu.com/s/1yEbHDQBzy43uV8gIYXqbnw?pwd=6666#list/path=%2Fsharelink2076919717-858150382706250%2Ffiles%2Fcentos7.x-hadoop3.2.x)
