@@ -203,7 +203,7 @@ Hadoop的配置4个配置文件：
 - mapred-site.xml
 - yarn-site.xml
 
-属性的优先级： 码中的属性 > xxx-site.xml > xxx-default.xml
+属性的优先级： 代码中的属性 > xxx-site.xml > xxx-default.xml
 
 ## 1. 本地模式
 
@@ -330,6 +330,10 @@ cat > ${HADOOP_HOME}/etc/hadoop/mapred-site.xml <<EOF
         <name>mapreduce.framework.name</name>
         <value>yarn</value>
         <description>yarn模式</description>
+    </property>
+    <property>
+        <name>mapreduce.application.classpath</name>
+        <value>$HADOOP_HOME/share/hadoop/mapreduce/*:$HADOOP_HOME/share/hadoop/mapreduce/lib/*</value>
     </property>
 </configuration>
 EOF
@@ -600,6 +604,10 @@ cat > ${HADOOP_HOME}/etc/hadoop/mapred-site.xml <<EOF
         <value>yarn</value>
         <description>yarn模式</description>
     </property>
+    <property>
+        <name>mapreduce.application.classpath</name>
+        <value>$HADOOP_HOME/share/hadoop/mapreduce/*:$HADOOP_HOME/share/hadoop/mapreduce/lib/*</value>
+    </property>
     <!-- 配置作业历史服务器的地址-->
     <property>
       <name>mapreduce.jobhistory.address</name>
@@ -706,7 +714,7 @@ echo 'hadoop-master' > /etc/hostname
 
 ### 3.9. 启动hadoop集群
 
-> *-site.xml > *-default.xml 
+TODO: 在任意一台机器上执行启动都可
 
 在master主机上执行：
 ```bash
@@ -729,4 +737,30 @@ hdfs dfsadmin -report
 
 访问集群：
 http://192.168.168.200:9870
+
+### 3.10. 程序案例演示: wordcount
+下面运行一次经典的WorkCount程序来检查hadoop工作是否正常：
+创建input文件夹：
+```bash
+su hdfs -c 'hdfs dfs -mkdir /input'
+```
+将测试文件上传的hdfs的/input目录下：
+```bash
+su hdfs -c 'hdfs dfs -put -f ${HADOOP_HOME}/README.txt /input/test.txt'
+
+# 查看目录下文件
+su hdfs -c 'hdfs dfs -ls /input'
+```
+接运行hadoop安装包中自带的workcount程序：
+```bash
+su hdfs -c 'hadoop jar ${HADOOP_HOME}/share/hadoop/mapreduce/hadoop-mapreduce-examples-3.2.1.jar wordcount /input/test.txt /output/'
+```
+查看计算结果：
+```bash
+su hdfs -c 'hdfs dfs -ls /output/'
+su hdfs -c 'hdfs dfs -cat /output/part-r-00000'
+
+# 删除测试目录
+su hdfs -c 'hdfs dfs -rm -r -f /input/ /output/ /tmp/'
+```
 
