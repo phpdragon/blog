@@ -350,10 +350,6 @@ cat > ${HADOOP_HOME}/etc/hadoop/yarn-site.xml <<EOF
         <value>mapreduce_shuffle</value>
         <description>NodeManager上运行的附属服务。需配置成mapreduce_shuffle，才可运行MapReduce程序</description>
     </property>
-    <property>
-        <name>yarn.nodemanager.env-whitelist</name>
-        <value>JAVA_HOME,HADOOP_COMMON_HOME,HADOOP_HDFS_HOME,HADOOP_CONF_DIR,CLASSPATH_PREPEND_DISTCACHE,HADOOP_YARN_HOME,HADOOP_MAPRED_HOME</value>
-    </property>
 </configuration>
 EOF
 ```
@@ -442,7 +438,7 @@ hdfs dfs -rm -r -f /input/ /output/ /tmp/
 
 --------------
 
-# 八、分布式模式搭建
+# 八、完全分布式(单点)模式搭建
 
 > 生产环境基于上节的伪分布模式搭建
 
@@ -645,19 +641,14 @@ cat > ${HADOOP_HOME}/etc/hadoop/yarn-site.xml <<EOF
 <?xml version="1.0"?>
 <?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
 <configuration>
-<!-- Site specific YARN configuration properties -->
-    <property>
-        <name>yarn.nodemanager.aux-services</name>
-        <value>mapreduce_shuffle</value>
-    </property>
     <property>
         <name>yarn.resourcemanager.hostname</name>
         <value>hadoop-master</value>
         <description>yarn 资源管理服务主机名</description>
     </property>
     <property>
-        <name>yarn.nodemanager.env-whitelist</name>
-        <value>JAVA_HOME,HADOOP_COMMON_HOME,HADOOP_HDFS_HOME,HADOOP_CONF_DIR,CLASSPATH_PREPEND_DISTCACHE,HADOOP_YARN_HOME,HADOOP_HOME</value>
+        <name>yarn.nodemanager.aux-services</name>
+        <value>mapreduce_shuffle</value>
     </property>
 </configuration>
 EOF
@@ -764,11 +755,644 @@ su hdfs -c 'hdfs dfs -cat /output/part-r-00000'
 su hdfs -c 'hdfs dfs -rm -r -f /input/ /output/ /tmp/'
 ```
 
-# 九、高可用模式搭建
+# 九、完全分布式(高可用)模式搭建
 
+> 基于上一节的内容搭建高可用模式
+
+## 1. 搭建zookeeper集群
+
+### 1.1. 下载和安装
+
+前往 [安装包归档地址](http://archive.apache.org/dist/zookeeper/) 下载 [zookeeper-3.4.10.tar.gz](http://archive.apache.org/dist/zookeeper/zookeeper-3.4.10/zookeeper-3.4.10.tar.gz)
+
+```bash
+#wget http://archive.apache.org/dist/zookeeper/zookeeper-3.4.10/zookeeper-3.4.10.tar.gz
+cp /mnt/hgfs/shared-folder/zookeeper-3.4.10.tar.gz ./
+
+tar zxf zookeeper-3.4.10.tar.gz -C /usr/local
+
+cd /usr/local
+ln -s  zookeeper-3.4.10 zookeeper
+
+# 删除多余的cmd命令文件（可不删除cmd脚本）
+find /usr/local/zookeeper/ -name *.cmd -exec rm -f {} \;
+```
+
+### 1.2. 添加环境变量
+```bash
+cat > /etc/profile.d/zookeeper.sh <<EOF
+export ZOOKEEPER_HOME="/usr/local/zookeeper/"
+export PATH=$PATH:\${ZOOKEEPER_HOME}/bin
+EOF
+
+source /etc/profile
+```
+
+### 1.3. 配置zookeeper
+
+```bash
+cd /usr/local/zookeeper/conf
+cp zoo_sample.cfg zoo.cfg
+
+mkdir -p /usr/local/zookeeper/data
+
+sed -i 's|dataDir=/tmp/zookeeper|dataDir=/usr/local/zookeeper/data|g' zoo.cfg
+
+cat >> zoo.cfg <<EOF
+dataLogDir=/usr/local/zookeeper/logs
+
+server.1=hadoop-master:2888:3888
+server.2=hadoop-slave1:2888:3888
+server.3=hadoop-slave2:2888:3888
+EOF
+
+chown -R yarn:hadoop /usr/local/zookeeper/
+chmod 775 /usr/local/zookeeper/data
+chmod 775 /usr/local/zookeeper/logs
+```
+
+### 1.4. 添加开机自启
+
+```bash
+cat > /usr/local/zookeeper/bin/zookeeper.service <<EOF
+[Unit]
+Description=zookeeper
+After=syslog.target network.target
+
+[Service]
+Type=forking
+Environment=ZOO_LOG_DIR=/usr/local/zookeeper/logs
+ExecStart=/usr/local/zookeeper/bin/zkServer.sh start
+ExecStop=/usr/local/zookeeper/bin/zkServer.sh stop
+Restart=always
+User=yarn
+Group=hadoop
+
+[Install]
+WantedBy=multi-user.target
+EOF
+```
+
+参考：
+- [centos7-service文件](https://www.cnblogs.com/chunjeh/p/17817520.html)
+- [Centos7以普通用户启动zookeeper并加入开机自启动服务](https://www.tracymc.cn/archives/3670)
+- [Centos下Zookeeper设置自启动](https://it.cha138.com/ios/show-384755.html)
+
+### 1.5. 分发zookeeper包至其他机器：
+```bash
+rsync /etc/profile.d/zookeeper.sh root@hadoop-slave1:/etc/profile.d/
+rsync /etc/profile.d/zookeeper.sh root@hadoop-slave2:/etc/profile.d/
+
+rsync -a /usr/local/zookeeper* root@hadoop-slave1:/usr/local/
+rsync -a /usr/local/zookeeper* root@hadoop-slave2:/usr/local/
+```
+
+### 1.5. 添加server对应的编号：
+```bash
+echo "1" > /usr/local/zookeeper/data/myid
+ssh root@hadoop-slave1 'echo "2" > /usr/local/zookeeper/data/myid'
+ssh root@hadoop-slave2 'echo "3" > /usr/local/zookeeper/data/myid'
+```
+
+验证：
+```bash
+echo $ZOOKEEPER_HOME
+ssh root@hadoop-slave1 'echo $ZOOKEEPER_HOME'
+ssh root@hadoop-slave2 'echo $ZOOKEEPER_HOME'
+
+cat /usr/local/zookeeper/data/myid
+ssh root@hadoop-slave1 'cat /usr/local/zookeeper/data/myid'
+ssh root@hadoop-slave2 'cat /usr/local/zookeeper/data/myid'
+```
+
+### 1.6. 启动集群
+```bash
+systemctl enable /usr/local/zookeeper/bin/zookeeper.service
+ssh root@hadoop-slave1 'systemctl enable /usr/local/zookeeper/bin/zookeeper.service'
+ssh root@hadoop-slave2 'systemctl enable /usr/local/zookeeper/bin/zookeeper.service'
+
+#systemctl disable /usr/local/zookeeper/bin/zookeeper.service
+
+systemctl daemon-reload
+ssh root@hadoop-slave1 'systemctl daemon-reload'
+ssh root@hadoop-slave2 'systemctl daemon-reload'
+
+systemctl start zookeeper
+ssh root@hadoop-slave1 'systemctl start zookeeper'
+ssh root@hadoop-slave2 'systemctl start zookeeper'
+
+# 关闭
+#systemctl stop zookeeper
+```
+验证：
+```bash
+zkServer.sh status
+ssh root@hadoop-slave1 'zkServer.sh status'
+ssh root@hadoop-slave2 'zkServer.sh status'
+```
+
+### 1.7. 测试集群
+在slave2上启动客户端：
+```bash
+zkCli.sh
+```
+创建临时节点数据
+```bash
+create -e /test 1234
+```
+不要退出客户端。
+
+然后分别登录其他机器：
+```bash
+zkCli.sh
+get /test
+```
+如果返回有设置的值，说明zookeeper已搭建成功。
+
+## 2. 配置环境变量
+
+覆盖之前的环境变量配置， 使用hadoop用户组启动：
+```bash
+cat > /etc/profile.d/hadoop.sh <<EOF
+export HADOOP_HOME="/usr/local/hadoop"
+export PATH=\$PATH:\${HADOOP_HOME}/bin:\${HADOOP_HOME}/sbin
+
+export HDFS_NAMENODE_USER=hdfs
+export HDFS_DATANODE_USER=hdfs
+export HDFS_SECONDARYNAMENODE_USER=hdfs
+export HDFS_JOURNALNODE_USER=hdfs
+export HDFS_ZKFC_USER=hdfs
+export YARN_RESOURCEMANAGER_USER=yarn
+export YARN_NODEMANAGER_USER=yarn
+EOF
+
+source /etc/profile
+```
+
+分发配置：
+```bash
+scp /etc/profile.d/hadoop.sh root@hadoop-slave1:/etc/profile.d/
+scp /etc/profile.d/hadoop.sh root@hadoop-slave2:/etc/profile.d/
+```
+
+## 3. 配置Hadoop
+
+### 3.1. 配置core-site.xml
+
+覆盖core-site.xml配置文件：
+```bash
+cat > ${HADOOP_HOME}/etc/hadoop/core-site.xml <<EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+<configuration>
+    <property>
+        <name>fs.defaultFS</name>
+        <value>hdfs://mycluster</value>
+        <description>把多个NameNode地址组装成一个集群mycluster</description>
+    </property>
+    <property>
+        <name>hadoop.tmp.dir</name>
+        <value>/usr/local/hadoop/tmp</value>
+        <description>指定hadoop运行时产生文件的存储路径</description>
+    </property>
+    <property>
+        <name>ha.zookeeper.quorum</name>
+        <value>hadoop-master:2181,hadoop-slave1:2181,hadoop-slave2:2181</value>
+        <description>指定ZKFC故障自动切换转移</description>
+    </property>
+</configuration>
+EOF
+```
+
+### 3.2. 配置hdfs-site.xml
+
+覆盖hdfs-site.xml配置文件：
+```bash
+cat > ${HADOOP_HOME}/etc/hadoop/hdfs-site.xml <<EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+<configuration>
+    <property>
+        <name>dfs.replication</name>
+        <value>2</value>
+        <description>设置数据块应该被复制的副本数,默认3份</description>
+    </property>
+    <property>
+        <name>dfs.namenode.name.dir</name>
+        <value>/usr/local/hadoop/hdfs/name</value>
+    </property>
+    <property>
+        <name>dfs.datanode.data.dir</name>
+        <value>/usr/local/hadoop/hdfs/data</value>
+    </property>
+
+    <property>
+        <name>dfs.nameservices</name>
+        <value>mycluster</value>
+        <description>完全分布式集群名称</description>
+    </property>
+    <property>
+        <name>dfs.ha.namenodes.mycluster</name>
+        <value>nn1,nn2,nn3</value>
+        <description>所有的namenode列表，此处也只是逻辑名称，非namenode所在的主机名称</description>
+    </property>
+    <property>
+        <name>dfs.namenode.rpc-address.mycluster.nn1</name>
+        <value>hadoop-master:8020</value>
+        <description>namenode之间用于RPC通信的地址。默认端口8020</description>
+    </property>
+    <property>
+        <name>dfs.namenode.rpc-address.mycluster.nn2</name>
+        <value>hadoop-slave1:8020</value>
+        <description>namenode之间用于RPC通信的地址。默认端口8020</description>
+    </property>
+    <property>
+        <name>dfs.namenode.rpc-address.mycluster.nn3</name>
+        <value>hadoop-slave2:8020</value>
+        <description>namenode之间用于RPC通信的地址。默认端口8020</description>
+    </property>
+    <property>
+        <name>dfs.namenode.http-address.mycluster.nn1</name>
+        <value>hadoop-master:9870</value>
+        <description>namenode的web访问地址，默认端口9870</description>
+    </property>
+    <property>
+        <name>dfs.namenode.http-address.mycluster.nn2</name>
+        <value>hadoop-slave1:9870</value>
+        <description>namenode的web访问地址，默认端口9870</description>
+    </property>
+    <property>
+        <name>dfs.namenode.http-address.mycluster.nn3</name>
+        <value>hadoop-slave2:9870</value>
+        <description>namenode的web访问地址，默认端口9870</description>
+    </property>
+    
+    <!--journalnode主机地址，最少三台，默认端口8485-->
+    <!--格式为 qjournal://jn1:port;jn2:port;jn3:port/\${dfs.nameservices}-->
+    <property>
+        <name>dfs.namenode.shared.edits.dir</name>
+        <value>qjournal://hadoop-master:8485;hadoop-slave1:8485;hadoop-slave2:8485/mycluster</value>
+        <description>指定NameNode的元数据在JournalNode上的存放位置</description>
+    </property>
+    <property>
+        <name>dfs.journalnode.edits.dir</name>
+        <value>/usr/local/hadoop/journal-data</value>
+        <description>指定journalNode在本地磁盘存放数据的位置</description>
+    </property>
+
+    <property>
+        <name>dfs.ha.automatic-failover.enabled</name>
+        <value>true</value>
+        <description>启用自动故障转移</description>
+    </property>
+    <property>
+      <name>dfs.ha.fencing.methods</name>
+      <value>sshfence</value>
+      <description>配置隔离机制，即同一时刻只能有一台服务器对外响应. 故障时相互操作方式(namenode要切换active和standby)，这里我们选ssh方式</description>
+    </property>
+    <property>
+      <name>dfs.ha.fencing.ssh.private-key-files</name>
+      <value>/root/.ssh/id_rsa</value>
+      <description>使用隔离机制时需要ssh无秘钥登录</description>
+    </property>
+    <property>
+        <name>dfs.client.failover.proxy.provider.mycluster</name>
+        <value>org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider</value>
+        <description>故障时自动切换的实现类</description>
+    </property>
+
+    <property>
+        <name>dfs.permissions.enabled</name>
+        <value>true</value>
+        <description>关闭权限检查，默认为true</description>
+    </property>
+</configuration>
+EOF
+```
+
+### 3.3. 配置mapred-site.xml
+
+覆盖hdfs-site.xml配置文件：
+```bash
+cat > ${HADOOP_HOME}/etc/hadoop/mapred-site.xml <<EOF
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+<configuration>
+    <property>
+        <name>mapreduce.framework.name</name>
+        <value>yarn</value>
+        <description>yarn模式</description>
+    </property>
+    <property>
+        <name>mapreduce.application.classpath</name>
+        <value>$HADOOP_HOME/share/hadoop/mapreduce/*:$HADOOP_HOME/share/hadoop/mapreduce/lib/*</value>
+    </property>
+    <!-- 配置作业历史服务器的地址-->
+    <property>
+      <name>mapreduce.jobhistory.address</name>
+      <value>hadoop-master:10020</value>
+      <description>MapReduce JobHistory Server IPC host:port</description>
+    </property>
+    <!-- 配置作业历史服务器的http地址-->
+    <property>
+      <name>mapreduce.jobhistory.webapp.address</name>
+      <value>hadoop-master:19888</value>
+      <description>MapReduce JobHistory Server Web UI host:port</description>
+    </property>
+    <!-- 配置作业历史服务器的https地址-->
+    <property>
+      <name>mapreduce.jobhistory.webapp.https.address</name>
+      <value>hadoop-master:19890</value>
+      <description>
+        The https address the MapReduce JobHistory Server WebApp is on.
+      </description>
+    </property>
+    <!-- 配置作业历史服务器的管理地址-->
+    <property>
+      <name>mapreduce.jobhistory.admin.address</name>
+      <value>hadoop-master:10033</value>
+      <description>The address of the History server admin interface.</description>
+    </property>
+</configuration>
+EOF
+```
+
+### 3.4. 配置yarn-site.xml
+
+```bash
+cat > ${HADOOP_HOME}/etc/hadoop/yarn-site.xml <<EOF
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+<configuration>
+    <property>
+        <name>yarn.resourcemanager.ha.enabled</name>
+        <value>true</value>
+        <description>开启RM高可靠</description>
+    </property>
+    <property>
+        <name>yarn.resourcemanager.cluster-id</name>
+        <value>yarn-cluster</value>
+        <description>指定RM集群名称</description>
+    </property>
+    <property>
+        <name>yarn.resourcemanager.ha.rm-ids</name>
+        <value>rm1,rm2</value>
+        <description>声明两台RM的地址, 注意这里是逻辑地址</description>
+    </property>
+    <property>
+        <name>yarn.resourcemanager.hostname.rm1</name>
+        <value>hadoop-master</value>
+        <description>声明一台RM的地址</description>
+    </property>
+    <property>
+        <name>yarn.resourcemanager.hostname.rm2</name>
+        <value>hadoop-slave1</value>
+        <description>声明一台RM的地址</description>
+    </property>
+    <property>
+        <name>yarn.resourcemanager.recovery.enabled</name>
+        <value>true</value>
+        <description>启用自动恢复，默认false</description>
+    </property>
+    <property>
+       <name>yarn.resourcemanager.store.class</name>
+       <value>org.apache.hadoop.yarn.server.resourcemanager.recovery.ZKRMStateStore</value>
+       <description>指定恢复实现类</description>
+    </property>
+    <property>
+        <name>yarn.resourcemanager.zk-address</name>
+        <value>hadoop-master:2181,hadoop-slave1:2181,hadoop-slave2:2181</value>
+        <description>指定zk集群地址</description>
+    </property>
+
+    <property>
+        <name>yarn.resourcemanager.webapp.address.rm1</name>
+        <value>hadoop-master:8088</value>
+        <description>RM对外暴露的web http地址，用户可通过该地址在浏览器中查看集群信息</description>
+    </property>
+    <property>
+        <name>yarn.resourcemanager.webapp.address.rm2</name>
+        <value>hadoop-slave1:8088</value>
+        <description>RM对外暴露的web http地址，用户可通过该地址在浏览器中查看集群信息</description>
+    </property>
+
+    <property>
+        <name>yarn.nodemanager.aux-services</name>
+        <value>mapreduce_shuffle</value>
+    </property>
+    <property>
+        <name>yarn.application.classpath</name>
+        <value>
+            /usr/local/hadoop/etc/hadoop,
+            /usr/local/hadoop/share/hadoop/common/*,
+            /usr/local/hadoop/share/hadoop/common/lib/*,
+            /usr/local/hadoop/share/hadoop/hdfs/*,
+            /usr/local/hadoop/share/hadoop/hdfs/lib/*,
+            /usr/local/hadoop/share/hadoop/yarn/*,
+            /usr/local/hadoop/share/hadoop/yarn/lib/*,
+            /usr/local/hadoop/share/hadoop/mapreduce/lib/*,
+            /usr/local/hadoop/share/hadoop/mapreduce/*,
+        </value>
+    </property>
+</configuration>
+EOF
+```
+
+### 3.5. 分发配置
+
+```bash
+su hdfs -c "mkdir -p /usr/local/hadoop/journal-data"
+ssh root@hadoop-slave1 'su hdfs -c "mkdir -p /usr/local/hadoop/journal-data"'
+ssh root@hadoop-slave2 'su hdfs -c "mkdir -p /usr/local/hadoop/journal-data"'
+
+scp -r /usr/local/hadoop/etc/ root@hadoop-slave1:/usr/local/hadoop/etc/
+scp -r /usr/local/hadoop/etc/ root@hadoop-slave2:/usr/local/hadoop/etc/
+```
+
+### 3.6. 启动集群
+
+#### 3.6.1. 启动JournalNode
+
+在所有journalnode节点上启动journalnode(本例中是所有机器)：
+```bash
+hdfs --daemon start journalnode
+ssh root@hadoop-slave1 'hdfs --daemon start journalnode'
+ssh root@hadoop-slave2 'hdfs --daemon start journalnode'
+```
+
+#### 3.6.2. 格式化文件系统
+
+> 在namenode(随便哪一个都行)上执行格式化，出现`successfully formated`即为执行成功。
+
+假如我们在slave2上执行：
+```bash
+hdfs namenode -format
+```
+
+启动slave2上的NameNode：
+```bash
+hdfs --daemon start namenode
+```
+
+同步hdfs目录至其他机器：
+```text
+ssh root@hadoop-master 'hdfs namenode -bootstrapStandby'
+ssh root@hadoop-slave1 'hdfs namenode -bootstrapStandby'
+```
+出现以下信息即为同步成功。
+```text
+=====================================================
+About to bootstrap Standby ID nn1 from:
+           Nameservice ID: mycluster
+        Other Namenode ID: nn3
+  Other NN's HTTP address: http://hadoop-slave2:9870
+  Other NN's IPC  address: hadoop-slave2/192.168.168.202:8020
+             Namespace ID: 134603182
+            Block pool ID: BP-510794777-192.168.168.202-1701941650572
+               Cluster ID: CID-c3a1e9a9-0dea-4b26-8310-e9922c92007c
+           Layout version: -65
+       isUpgradeFinalized: true
+=====================================================
+```
+
+#### 3.6.4. 格式化zookeeper节点
+
+在任意一台机器上执行格式化，出现`Successfully created /hadoop-ha/mycluster in ZK.`信息即为执行成功。
+```bash
+hdfs zkfc -formatZK
+```
+会在zookeeper上产生一个/hadoop-ha的目录。
+
+#### 3.6.3. 启动HDFS集群
+
+在任意一台机器上执行：
+```bash
+start-dfs.sh
+```
+
+启动DFSZK Failover Controller
+```bash
+hdfs --daemon start zkfc
+```
+
+
+任意机器上查看NN服务状态:
+```bash
+hdfs haadmin -getAllServiceState
+# 或者
+hdfs haadmin -getServiceState nn1
+hdfs haadmin -getServiceState nn2
+hdfs haadmin -getServiceState nn3
+
+# 查看管理命令参数说明
+hdfs haadmin -help
+```
+
+NameNode状态切换命令：
+```bash
+# 切换为active
+su hdfs -c 'hdfs haadmin -transitionToActive --forceactive --forcemanual nn1'
+
+# 切换为standby
+su hdfs -c 'hdfs haadmin -transitionToStandby --forcemanual nn3'
+```
+
+hdfs --daemon start namenode
+
+查看RM服务状态:
+```bash
+yarn rmadmin -getAllServiceState
+# 或者
+yarn rmadmin -getServiceState rm1
+yarn rmadmin -getServiceState rm2
+
+# 查看管理命令参数说明
+yarn rmadmin -help
+```
+
+RM状态切换命令：
+```bash
+# 切换为active
+yarn rmadmin -transitionToActive --forceactive --forcemanual rm1
+
+# 切换为standby
+yarn rmadmin -transitionToStandby --forcemanual rm2
+```
+
+
+### 3.7 测试故障转移
+
+#### 3.7.1 测试NN故障转移
+
+查看当前NameNode服务主active状态：
+```bash
+hdfs haadmin -getAllServiceState
+```
+
+回显如下：
+```text
+[root@hadoop-slave1 ~]# hdfs haadmin -getAllServiceState
+hadoop-master:8020                                 standby   
+hadoop-slave1:8020                                 active    
+hadoop-slave2:8020                                 standby   
+```
+
+杀死hadoop-node2上的NameNode进程：
+```bash
+ssh root@hadoop-slave1 "jps|grep NameNode|awk '{print \$1}'|xargs kill -9"
+# 重启
+ssh root@hadoop-slave1 "hdfs --daemon start namenode"
+```
+
+再次查看NameNode状态：
+```bash
+hdfs haadmin -getAllServiceState
+```
+回显如下：
+```text
+[root@hadoop-slave1 ~]# hdfs haadmin -getAllServiceState
+hadoop-master:8020                                 active    
+hadoop-slave1:8020                                 standby   
+hadoop-slave2:8020                                 standby   
+```
+
+#### 3.7.2 测试RM故障转移
+
+查看当前RM服务主active状态：
+```bash
+yarn rmadmin -getAllServiceState
+```
+
+回显如下：
+```text
+hadoop-master:8033                                 active    
+hadoop-slave1:8033                                 standby
+```
+
+杀死hadoop-node1上的RM进程：
+```bash
+ssh root@hadoop-master "jps|grep ResourceManager|awk '{print \$1}'|xargs kill -9"
+# 然后启动
+ssh root@hadoop-master 'yarn --daemon start resourcemanager'
+```
+
+再次查看RM状态：
+```bash
+yarn rmadmin -getAllServiceState
+```
+回显如下：
+```text
+[root@hadoop-slave1 hadoop]# yarn rmadmin -getAllServiceState
+hadoop-master:8033                                 standby   
+hadoop-slave1:8033                                 active
+```
+证明成功实现故障自动转移。
 
 
 # 十、参考资料
 
 - [Hadoop3.2.1版本的环境搭建](https://zhuanlan.zhihu.com/p/91302446)
+- [hadoop 3.2.1集群高可用(HA)搭建](https://blog.csdn.net/u012760435/article/details/104401268)
+- [Hadoop3.2.1集群搭建](http://blog.itpub.net/29956245/viewspace-2933087/)
+- [Hadoop集群搭建](https://blog.csdn.net/qq_41537880/article/details/129426222)
 - [HDFS High Availability Using the Quorum Journal Manager](https://hadoop.apache.org/docs/r3.2.1/hadoop-project-dist/hadoop-hdfs/HDFSHighAvailabilityWithQJM.html)
