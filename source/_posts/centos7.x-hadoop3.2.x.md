@@ -805,10 +805,10 @@ su hdfs -c 'hdfs dfs -rm -r -f /input/ /output/ /tmp/'
 ## 1. 集群规划
 
 | 节点名称 | NN | JN | DN | RM | NM | ZK | ZKFC |
-|:-- | :-- | :-- | :-- | :-- | :-- | :-- |:-----|
-| hadoop-node1 | NodeName | JournalNode | DataNode | ResourceManager | NodeManager | ZooKeeper | ZKFC |
-| hadoop-node2 | NodeName | JournalNode | DataNode |                 | NodeManager | ZooKeeper | ZKFC |
-| hadoop-node3 |          | JournalNode | DataNode | ResourceManager | NodeManager | ZooKeeper |      |
+|:-- | :-- | :-- | :-- |:--| :-- | :-- |:--|
+| hadoop-node1 | NodeName | JournalNode | DataNode | ResourceManager  | NodeManager | ZooKeeper | ZKFC |
+| hadoop-node2 | NodeName | JournalNode | DataNode | ResourceManager  | NodeManager | ZooKeeper | ZKFC |
+| hadoop-node3 | NodeName | JournalNode | DataNode |                  | NodeManager | ZooKeeper | ZKFC |
 
 配置前先关闭所有服务：
 ```bash
@@ -1194,7 +1194,7 @@ cat > ${HADOOP_HOME}/etc/hadoop/yarn-site.xml <<EOF
     </property>
     <property>
         <name>yarn.resourcemanager.ha.rm-ids</name>
-        <value>rm1,rm3</value>
+        <value>rm1,rm2</value>
         <description>声明两台RM的地址, 注意这里是逻辑地址</description>
     </property>
     <property>
@@ -1203,8 +1203,8 @@ cat > ${HADOOP_HOME}/etc/hadoop/yarn-site.xml <<EOF
         <description>声明一台RM的地址</description>
     </property>
     <property>
-        <name>yarn.resourcemanager.hostname.rm3</name>
-        <value>hadoop-node3</value>
+        <name>yarn.resourcemanager.hostname.rm2</name>
+        <value>hadoop-node2</value>
         <description>声明一台RM的地址</description>
     </property>
     <property>
