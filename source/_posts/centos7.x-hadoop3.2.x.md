@@ -20,38 +20,39 @@ Linux centos-7-64-mini 3.10.0-123.el7.x86_64 #1 SMP Mon Jun 30 12:09:22 UTC 2014
 
 # 二、准备工作
 
-## 1. 关闭SELINUX
+## 1. 开启SELINUX
 
 修改selinux配置文件(/etc/sysconfig/selinux)
 
 ```bash
-sed -i 's|^SELINUX=enforcing|SELINUX=disabled|g' /etc/selinux/config
+sed -i 's|^SELINUX=disabled|SELINUX=enforcing|g' /etc/selinux/config
 reboot
 
-getenforce | grep Disabled
+getenforce | grep Enforcing
 ```
 
-## 2. 关闭防火墙
+## 2. 开启防火墙
 
-关闭防火墙
+开启防火墙
 
 ```bash
-systemctl disable firewalld
-systemctl stop firewalld
-systemctl status firewalld
-
-
 systemctl enable firewalld
+#systemctl disable firewalld
 systemctl start firewalld
+#systemctl stop firewalld
 systemctl status firewalld
 
-firewall-cmd --permanent --zone=public --add-port=9870/tcp
-firewall-cmd --permanent --zone=public --add-port=8088/tcp
+# 允许192.168.168.0~255ip段访问
+firewall-cmd --permanent --add-rich-rule="rule family="ipv4" source address="192.168.168.0/24" accept"
+#firewall-cmd --permanent --zone=public --add-port=9870/tcp
+#firewall-cmd --permanent --zone=public --add-port=8088/tcp
 firewall-cmd --reload
 ```
 
 查看firewall规则
 ```bash
+firewall-cmd --list-all
+firewall-cmd --zone=public --list-all 
 firewall-cmd --zone=public --list-services
 firewall-cmd --zone=public --list-ports
 ```
@@ -451,9 +452,9 @@ hdfs dfs -rm -r -f /input/ /output/ /tmp/
 ## 1. 集群规划：
 | 节点名称 | DN | NM | NN | RM |
 |:-- | :-- | :-- | :-- | :-- |
-| hadoop-node1 | DataNode | NodeManager |      NodeName     | ResourceManager |
-| hadoop-node2 | DataNode | NodeManager | SecondaryNameNode |                 |
-| hadoop-node3 | DataNode | NodeManager |                   |                 |
+| hadoop-201 | DataNode | NodeManager |      NodeName     | ResourceManager |
+| hadoop-202 | DataNode | NodeManager | SecondaryNameNode |                 |
+| hadoop-203 | DataNode | NodeManager |                   |                 |
 
 
 配置前先关闭所有服务：
@@ -511,9 +512,9 @@ Last login: Mon Dec  5 20:27:45 2023
 
 ```bash
 cat >> /etc/hosts <<EOF
-192.168.168.201 hadoop-node1
-192.168.168.202 hadoop-node2
-192.168.168.203 hadoop-node3
+192.168.168.201 hadoop-201
+192.168.168.202 hadoop-202
+192.168.168.203 hadoop-203
 EOF
 ```
 
@@ -546,7 +547,7 @@ cat > ${HADOOP_HOME}/etc/hadoop/core-site.xml <<EOF
 <configuration>
     <property>
         <name>fs.defaultFS</name>
-        <value>hdfs://hadoop-node1:9000</value>
+        <value>hdfs://hadoop-201:9000</value>
         <description>指定HDFS Master（namenode）的通信地址，默认端口</description>
     </property>
     <property>
@@ -582,12 +583,12 @@ cat > ${HADOOP_HOME}/etc/hadoop/hdfs-site.xml <<EOF
     <!-- secondarynamenode守护进程的http地址：主机名和端口号。参考守护进程布局-->
     <property>
         <name>dfs.namenode.secondary.http-address</name>
-        <value>hadoop-node2:9868</value>
+        <value>hadoop-202:9868</value>
     </property>
     <!-- secondarynamenode守护进程的https地址：主机名和端口号。参考守护进程布局-->
     <property>
         <name>dfs.namenode.secondary.https-address</name>
-        <value>hadoop-node2:9869</value>
+        <value>hadoop-202:9869</value>
         <description>
         The secondary namenode HTTPS server address and port.
         </description>
@@ -616,19 +617,19 @@ cat > ${HADOOP_HOME}/etc/hadoop/mapred-site.xml <<EOF
     <!-- 配置作业历史服务器的地址-->
     <property>
       <name>mapreduce.jobhistory.address</name>
-      <value>hadoop-node1:10020</value>
+      <value>hadoop-201:10020</value>
       <description>MapReduce JobHistory Server IPC host:port</description>
     </property>
     <!-- 配置作业历史服务器的http地址-->
     <property>
       <name>mapreduce.jobhistory.webapp.address</name>
-      <value>hadoop-node1:19888</value>
+      <value>hadoop-201:19888</value>
       <description>MapReduce JobHistory Server Web UI host:port</description>
     </property>
     <!-- 配置作业历史服务器的https地址-->
     <property>
       <name>mapreduce.jobhistory.webapp.https.address</name>
-      <value>hadoop-node1:19890</value>
+      <value>hadoop-201:19890</value>
       <description>
         The https address the MapReduce JobHistory Server WebApp is on.
       </description>
@@ -636,7 +637,7 @@ cat > ${HADOOP_HOME}/etc/hadoop/mapred-site.xml <<EOF
     <!-- 配置作业历史服务器的管理地址-->
     <property>
       <name>mapreduce.jobhistory.admin.address</name>
-      <value>hadoop-node1:10033</value>
+      <value>hadoop-201:10033</value>
       <description>The address of the History server admin interface.</description>
     </property>
 </configuration>
@@ -652,7 +653,7 @@ cat > ${HADOOP_HOME}/etc/hadoop/yarn-site.xml <<EOF
 <configuration>
     <property>
         <name>yarn.resourcemanager.hostname</name>
-        <value>hadoop-node1</value>
+        <value>hadoop-201</value>
         <description>yarn 资源管理服务主机名</description>
     </property>
     <property>
@@ -668,9 +669,9 @@ EOF
 配置workers文件，此文件用于指定datanode守护进程所在的机器节点主机名
 ```bash
 cat > ${HADOOP_HOME}/etc/hadoop/workers <<EOF
-hadoop-node1
-hadoop-node2
-hadoop-node3
+hadoop-201
+hadoop-202
+hadoop-203
 EOF
 ```
 
@@ -693,9 +694,9 @@ chmod 777 /usr/local/hadoop/tmp/
 克隆出master、slave1、slave2三台机器，然后编辑虚拟机设置->网络适配器->高级->生成MAC地址，拷贝生成的MAC地址(或按下面内容手动输入)。
 | 节点名称 | IP | MAC地址 | UUID |
 |:-- | :-- | :-- | :-- |
-| hadoop-node1 | 192.168.168.201 | 00:0C:29:18:1F:D3 | f0208bba-45e6-4b85-8104-39c3f9aaa513 |
-| hadoop-node2 | 192.168.168.202 | 00:0C:29:18:1F:D4 | f0208bba-45e6-4b85-8104-39c3f9aaa514 |
-| hadoop-node3 | 192.168.168.203 | 00:0C:29:18:1F:D5 | f0208bba-45e6-4b85-8104-39c3f9aaa515 |
+| hadoop-201 | 192.168.168.201 | 00:0C:29:18:1F:D3 | f0208bba-45e6-4b85-8104-39c3f9aaa513 |
+| hadoop-202 | 192.168.168.202 | 00:0C:29:18:1F:D4 | f0208bba-45e6-4b85-8104-39c3f9aaa514 |
+| hadoop-203 | 192.168.168.203 | 00:0C:29:18:1F:D5 | f0208bba-45e6-4b85-8104-39c3f9aaa515 |
 
 分别登录三台机器，修改网络配置文件：
 编辑 `vi /etc/sysconfig/network-scripts/ifcfg-eno*`, 修改其中的UUID、MAC
@@ -747,7 +748,7 @@ jps | grep -v Jps
 
 查看node2服务分布：
 ```bash
-ssh root@hadoop-node2 'jps | grep -v Jps'
+ssh root@hadoop-202 'jps | grep -v Jps'
 ```
 回显如下：
 ```text
@@ -758,7 +759,7 @@ ssh root@hadoop-node2 'jps | grep -v Jps'
 
 查看node3服务分布：
 ```bash
-ssh root@hadoop-node3 'jps | grep -v Jps'
+ssh root@hadoop-203 'jps | grep -v Jps'
 ```
 回显如下：
 ```text
@@ -806,9 +807,9 @@ su hdfs -c 'hdfs dfs -rm -r -f /input/ /output/ /tmp/'
 
 | 节点名称 | NN | JN | DN | RM | NM | ZK | ZKFC |
 |:-- | :-- | :-- | :-- |:--| :-- | :-- |:--|
-| hadoop-node1 | NodeName | JournalNode | DataNode | ResourceManager  | NodeManager | ZooKeeper | ZKFC |
-| hadoop-node2 | NodeName | JournalNode | DataNode | ResourceManager  | NodeManager | ZooKeeper | ZKFC |
-| hadoop-node3 | NodeName | JournalNode | DataNode |                  | NodeManager | ZooKeeper | ZKFC |
+| hadoop-201 | NodeName | JournalNode | DataNode | ResourceManager  | NodeManager | ZooKeeper | ZKFC |
+| hadoop-202 | NodeName | JournalNode | DataNode | ResourceManager  | NodeManager | ZooKeeper | ZKFC |
+| hadoop-203 | NodeName | JournalNode | DataNode |                  | NodeManager | ZooKeeper | ZKFC |
 
 配置前先关闭所有服务：
 ```bash
@@ -856,9 +857,9 @@ sed -i 's|dataDir=/tmp/zookeeper|dataDir=/usr/local/zookeeper/data|g' zoo.cfg
 cat >> zoo.cfg <<EOF
 dataLogDir=/usr/local/zookeeper/logs
 
-server.1=hadoop-node1:2888:3888
-server.2=hadoop-node2:2888:3888
-server.3=hadoop-node3:2888:3888
+server.1=hadoop-201:2888:3888
+server.2=hadoop-202:2888:3888
+server.3=hadoop-203:2888:3888
 EOF
 
 mkdir -p /usr/local/zookeeper/data
@@ -898,46 +899,46 @@ EOF
 
 ### 2.5. 分发zookeeper包至其他机器：
 ```bash
-scp /etc/profile.d/zookeeper.sh root@hadoop-node2:/etc/profile.d/
-scp /etc/profile.d/zookeeper.sh root@hadoop-node3:/etc/profile.d/
+scp /etc/profile.d/zookeeper.sh root@hadoop-202:/etc/profile.d/
+scp /etc/profile.d/zookeeper.sh root@hadoop-203:/etc/profile.d/
 
-rsync -a /usr/local/zookeeper* root@hadoop-node2:/usr/local/
-rsync -a /usr/local/zookeeper* root@hadoop-node3:/usr/local/
+rsync -a /usr/local/zookeeper* root@hadoop-202:/usr/local/
+rsync -a /usr/local/zookeeper* root@hadoop-203:/usr/local/
 ```
 
 ### 2.6. 添加server对应的编号：
 ```bash
 echo "1" > /usr/local/zookeeper/data/myid
-ssh root@hadoop-node2 'echo "2" > /usr/local/zookeeper/data/myid'
-ssh root@hadoop-node3 'echo "3" > /usr/local/zookeeper/data/myid'
+ssh root@hadoop-202 'echo "2" > /usr/local/zookeeper/data/myid'
+ssh root@hadoop-203 'echo "3" > /usr/local/zookeeper/data/myid'
 ```
 
 验证：
 ```bash
 echo $ZOOKEEPER_HOME
-ssh root@hadoop-node2 'echo $ZOOKEEPER_HOME'
-ssh root@hadoop-node3 'echo $ZOOKEEPER_HOME'
+ssh root@hadoop-202 'echo $ZOOKEEPER_HOME'
+ssh root@hadoop-203 'echo $ZOOKEEPER_HOME'
 
 cat /usr/local/zookeeper/data/myid
-ssh root@hadoop-node2 'cat /usr/local/zookeeper/data/myid'
-ssh root@hadoop-node3 'cat /usr/local/zookeeper/data/myid'
+ssh root@hadoop-202 'cat /usr/local/zookeeper/data/myid'
+ssh root@hadoop-203 'cat /usr/local/zookeeper/data/myid'
 ```
 
 ### 2.7. 启动集群
 ```bash
 systemctl enable /usr/local/zookeeper/bin/zookeeper.service
-ssh root@hadoop-node2 'systemctl enable /usr/local/zookeeper/bin/zookeeper.service'
-ssh root@hadoop-node3 'systemctl enable /usr/local/zookeeper/bin/zookeeper.service'
+ssh root@hadoop-202 'systemctl enable /usr/local/zookeeper/bin/zookeeper.service'
+ssh root@hadoop-203 'systemctl enable /usr/local/zookeeper/bin/zookeeper.service'
 
 #systemctl disable /usr/local/zookeeper/bin/zookeeper.service
 
 systemctl daemon-reload
-ssh root@hadoop-node2 'systemctl daemon-reload'
-ssh root@hadoop-node3 'systemctl daemon-reload'
+ssh root@hadoop-202 'systemctl daemon-reload'
+ssh root@hadoop-203 'systemctl daemon-reload'
 
 systemctl start zookeeper
-ssh root@hadoop-node2 'systemctl start zookeeper'
-ssh root@hadoop-node3 'systemctl start zookeeper'
+ssh root@hadoop-202 'systemctl start zookeeper'
+ssh root@hadoop-203 'systemctl start zookeeper'
 
 # 关闭
 #systemctl stop zookeeper
@@ -945,8 +946,8 @@ ssh root@hadoop-node3 'systemctl start zookeeper'
 验证：
 ```bash
 zkServer.sh status
-ssh root@hadoop-node2 'zkServer.sh status'
-ssh root@hadoop-node3 'zkServer.sh status'
+ssh root@hadoop-202 'zkServer.sh status'
+ssh root@hadoop-203 'zkServer.sh status'
 ```
 
 ### 2.8. 测试集群
@@ -989,8 +990,8 @@ source /etc/profile
 
 分发配置：
 ```bash
-scp /etc/profile.d/hadoop.sh root@hadoop-node2:/etc/profile.d/
-scp /etc/profile.d/hadoop.sh root@hadoop-node3:/etc/profile.d/
+scp /etc/profile.d/hadoop.sh root@hadoop-202:/etc/profile.d/
+scp /etc/profile.d/hadoop.sh root@hadoop-203:/etc/profile.d/
 ```
 
 ## 4. 配置Hadoop
@@ -1015,7 +1016,7 @@ cat > ${HADOOP_HOME}/etc/hadoop/core-site.xml <<EOF
     </property>
     <property>
         <name>ha.zookeeper.quorum</name>
-        <value>hadoop-node1:2181,hadoop-node2:2181,hadoop-node3:2181</value>
+        <value>hadoop-201:2181,hadoop-202:2181,hadoop-203:2181</value>
         <description>指定ZKFC故障自动切换转移</description>
     </property>
 </configuration>
@@ -1056,32 +1057,32 @@ cat > ${HADOOP_HOME}/etc/hadoop/hdfs-site.xml <<EOF
     </property>
     <property>
         <name>dfs.namenode.rpc-address.mycluster.nn1</name>
-        <value>hadoop-node1:8020</value>
+        <value>hadoop-201:8020</value>
         <description>namenode之间用于RPC通信的地址。默认端口8020</description>
     </property>
     <property>
         <name>dfs.namenode.rpc-address.mycluster.nn2</name>
-        <value>hadoop-node2:8020</value>
+        <value>hadoop-202:8020</value>
         <description>namenode之间用于RPC通信的地址。默认端口8020</description>
     </property>
     <property>
         <name>dfs.namenode.rpc-address.mycluster.nn3</name>
-        <value>hadoop-node3:8020</value>
+        <value>hadoop-203:8020</value>
         <description>namenode之间用于RPC通信的地址。默认端口8020</description>
     </property>
     <property>
         <name>dfs.namenode.http-address.mycluster.nn1</name>
-        <value>hadoop-node1:9870</value>
+        <value>hadoop-201:9870</value>
         <description>namenode的web访问地址，默认端口9870</description>
     </property>
     <property>
         <name>dfs.namenode.http-address.mycluster.nn2</name>
-        <value>hadoop-node2:9870</value>
+        <value>hadoop-202:9870</value>
         <description>namenode的web访问地址，默认端口9870</description>
     </property>
     <property>
         <name>dfs.namenode.http-address.mycluster.nn3</name>
-        <value>hadoop-node3:9870</value>
+        <value>hadoop-203:9870</value>
         <description>namenode的web访问地址，默认端口9870</description>
     </property>
 
@@ -1089,7 +1090,7 @@ cat > ${HADOOP_HOME}/etc/hadoop/hdfs-site.xml <<EOF
     <!--格式为 qjournal://jn1:port;jn2:port;jn3:port/\${dfs.nameservices}-->
     <property>
         <name>dfs.namenode.shared.edits.dir</name>
-        <value>qjournal://hadoop-node1:8485;hadoop-node2:8485;hadoop-node3:8485/mycluster</value>
+        <value>qjournal://hadoop-201:8485;hadoop-202:8485;hadoop-203:8485/mycluster</value>
         <description>指定NameNode的元数据在JournalNode上的存放位置</description>
     </property>
     <property>
@@ -1148,19 +1149,19 @@ cat > ${HADOOP_HOME}/etc/hadoop/mapred-site.xml <<EOF
     <!-- 配置作业历史服务器的地址-->
     <property>
       <name>mapreduce.jobhistory.address</name>
-      <value>hadoop-node1:10020</value>
+      <value>hadoop-201:10020</value>
       <description>MapReduce JobHistory Server IPC host:port</description>
     </property>
     <!-- 配置作业历史服务器的http地址-->
     <property>
       <name>mapreduce.jobhistory.webapp.address</name>
-      <value>hadoop-node1:19888</value>
+      <value>hadoop-201:19888</value>
       <description>MapReduce JobHistory Server Web UI host:port</description>
     </property>
     <!-- 配置作业历史服务器的https地址-->
     <property>
       <name>mapreduce.jobhistory.webapp.https.address</name>
-      <value>hadoop-node1:19890</value>
+      <value>hadoop-201:19890</value>
       <description>
         The https address the MapReduce JobHistory Server WebApp is on.
       </description>
@@ -1168,7 +1169,7 @@ cat > ${HADOOP_HOME}/etc/hadoop/mapred-site.xml <<EOF
     <!-- 配置作业历史服务器的管理地址-->
     <property>
       <name>mapreduce.jobhistory.admin.address</name>
-      <value>hadoop-node1:10033</value>
+      <value>hadoop-201:10033</value>
       <description>The address of the History server admin interface.</description>
     </property>
 </configuration>
@@ -1199,12 +1200,12 @@ cat > ${HADOOP_HOME}/etc/hadoop/yarn-site.xml <<EOF
     </property>
     <property>
         <name>yarn.resourcemanager.hostname.rm1</name>
-        <value>hadoop-node1</value>
+        <value>hadoop-201</value>
         <description>声明一台RM的地址</description>
     </property>
     <property>
         <name>yarn.resourcemanager.hostname.rm2</name>
-        <value>hadoop-node2</value>
+        <value>hadoop-202</value>
         <description>声明一台RM的地址</description>
     </property>
     <property>
@@ -1219,18 +1220,18 @@ cat > ${HADOOP_HOME}/etc/hadoop/yarn-site.xml <<EOF
     </property>
     <property>
         <name>yarn.resourcemanager.zk-address</name>
-        <value>hadoop-node1:2181,hadoop-node2:2181,hadoop-node3:2181</value>
+        <value>hadoop-201:2181,hadoop-202:2181,hadoop-203:2181</value>
         <description>指定zk集群地址</description>
     </property>
 
     <property>
         <name>yarn.resourcemanager.webapp.address.rm1</name>
-        <value>hadoop-node1:8088</value>
+        <value>hadoop-201:8088</value>
         <description>RM对外暴露的web http地址，用户可通过该地址在浏览器中查看集群信息</description>
     </property>
     <property>
         <name>yarn.resourcemanager.webapp.address.rm2</name>
-        <value>hadoop-node2:8088</value>
+        <value>hadoop-202:8088</value>
         <description>RM对外暴露的web http地址，用户可通过该地址在浏览器中查看集群信息</description>
     </property>
 
@@ -1262,11 +1263,11 @@ EOF
 chmod 700 /usr/local/hadoop/hdfs/name
 
 su hdfs -c "mkdir -p /usr/local/hadoop/journal-data"
-ssh root@hadoop-node2 'su hdfs -c "mkdir -p /usr/local/hadoop/journal-data"'
-ssh root@hadoop-node3 'su hdfs -c "mkdir -p /usr/local/hadoop/journal-data"'
+ssh root@hadoop-202 'su hdfs -c "mkdir -p /usr/local/hadoop/journal-data"'
+ssh root@hadoop-203 'su hdfs -c "mkdir -p /usr/local/hadoop/journal-data"'
 
-scp -r /usr/local/hadoop/etc/* root@hadoop-node2:/usr/local/hadoop/etc/
-scp -r /usr/local/hadoop/etc/* root@hadoop-node3:/usr/local/hadoop/etc/
+scp -r /usr/local/hadoop/etc/* root@hadoop-202:/usr/local/hadoop/etc/
+scp -r /usr/local/hadoop/etc/* root@hadoop-203:/usr/local/hadoop/etc/
 ```
 
 ### 4.6. 启动集群
@@ -1276,8 +1277,8 @@ scp -r /usr/local/hadoop/etc/* root@hadoop-node3:/usr/local/hadoop/etc/
 在所有journalnode节点上启动journalnode(本例中是所有机器)：
 ```bash
 hdfs --daemon start journalnode
-ssh root@hadoop-node2 'hdfs --daemon start journalnode'
-ssh root@hadoop-node3 'hdfs --daemon start journalnode'
+ssh root@hadoop-202 'hdfs --daemon start journalnode'
+ssh root@hadoop-203 'hdfs --daemon start journalnode'
 ```
 
 #### 4.6.2. 格式化文件系统
@@ -1287,8 +1288,8 @@ ssh root@hadoop-node3 'hdfs --daemon start journalnode'
 假如我们在hadoop-node2上执行：
 ```bash
 rm -rf /usr/local/hadoop/hdfs/
-ssh root@hadoop-node2 'rm -rf /usr/local/hadoop/hdfs/'
-ssh root@hadoop-node3 'rm -rf /usr/local/hadoop/hdfs/'
+ssh root@hadoop-202 'rm -rf /usr/local/hadoop/hdfs/'
+ssh root@hadoop-203 'rm -rf /usr/local/hadoop/hdfs/'
 
 hdfs namenode -format
 ```
@@ -1300,8 +1301,8 @@ hdfs --daemon start namenode
 
 同步hdfs目录至其他机器：
 ```text
-ssh root@hadoop-node1 'hdfs namenode -bootstrapStandby'
-ssh root@hadoop-node2 'hdfs namenode -bootstrapStandby'
+ssh root@hadoop-201 'hdfs namenode -bootstrapStandby'
+ssh root@hadoop-202 'hdfs namenode -bootstrapStandby'
 ```
 出现以下信息即为同步成功。
 ```text
@@ -1309,8 +1310,8 @@ ssh root@hadoop-node2 'hdfs namenode -bootstrapStandby'
 About to bootstrap Standby ID nn1 from:
            Nameservice ID: mycluster
         Other Namenode ID: nn3
-  Other NN's HTTP address: http://hadoop-node3:9870
-  Other NN's IPC  address: hadoop-node3/192.168.168.202:8020
+  Other NN's HTTP address: http://hadoop-203:9870
+  Other NN's IPC  address: hadoop-203/192.168.168.202:8020
              Namespace ID: 134603182
             Block pool ID: BP-510794777-192.168.168.202-1701941650572
                Cluster ID: CID-c3a1e9a9-0dea-4b26-8310-e9922c92007c
@@ -1392,17 +1393,17 @@ hdfs haadmin -getServiceState nn2
 
 回显如下：
 ```text
-[root@hadoop-node2 ~]# hdfs haadmin -getAllServiceState
-hadoop-node1:8020                                 standby   
-hadoop-node2:8020                                 active    
-hadoop-node3:8020                                 standby   
+[root@hadoop-202 ~]# hdfs haadmin -getAllServiceState
+hadoop-201:8020                                 standby   
+hadoop-202:8020                                 active    
+hadoop-203:8020                                 standby   
 ```
 
 杀死hadoop-node2上的NameNode进程：
 ```bash
-ssh root@hadoop-node2 "jps|grep NameNode|awk '{print \$1}'|xargs kill -9"
+ssh root@hadoop-202 "jps|grep NameNode|awk '{print \$1}'|xargs kill -9"
 # 重启
-ssh root@hadoop-node2 "hdfs --daemon start namenode"
+ssh root@hadoop-202 "hdfs --daemon start namenode"
 ```
 
 再次查看NameNode状态：
@@ -1414,10 +1415,10 @@ hdfs haadmin -getServiceState nn2
 ```
 回显如下：
 ```text
-[root@hadoop-node2 ~]# hdfs haadmin -getAllServiceState
-hadoop-node1:8020                                 active    
-hadoop-node2:8020                                 standby   
-hadoop-node3:8020                                 standby   
+[root@hadoop-202 ~]# hdfs haadmin -getAllServiceState
+hadoop-201:8020                                 active    
+hadoop-202:8020                                 standby   
+hadoop-203:8020                                 standby   
 ```
 
 #### 4.7.2 测试RM故障转移
@@ -1432,15 +1433,15 @@ yarn rmadmin -getServiceState rm2
 
 回显如下：
 ```text
-hadoop-node1:8033                                 active    
-hadoop-node2:8033                                 standby
+hadoop-201:8033                                 active    
+hadoop-202:8033                                 standby
 ```
 
 杀死hadoop-node1上的RM进程：
 ```bash
-ssh root@hadoop-node1 "jps|grep ResourceManager|awk '{print \$1}'|xargs kill -9"
+ssh root@hadoop-201 "jps|grep ResourceManager|awk '{print \$1}'|xargs kill -9"
 # 然后启动
-ssh root@hadoop-node1 'yarn --daemon start resourcemanager'
+ssh root@hadoop-201 'yarn --daemon start resourcemanager'
 ```
 
 再次查看RM状态：
@@ -1452,9 +1453,9 @@ yarn rmadmin -getServiceState rm3
 ```
 回显如下：
 ```text
-[root@hadoop-node2 hadoop]# yarn rmadmin -getAllServiceState
-hadoop-node1:8033                                 standby   
-hadoop-node2:8033                                 active
+[root@hadoop-202 hadoop]# yarn rmadmin -getAllServiceState
+hadoop-201:8033                                 standby   
+hadoop-202:8033                                 active
 ```
 证明成功实现故障自动转移。
 
@@ -1496,16 +1497,146 @@ yarn --daemon stop resourcemanager
 yarn --help
 ```
 
+## 4.9. 一键重启脚本
 
-# 十、参考资料
+一键同步配置脚本：
+```bash
+cat > ${HADOOP_HOME}/sbin/sync-hadoop-configs.sh <<EOF
+#!/bin/sh
+
+HADOOP_CONF_DIR="/usr/local/hadoop/etc/hadoop"
+
+# 需要同步的机器列表
+HOST_NODES=\$(cat "\${HADOOP_CONF_DIR}/workers")
+# 需要同步的文件列表
+CONF_FILES="core-site.xml hdfs-site.xml yarn-site.xml mapred-site.xml"
+
+RM_HADOOP_LOGS_CMD="rm -rf /usr/local/hadoop/logs/*"
+
+echo "sync system profiles:"
+echo ""
+
+for host in \$HOST_NODES
+do
+    if [ "\${SELF_HOST}" != \$host ];then
+        scp /etc/profile.d/hadoop.sh   root@\${host}:/etc/profile.d/
+    fi
+done
+
+echo ""
+echo "sync hadoop config files:"
+echo ""
+
+for file_name in \$CONF_FILES
+do
+    for host in \$HOST_NODES
+    do
+        file="\${HADOOP_CONF_DIR}/\${file_name}"
+        if [ -f \${file} ];then
+            if [ "\${SELF_HOST}" != \$host ];then
+                scp "\${file}" "root@\${host}:\${HADOOP_CONF_DIR}/"
+            fi
+        fi
+    done
+done
+
+exit 0
+EOF
+```
+
+一键重启脚本：
+```shell
+cat > restart-hadoop-all.sh <<EOF
+#!/bin/sh
+
+HERE="$(cd $(dirname $0);pwd)"
+
+${HERE}/sync-hadoop-configs.sh
+
+echo ""
+echo "stop all hadoop services:"
+echo ""
+stop-hadoop-all.sh
+
+echo ""
+echo "clean all logs:"
+echo ""
+
+for host in \$HOST_NODES
+do
+    if [ "\${SELF_HOST}" != \$host ];then
+        ssh "root@\${host}" \${RM_HADOOP_LOGS_CMD}
+    else
+        eval \${RM_HADOOP_LOGS_CMD}
+    fi
+done
+
+echo ""
+echo "start all hadoop services:"
+echo ""
+start-hadoop-all.sh
+echo ""
+
+exit 0
+EOF
+```
+
+# 十、调优
+
+core-site.xml
+```text
+    <property>
+         <name>ipc.client.connection.maxidletime</name>
+         <value>5000</value>
+         <description>客户机中断与服务器连接的最长时间毫秒。默认10秒</description>
+    </property>
+    <property>
+         <name>ipc.client.connect.timeout</name>
+         <value>5000</value>
+         <description>客户端等待套接字与服务器建立连接所需的毫秒数，默认20000</description>
+    </property>
+    <property>
+         <name>ipc.client.connect.max.retries.on.timeouts</name>
+         <value>3</value>
+         <description>指定客户端在套接字超时时尝试与服务器建立连接的次数，默认45</description>
+    </property>
+```
+
+hdfs-site.xml
+```text
+    <property>
+         <name>dfs.namenode.handler.count</name>
+         <value>10</value>
+         <description>
+         NameNode有一个工作线程池，用来处理不同DataNode的并发心跳以及客户端并发的元数据操作。
+         对于大集群或者有大量客户端的集群来说，通常需要增大参数dfs.namenode.handler.count的默认值10。
+         设置该值的一般原则是将其设置为集群大小的自然对数乘以20，即20 * log(N)，N为集群大小。
+         </description>
+    </property>
+    <property>
+         <name>dfs.hosts</name>
+         <value>/usr/local/hadoop/etc/hadoop/workers</value>
+         <description>
+         命名一个文件，该文件包含允许连接到namenode的主机列表。
+         必须指定文件的完整路径名。如果该值为空，则允许所有主机。
+         </description>
+    </property>
+```
+
+
+# 十一、参考资料
 
 - [Hadoop3.2.1版本的环境搭建](https://zhuanlan.zhihu.com/p/91302446)
 - [hadoop 3.2.1集群高可用(HA)搭建](https://blog.csdn.net/u012760435/article/details/104401268)
 - [Hadoop3.2.1集群搭建](http://blog.itpub.net/29956245/viewspace-2933087/)
 - [Hadoop集群搭建](https://blog.csdn.net/qq_41537880/article/details/129426222)
+- [Hdfs安装模式之完全分布式集群](https://zhuanlan.zhihu.com/p/113637003)
 - [HDFS High Availability Using the Quorum Journal Manager](https://hadoop.apache.org/docs/r3.2.1/hadoop-project-dist/hadoop-hdfs/HDFSHighAvailabilityWithQJM.html)
+- [Hadoop: Setting up a Single Node Cluster](https://hadoop.apache.org/docs/r3.2.1/hadoop-project-dist/hadoop-common/SingleCluster.html)
+- [hive配置Kerbros安全认证](https://zhuanlan.zhihu.com/p/137424234)
+- [Hadoop集群的启动脚本整理及守护线程源码](https://zhuanlan.zhihu.com/p/113912871)
 
 
-# 十一、附件
+# 十二、附件
 
 本文使用到的软件包已上传网盘：[BlogDocs->files->centos7.x-hadoop3.2.x](https://pan.baidu.com/s/1yEbHDQBzy43uV8gIYXqbnw?pwd=6666#list/path=%2Fsharelink2076919717-858150382706250%2Ffiles%2Fcentos7.x-hadoop3.2.x)
