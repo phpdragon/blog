@@ -2,7 +2,7 @@
 title: CentOS 6.X下搭建LNMP服务器
 date: 2023-11-16 21:55:58
 categories: ['OS', 'Linux', 'CentOS', 'LNMP']
-tags: ['CentOs', 'CentOS6.X', 'Linux', 'Nginx', 'PHP', 'MySQL']
+tags: ['CentOS', 'CentOS6.X', 'Linux', 'Nginx', 'PHP', 'MySQL']
 ---
 
 # 一、系统版本

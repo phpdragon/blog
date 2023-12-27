@@ -2,7 +2,7 @@
 title: Centos6.X下安装Tomcat-6.X，JSVC / 端口转发模式
 date: 2023-12-04 19:45:29
 categories: ['OS', 'Linux', 'CentOS', 'WebServer', 'Tomcat']
-tags: ['CentOs','CentOS6.X', 'Linux', 'WebServer', 'Tomcat']
+tags: ['CentOS','CentOS6.X', 'Linux', 'WebServer', 'Tomcat']
 ---
 
 # 一、系统版本
