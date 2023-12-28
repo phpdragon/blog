@@ -7,10 +7,13 @@ tags: ['CentOS', 'CentOS7.X', 'Linux', 'MySQL']
 
 # 一、查看系统版本
 
+> 当前系统基于博文安装：[虚拟机最小化安装CentOS 7.X系统](/blog/2023/11/16/vmware-build-small-centos-7.x/)
+
 ```bash
 [root@centos7-64-mini /]# cat /etc/redhat-release 
 CentOS Linux release 7.9.2009 (Core)
 ```
+当前系统版本基于CentOS 7.0。
 
 
 # 二、卸载Mariadb
@@ -45,6 +48,20 @@ rpm -ivh mysql-community-client-5.7.44-1.el7.x86_64.rpm
 rpm -ivh mysql-community-server-5.7.44-1.el7.x86_64.rpm
 ```
 
+配置MySQL：
+```bash
+usermod -d /opt/mysql mysql
+mv /var/lib/mysql /opt/
+sed -i 's|datadir=/var/lib/mysql|datadir=/opt/mysql|g' /etc/my.cnf
+sed -i 's|socket=/var/lib/mysql/mysql.sock|socket=/opt/mysql/mysql.sock|g' /etc/my.cnf
+
+cat > /etc/my.cnf <<EOF
+[mysql]
+socket=/opt/mysql/mysql.sock
+
+EOF
+```
+
 # 五、查看安装版本
 ```bash
 [root@centos7-64-mini /]# mysqld --verbose --version
@@ -54,6 +71,9 @@ mysqld  Ver 5.7.44 for Linux on x86_64 (MySQL Community Server (GPL))
 # 六、启动MySQL
 ```bash
 systemctl enable mysqld.service
+#systemctl disable mysqld.service
+systemctl list-unit-files | grep mysqld
+
 systemctl start mysqld.service
 systemctl status mysqld.service
 ```
@@ -73,18 +93,22 @@ mysql -uroot -p'原始密码'
 ```sql
 set global validate_password_policy=LOW;
 ALTER USER 'root'@'localhost' IDENTIFIED BY '你的新密码';
-```
 
+#设置为可外部链接
+UPDATE mysql.user SET Host='%' WHERE User='root' AND Host='localhost' LIMIT 1;
+FLUSH PRIVILEGES;
 
-# 八、添加可外部连接用户
-```sql
+#或者添加可外部链接用户
 set global validate_password_policy=LOW;
 CREATE USER 'root'@'%' IDENTIFIED BY 'root1234';
 GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY 'root1234' WITH GRANT OPTION;
 FLUSH PRIVILEGES;
 ```
 
-# 九、数据库初始化
+
+# 八、数据库初始化
+
+如果想初始化数据结构，可使用如下方法
 
 ## 查看datadir目录:
 ```bash
@@ -112,6 +136,6 @@ mysql -uroot -p'原始密码'
 ALTER USER 'root'@'localhost' IDENTIFIED BY '你的新密码';
 ```
 
-# 十、附件
+# 九、附件
 
 本文使用到的软件包已上传网盘：[BlogDocs->files->centos7.x-mysql5.7.x](https://pan.baidu.com/s/1yEbHDQBzy43uV8gIYXqbnw?pwd=6666#list/path=%2Fsharelink2076919717-858150382706250%2Ffiles%2Fcentos7.x-mysql5.7.x)
