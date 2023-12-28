@@ -486,7 +486,7 @@ echo 'LANG="en_US.UTF-8"' > /etc/locale.conf
 ```bash
 yum -y install ntpdate
 echo '#每分钟同步internet时间
-*/1 * * * * /usr/sbin/ntpdate cn.pool.ntp.org && /usr/sbin/hwclock -w' >> /var/spool/cron/root
+*/1 * * * * /usr/sbin/ntpdate cn.pool.ntp.org >/dev/null && /usr/sbin/hwclock -w' >> /var/spool/cron/root
 
 cat /var/spool/cron/root
 ```
