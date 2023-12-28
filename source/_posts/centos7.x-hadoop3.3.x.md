@@ -1,7 +1,8 @@
 ---
 title: CentOS7.X 部署 Hadoop 3.3.X
 date: 2023-12-05 19:01:19
-tags:
+categories: ['OS', 'Linux', 'CentOS', 'Hadoop']
+tags: ['OS', 'Linux', 'CentOS', 'CentOS7.X', 'Hadoop']
 ---
 
 
