@@ -1,5 +1,5 @@
 ---
-title: CentOS7 部署 Hadoop 3.2.X
+title: CentOS7.X 部署 Hadoop 3.3.X
 date: 2023-12-05 19:01:19
 tags:
 ---
@@ -11,6 +11,9 @@ tags:
 
 查看系统版本
 ```text
+[root@hadoop-201 src]# cat /etc/redhat-release 
+CentOS Linux release 7.9.2009 (Core)
+
 [root@centos-7-64-mini ~]# uname -a
 Linux centos-7-64-mini 3.10.0-123.el7.x86_64 #1 SMP Mon Jun 30 12:09:22 UTC 2014 x86_64 x86_64 x86_64 GNU/Linux
 ```
@@ -86,20 +89,21 @@ Java HotSpot(TM) 64-Bit Server VM (build 25.241-b07, mixed mode)
 
 # 四、安装hadoop
 
-前往官网下载：[hadoop-3.2.1.tar.gz](https://downloads.apache.org/hadoop/common/hadoop-3.2.1/hadoop-3.2.1.tar.gz)，选择你想要的版本，这里选版本 3.2.1。
+前往官网下载：[hadoop-3.3.6.tar.gz](https://downloads.apache.org/hadoop/common/hadoop-3.3.6/hadoop-3.3.6.tar.gz)，选择你想要的版本，这里选版本 3.3.6。
 
 ## 1. 下载解压
 ```bash
 cd /usr/local/src
-#wget https://downloads.apache.org/hadoop/common/hadoop-3.2.1/hadoop-3.2.1.tar.gz
-cp /mnt/hgfs/shared-folder/hadoop-3.2.1.tar.gz ./
-tar zxvf hadoop-3.2.1.tar.gz -C /usr/local/
+wget https://downloads.apache.org/hadoop/common/hadoop-3.3.6/hadoop-3.3.6.tar.gz
 
-cd /usr/local/
-ln -s hadoop-3.2.1 hadoop
+mkdir -p /opt/server/
+tar zxvf hadoop-3.3.6.tar.gz -C /opt/server/
+
+cd /opt/server/
+ln -s hadoop-3.3.6 hadoop
 
 # 删除多余的cmd命令文件（可不删除cmd脚本）
-find /usr/local/hadoop/ -name *.cmd -exec rm -f {} \;
+find /opt/server/hadoop/ -name *.cmd -exec rm -f {} \;
 ```
 
 ## 2. 目录结构说明
@@ -119,7 +123,7 @@ find /usr/local/hadoop/ -name *.cmd -exec rm -f {} \;
 ## 3. 添加环境变量
 ```bash
 cat > /etc/profile.d/hadoop.sh <<EOF 
-export HADOOP_HOME="/usr/local/hadoop"
+export HADOOP_HOME="/opt/server/hadoop"
 export PATH=\$PATH:\${HADOOP_HOME}/bin:\${HADOOP_HOME}/sbin
 EOF
 
@@ -133,12 +137,13 @@ hadoop version
 
 回显如下：
 ```bash
-Hadoop 3.2.1
-Source code repository https://gitbox.apache.org/repos/asf/hadoop.git -r b3cbbb467e22ea829b3808f4b7b01d07e0bf3842
-Compiled by rohithsharmaks on 2019-09-10T15:56Z
-Compiled with protoc 2.5.0
-From source with checksum 776eaf9eee9c0ffc370bcbc1888737
-This command was run using /usr/local/hadoop-3.2.1/share/hadoop/common/hadoop-common-3.2.1.jar
+Hadoop 3.3.6
+Source code repository https://github.com/apache/hadoop.git -r 1be78238728da9266a4f88195058f08fd012bf9c
+Compiled by ubuntu on 2023-06-18T08:22Z
+Compiled on platform linux-x86_64
+Compiled with protoc 3.7.1
+From source with checksum 5652179ad55f76cb287d9c633bb53bbd
+This command was run using /opt/server/hadoop-3.3.6/share/hadoop/common/hadoop-common-3.3.6.jar
 ```
 
 ## 4. 配置运行参数
@@ -235,7 +240,7 @@ cd $HADOOP_HOME
 mkdir -p input
 cp ./*.txt ./input/
 
-hadoop jar ./share/hadoop/mapreduce/hadoop-mapreduce-examples-3.2.1.jar grep input ./output '[a-z.]'
+hadoop jar ./share/hadoop/mapreduce/hadoop-mapreduce-examples-3.3.6.jar grep input ./output '[a-z.]'
 
 cat ./output/part-r-00000
 rm -rf ./input ./output
@@ -294,7 +299,7 @@ cat > ${HADOOP_HOME}/etc/hadoop/core-site.xml <<EOF
     </property>
     <property>
         <name>hadoop.tmp.dir</name>
-        <value>/usr/local/hadoop/tmp</value>
+        <value>/opt/data/hadoop/tmp</value>
         <description>指定hadoop运行时产生文件的存储路径</description>
     </property>
 </configuration>
@@ -315,11 +320,11 @@ cat > ${HADOOP_HOME}/etc/hadoop/hdfs-site.xml <<EOF
     </property>
     <property>
         <name>dfs.namenode.name.dir</name>
-        <value>/usr/local/hadoop/hdfs/name</value>
+        <value>/opt/data/hadoop/hdfs/name</value>
     </property>
     <property>
         <name>dfs.datanode.data.dir</name>
-        <value>/usr/local/hadoop/hdfs/data</value>
+        <value>/opt/data/hadoop/hdfs/data</value>
     </property>
 </configuration>
 EOF
@@ -362,13 +367,11 @@ EOF
 
 ## 5. 启动hadoop
 ```bash
-chown -R hdfs:hadoop /usr/local/hadoop/
-
 # 格式化文件系统
 hdfs namenode -format
 
 # 添加开机自启
-echo '/usr/local/hadoop/sbin/start-hadoop-all.sh &' >> /etc/rc.local
+echo '/opt/server/hadoop/sbin/start-hadoop-all.sh &' >> /etc/rc.local
 
 # 启动hadoop
 start-hadoop-all.sh
@@ -426,7 +429,7 @@ hdfs dfs -put -f ${HADOOP_HOME}/README.txt /input/test.txt
 接运行hadoop安装包中自带的workcount程序：
 ```bash
 cd ${HADOOP_HOME}/share/hadoop/mapreduce/
-hadoop jar ./hadoop-mapreduce-examples-3.2.1.jar wordcount /input/test.txt /output/
+hadoop jar ./hadoop-mapreduce-examples-3.3.6.jar wordcount /input/test.txt /output/
 ```
 查看计算结果：
 ```bash
@@ -511,7 +514,9 @@ Last login: Mon Dec  5 20:27:45 2023
 > 尽量清理之前配置的hosts映射。
 
 ```bash
-cat >> /etc/hosts <<EOF
+cat > /etc/hosts <<EOF
+127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
+::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
 192.168.168.201 hadoop-201
 192.168.168.202 hadoop-202
 192.168.168.203 hadoop-203
@@ -524,7 +529,7 @@ EOF
 覆盖之前的环境变量配置， 使用hadoop用户组启动：
 ```bash
 cat > /etc/profile.d/hadoop.sh <<EOF
-export HADOOP_HOME="/usr/local/hadoop"
+export HADOOP_HOME="/opt/server/hadoop"
 export PATH=\$PATH:\${HADOOP_HOME}/bin:\${HADOOP_HOME}/sbin
 
 export HDFS_NAMENODE_USER=hdfs
@@ -552,7 +557,7 @@ cat > ${HADOOP_HOME}/etc/hadoop/core-site.xml <<EOF
     </property>
     <property>
         <name>hadoop.tmp.dir</name>
-        <value>/usr/local/hadoop/tmp</value>
+        <value>/opt/data/hadoop/tmp</value>
         <description>指定hadoop运行时产生文件的存储路径</description>
     </property>
 </configuration>
@@ -574,11 +579,11 @@ cat > ${HADOOP_HOME}/etc/hadoop/hdfs-site.xml <<EOF
     </property>
     <property>
         <name>dfs.namenode.name.dir</name>
-        <value>/usr/local/hadoop/hdfs/name</value>
+        <value>/opt/data/hadoop/hdfs/name</value>
     </property>
     <property>
         <name>dfs.datanode.data.dir</name>
-        <value>/usr/local/hadoop/hdfs/data</value>
+        <value>/opt/data/hadoop/hdfs/data</value>
     </property>
     <!-- secondarynamenode守护进程的http地址：主机名和端口号。参考守护进程布局-->
     <property>
@@ -678,20 +683,21 @@ EOF
 ## 8. 调整目录权限
 
 ```bash
-mkdir -p /usr/local/hadoop/logs/
-mkdir -p /usr/local/hadoop/tmp/
+mkdir -p /opt/server/hadoop/logs/
+mkdir -p /opt/data/hadoop/tmp/
 
-chown -R hdfs:hadoop /usr/local/hadoop/
+chown -R hdfs:hadoop /opt/server/hadoop/
+chown -R hdfs:hadoop /opt/data/hadoop/
 
-chmod 775 /usr/local/hadoop/logs/
-chmod 777 /usr/local/hadoop/tmp/
+chmod 775 /opt/server/hadoop/logs/
+chmod 777 /opt/data/hadoop/tmp/
 ```
 
 ## 9. 克隆主机
 
 > UUID可以通过[在线生成uuid - UUID Online](https://www.uuid.online)
 
-克隆出master、slave1、slave2三台机器，然后编辑虚拟机设置->网络适配器->高级->生成MAC地址，拷贝生成的MAC地址(或按下面内容手动输入)。
+克隆出hadoop-201、hadoop-202、hadoop-203三台机器，然后编辑虚拟机设置->网络适配器->高级->生成MAC地址，拷贝生成的MAC地址(或按下面内容手动输入)。
 | 节点名称 | IP | MAC地址 | UUID |
 |:-- | :-- | :-- | :-- |
 | hadoop-201 | 192.168.168.201 | 00:0C:29:18:1F:D3 | f0208bba-45e6-4b85-8104-39c3f9aaa513 |
@@ -717,6 +723,14 @@ echo '节点名称' > /etc/hostname
 
 在master主机上执行：
 ```bash
+rm -rf /opt/data/hadoop/hdfs/
+ssh root@hadoop-202 'rm -rf /opt/data/hadoop/hdfs/'
+ssh root@hadoop-203 'rm -rf /opt/data/hadoop/hdfs/'
+
+hdfs namenode -format
+ssh root@hadoop-202 'hdfs namenode -format'
+ssh root@hadoop-203 'hdfs namenode -format'
+
 # 启动hadoop
 start-hadoop-all.sh
 
@@ -767,7 +781,7 @@ ssh root@hadoop-203 'jps | grep -v Jps'
 3387 DataNode
 ```
 
-和规划的服务布局一致。访问集群：http://192.168.168.200:9870
+和规划的服务布局一致。访问集群：http://192.168.168.201:9870
 
 
 
@@ -786,7 +800,7 @@ su hdfs -c 'hdfs dfs -ls /input'
 ```
 接运行hadoop安装包中自带的workcount程序：
 ```bash
-su hdfs -c 'hadoop jar ${HADOOP_HOME}/share/hadoop/mapreduce/hadoop-mapreduce-examples-3.2.1.jar wordcount /input/test.txt /output/'
+su hdfs -c 'hadoop jar ${HADOOP_HOME}/share/hadoop/mapreduce/hadoop-mapreduce-examples-3.3.6.jar wordcount /input/test.txt /output/'
 ```
 查看计算结果：
 ```bash
@@ -820,26 +834,25 @@ stop-hadoop-all.sh
 
 ### 2.1. 下载和安装
 
-前往 [安装包归档地址](http://archive.apache.org/dist/zookeeper/) 下载 [zookeeper-3.4.10.tar.gz](http://archive.apache.org/dist/zookeeper/zookeeper-3.4.10/zookeeper-3.4.10.tar.gz)
+前往 [安装包归档地址](http://archive.apache.org/dist/zookeeper/) 下载 [zookeeper-3.9.1-bin.tar.gz](http://archive.apache.org/dist/zookeeper/zookeeper-3.9.1/apache-zookeeper-3.9.1-bin.tar.gz)
 
 ```bash
 cd /usr/local/src
-#wget http://archive.apache.org/dist/zookeeper/zookeeper-3.4.10/zookeeper-3.4.10.tar.gz
-cp /mnt/hgfs/shared-folder/zookeeper-3.4.10.tar.gz ./
+wget http://archive.apache.org/dist/zookeeper/zookeeper-3.9.1/apache-zookeeper-3.9.1-bin.tar.gz
 
-tar zxf zookeeper-3.4.10.tar.gz -C /usr/local/
+tar zxf apache-zookeeper-3.9.1-bin.tar.gz -C /opt/server/
 
-cd /usr/local/
-ln -s  zookeeper-3.4.10 zookeeper
+cd /opt/server
+ln -s apache-zookeeper-3.9.1-bin/ zookeeper
 
 # 删除多余的cmd命令文件（可不删除cmd脚本）
-find /usr/local/zookeeper/ -name *.cmd -exec rm -f {} \;
+find /opt/server/zookeeper/ -name *.cmd -exec rm -f {} \;
 ```
 
 ### 2.2. 添加环境变量
 ```bash
 cat > /etc/profile.d/zookeeper.sh <<EOF
-export ZOOKEEPER_HOME="/usr/local/zookeeper/"
+export ZOOKEEPER_HOME="/opt/server/zookeeper/"
 export PATH=$PATH:\${ZOOKEEPER_HOME}/bin
 EOF
 
@@ -849,43 +862,43 @@ source /etc/profile
 ### 2.3. 配置zookeeper
 
 ```bash
-cd /usr/local/zookeeper/conf
+cd /opt/server/zookeeper/conf
 cp zoo_sample.cfg zoo.cfg
 
-sed -i 's|dataDir=/tmp/zookeeper|dataDir=/usr/local/zookeeper/data|g' zoo.cfg
+sed -i 's|dataDir=/tmp/zookeeper|dataDir=/opt/server/zookeeper/data|g' zoo.cfg
 
 cat >> zoo.cfg <<EOF
-dataLogDir=/usr/local/zookeeper/logs
+dataLogDir=/opt/server/zookeeper/logs
 
 server.1=hadoop-201:2888:3888
 server.2=hadoop-202:2888:3888
 server.3=hadoop-203:2888:3888
 EOF
 
-mkdir -p /usr/local/zookeeper/data
-mkdir -p /usr/local/zookeeper/logs
 
-chown -R yarn:hadoop /usr/local/zookeeper/
-chmod 775 /usr/local/zookeeper/data
-chmod 775 /usr/local/zookeeper/logs
+mkdir -p /opt/server/zookeeper/data
+mkdir -p /opt/server/zookeeper/logs
+
+chmod 775 /opt/server/zookeeper/data
+chmod 775 /opt/server/zookeeper/logs
 ```
 
 ### 2.4. 添加开机自启
 
 ```bash
-cat > /usr/local/zookeeper/bin/zookeeper.service <<EOF
+cat > /usr/lib/systemd/system/zookeeper.service <<EOF
 [Unit]
 Description=zookeeper
 After=syslog.target network.target
 
 [Service]
 Type=forking
-Environment=ZOO_LOG_DIR=/usr/local/zookeeper/logs
-ExecStart=/usr/local/zookeeper/bin/zkServer.sh start
-ExecStop=/usr/local/zookeeper/bin/zkServer.sh stop
+Environment=ZOO_LOG_DIR=/opt/server/zookeeper/logs
+ExecStart=/opt/server/zookeeper/bin/zkServer.sh start
+ExecStop=/opt/server/zookeeper/bin/zkServer.sh stop
 Restart=always
-User=yarn
-Group=hadoop
+User=root
+Group=root
 
 [Install]
 WantedBy=multi-user.target
@@ -902,15 +915,15 @@ EOF
 scp /etc/profile.d/zookeeper.sh root@hadoop-202:/etc/profile.d/
 scp /etc/profile.d/zookeeper.sh root@hadoop-203:/etc/profile.d/
 
-rsync -a /usr/local/zookeeper* root@hadoop-202:/usr/local/
-rsync -a /usr/local/zookeeper* root@hadoop-203:/usr/local/
+rsync -a /opt/server/*zookeeper* root@hadoop-202:/opt/server/
+rsync -a /opt/server/*zookeeper* root@hadoop-203:/opt/server/
 ```
 
 ### 2.6. 添加server对应的编号：
 ```bash
-echo "1" > /usr/local/zookeeper/data/myid
-ssh root@hadoop-202 'echo "2" > /usr/local/zookeeper/data/myid'
-ssh root@hadoop-203 'echo "3" > /usr/local/zookeeper/data/myid'
+echo "1" > /opt/server/zookeeper/data/myid
+ssh root@hadoop-202 'echo "2" > /opt/server/zookeeper/data/myid'
+ssh root@hadoop-203 'echo "3" > /opt/server/zookeeper/data/myid'
 ```
 
 验证：
@@ -919,18 +932,18 @@ echo $ZOOKEEPER_HOME
 ssh root@hadoop-202 'echo $ZOOKEEPER_HOME'
 ssh root@hadoop-203 'echo $ZOOKEEPER_HOME'
 
-cat /usr/local/zookeeper/data/myid
-ssh root@hadoop-202 'cat /usr/local/zookeeper/data/myid'
-ssh root@hadoop-203 'cat /usr/local/zookeeper/data/myid'
+cat /opt/server/zookeeper/data/myid
+ssh root@hadoop-202 'cat /opt/server/zookeeper/data/myid'
+ssh root@hadoop-203 'cat /opt/server/zookeeper/data/myid'
 ```
 
 ### 2.7. 启动集群
 ```bash
-systemctl enable /usr/local/zookeeper/bin/zookeeper.service
-ssh root@hadoop-202 'systemctl enable /usr/local/zookeeper/bin/zookeeper.service'
-ssh root@hadoop-203 'systemctl enable /usr/local/zookeeper/bin/zookeeper.service'
+systemctl enable zookeeper
+ssh root@hadoop-202 'systemctl enable zookeeper'
+ssh root@hadoop-203 'systemctl enable zookeeper'
 
-#systemctl disable /usr/local/zookeeper/bin/zookeeper.service
+#systemctl disable zookeeper
 
 systemctl daemon-reload
 ssh root@hadoop-202 'systemctl daemon-reload'
@@ -973,7 +986,7 @@ get /test
 覆盖之前的环境变量配置， 使用hadoop用户组启动：
 ```bash
 cat > /etc/profile.d/hadoop.sh <<EOF
-export HADOOP_HOME="/usr/local/hadoop"
+export HADOOP_HOME="/opt/server/hadoop"
 export PATH=\$PATH:\${HADOOP_HOME}/bin:\${HADOOP_HOME}/sbin
 
 export HDFS_NAMENODE_USER=hdfs
@@ -1011,7 +1024,7 @@ cat > ${HADOOP_HOME}/etc/hadoop/core-site.xml <<EOF
     </property>
     <property>
         <name>hadoop.tmp.dir</name>
-        <value>/usr/local/hadoop/tmp</value>
+        <value>/opt/data/hadoop/tmp</value>
         <description>指定hadoop运行时产生文件的存储路径</description>
     </property>
     <property>
@@ -1038,11 +1051,11 @@ cat > ${HADOOP_HOME}/etc/hadoop/hdfs-site.xml <<EOF
     </property>
     <property>
         <name>dfs.namenode.name.dir</name>
-        <value>/usr/local/hadoop/hdfs/name</value>
+        <value>/opt/data/hadoop/hdfs/name</value>
     </property>
     <property>
         <name>dfs.datanode.data.dir</name>
-        <value>/usr/local/hadoop/hdfs/data</value>
+        <value>/opt/data/hadoop/hdfs/data</value>
     </property>
 
     <property>
@@ -1095,7 +1108,7 @@ cat > ${HADOOP_HOME}/etc/hadoop/hdfs-site.xml <<EOF
     </property>
     <property>
         <name>dfs.journalnode.edits.dir</name>
-        <value>/usr/local/hadoop/journal-data</value>
+        <value>/opt/data/hadoop/journal-data</value>
         <description>指定journalNode在本地磁盘存放数据的位置</description>
     </property>
 
@@ -1242,15 +1255,15 @@ cat > ${HADOOP_HOME}/etc/hadoop/yarn-site.xml <<EOF
     <property>
         <name>yarn.application.classpath</name>
         <value>
-            /usr/local/hadoop/etc/hadoop,
-            /usr/local/hadoop/share/hadoop/common/*,
-            /usr/local/hadoop/share/hadoop/common/lib/*,
-            /usr/local/hadoop/share/hadoop/hdfs/*,
-            /usr/local/hadoop/share/hadoop/hdfs/lib/*,
-            /usr/local/hadoop/share/hadoop/yarn/*,
-            /usr/local/hadoop/share/hadoop/yarn/lib/*,
-            /usr/local/hadoop/share/hadoop/mapreduce/lib/*,
-            /usr/local/hadoop/share/hadoop/mapreduce/*,
+            /opt/server/hadoop/etc/hadoop,
+            /opt/server/hadoop/share/hadoop/common/*,
+            /opt/server/hadoop/share/hadoop/common/lib/*,
+            /opt/server/hadoop/share/hadoop/hdfs/*,
+            /opt/server/hadoop/share/hadoop/hdfs/lib/*,
+            /opt/server/hadoop/share/hadoop/yarn/*,
+            /opt/server/hadoop/share/hadoop/yarn/lib/*,
+            /opt/server/hadoop/share/hadoop/mapreduce/lib/*,
+            /opt/server/hadoop/share/hadoop/mapreduce/*,
         </value>
     </property>
 </configuration>
@@ -1260,14 +1273,14 @@ EOF
 ### 4.5. 分发配置
 
 ```bash
-chmod 700 /usr/local/hadoop/hdfs/name
+chmod 700 /opt/data/hadoop/hdfs/name
 
-su hdfs -c "mkdir -p /usr/local/hadoop/journal-data"
-ssh root@hadoop-202 'su hdfs -c "mkdir -p /usr/local/hadoop/journal-data"'
-ssh root@hadoop-203 'su hdfs -c "mkdir -p /usr/local/hadoop/journal-data"'
+su hdfs -c "mkdir -p /opt/data/hadoop/journal-data"
+ssh root@hadoop-202 'su hdfs -c "mkdir -p /opt/data/hadoop/journal-data"'
+ssh root@hadoop-203 'su hdfs -c "mkdir -p /opt/data/hadoop/journal-data"'
 
-scp -r /usr/local/hadoop/etc/* root@hadoop-202:/usr/local/hadoop/etc/
-scp -r /usr/local/hadoop/etc/* root@hadoop-203:/usr/local/hadoop/etc/
+scp -r /opt/server/hadoop/etc/* root@hadoop-202:/opt/server/hadoop/etc/
+scp -r /opt/server/hadoop/etc/* root@hadoop-203:/opt/server/hadoop/etc/
 ```
 
 ### 4.6. 启动集群
@@ -1287,9 +1300,9 @@ ssh root@hadoop-203 'hdfs --daemon start journalnode'
 
 假如我们在hadoop-node2上执行：
 ```bash
-rm -rf /usr/local/hadoop/hdfs/
-ssh root@hadoop-202 'rm -rf /usr/local/hadoop/hdfs/'
-ssh root@hadoop-203 'rm -rf /usr/local/hadoop/hdfs/'
+rm -rf /opt/data/hadoop/hdfs/
+ssh root@hadoop-201 'rm -rf /opt/data/hadoop/hdfs/'
+ssh root@hadoop-203 'rm -rf /opt/data/hadoop/hdfs/'
 
 hdfs namenode -format
 ```
@@ -1302,7 +1315,7 @@ hdfs --daemon start namenode
 同步hdfs目录至其他机器：
 ```text
 ssh root@hadoop-201 'hdfs namenode -bootstrapStandby'
-ssh root@hadoop-202 'hdfs namenode -bootstrapStandby'
+ssh root@hadoop-203 'hdfs namenode -bootstrapStandby'
 ```
 出现以下信息即为同步成功。
 ```text
@@ -1504,14 +1517,14 @@ yarn --help
 cat > ${HADOOP_HOME}/sbin/sync-hadoop-configs.sh <<EOF
 #!/bin/sh
 
-HADOOP_CONF_DIR="/usr/local/hadoop/etc/hadoop"
+HADOOP_CONF_DIR="/opt/server/hadoop/etc/hadoop"
 
 # 需要同步的机器列表
 HOST_NODES=\$(cat "\${HADOOP_CONF_DIR}/workers")
 # 需要同步的文件列表
 CONF_FILES="core-site.xml hdfs-site.xml yarn-site.xml mapred-site.xml"
 
-RM_HADOOP_LOGS_CMD="rm -rf /usr/local/hadoop/logs/*"
+RM_HADOOP_LOGS_CMD="rm -rf /opt/server/hadoop/logs/*"
 
 echo "sync system profiles:"
 echo ""
@@ -1542,16 +1555,18 @@ done
 
 exit 0
 EOF
+
+chmod a+x sync-hadoop-configs.sh
 ```
 
 一键重启脚本：
-```shell
+```bash
 cat > restart-hadoop-all.sh <<EOF
 #!/bin/sh
 
-HERE="$(cd $(dirname $0);pwd)"
+HERE="\$(cd \$(dirname \$0);pwd)"
 
-${HERE}/sync-hadoop-configs.sh
+\${HERE}/sync-hadoop-configs.sh
 
 echo ""
 echo "stop all hadoop services:"
@@ -1579,48 +1594,50 @@ echo ""
 
 exit 0
 EOF
+
+chmod a+x restart-hadoop-all.sh
 ```
 
 # 十、调优
 
 core-site.xml
 ```text
-    <property>
-         <name>ipc.client.connection.maxidletime</name>
-         <value>5000</value>
-         <description>客户机中断与服务器连接的最长时间毫秒。默认10秒</description>
-    </property>
-    <property>
-         <name>ipc.client.connect.timeout</name>
-         <value>5000</value>
-         <description>客户端等待套接字与服务器建立连接所需的毫秒数，默认20000</description>
-    </property>
-    <property>
-         <name>ipc.client.connect.max.retries.on.timeouts</name>
-         <value>3</value>
-         <description>指定客户端在套接字超时时尝试与服务器建立连接的次数，默认45</description>
-    </property>
+<property>
+     <name>ipc.client.connection.maxidletime</name>
+     <value>5000</value>
+     <description>客户机中断与服务器连接的最长时间毫秒。默认10秒</description>
+</property>
+<property>
+     <name>ipc.client.connect.timeout</name>
+     <value>5000</value>
+     <description>客户端等待套接字与服务器建立连接所需的毫秒数，默认20000</description>
+</property>
+<property>
+     <name>ipc.client.connect.max.retries.on.timeouts</name>
+     <value>3</value>
+     <description>指定客户端在套接字超时时尝试与服务器建立连接的次数，默认45</description>
+</property>
 ```
 
 hdfs-site.xml
 ```text
-    <property>
-         <name>dfs.namenode.handler.count</name>
-         <value>10</value>
-         <description>
-         NameNode有一个工作线程池，用来处理不同DataNode的并发心跳以及客户端并发的元数据操作。
-         对于大集群或者有大量客户端的集群来说，通常需要增大参数dfs.namenode.handler.count的默认值10。
-         设置该值的一般原则是将其设置为集群大小的自然对数乘以20，即20 * log(N)，N为集群大小。
-         </description>
-    </property>
-    <property>
-         <name>dfs.hosts</name>
-         <value>/usr/local/hadoop/etc/hadoop/workers</value>
-         <description>
-         命名一个文件，该文件包含允许连接到namenode的主机列表。
-         必须指定文件的完整路径名。如果该值为空，则允许所有主机。
-         </description>
-    </property>
+<property>
+     <name>dfs.namenode.handler.count</name>
+     <value>10</value>
+     <description>
+     NameNode有一个工作线程池，用来处理不同DataNode的并发心跳以及客户端并发的元数据操作。
+     对于大集群或者有大量客户端的集群来说，通常需要增大参数dfs.namenode.handler.count的默认值10。
+     设置该值的一般原则是将其设置为集群大小的自然对数乘以20，即20 * log(N)，N为集群大小。
+     </description>
+</property>
+<property>
+     <name>dfs.hosts</name>
+     <value>/opt/server/hadoop/etc/hadoop/workers</value>
+     <description>
+     命名一个文件，该文件包含允许连接到namenode的主机列表。
+     必须指定文件的完整路径名。如果该值为空，则允许所有主机。
+     </description>
+</property>
 ```
 
 
@@ -1639,4 +1656,4 @@ hdfs-site.xml
 
 # 十二、附件
 
-本文使用到的软件包已上传网盘：[BlogDocs->files->centos7.x-hadoop3.2.x](https://pan.baidu.com/s/1yEbHDQBzy43uV8gIYXqbnw?pwd=6666#list/path=%2Fsharelink2076919717-858150382706250%2Ffiles%2Fcentos7.x-hadoop3.2.x)
+本文使用到的软件包已上传网盘：[BlogDocs->files->centos7.x-hadoop3.3.x](https://pan.baidu.com/s/1yEbHDQBzy43uV8gIYXqbnw?pwd=6666#list/path=%2Fsharelink2076919717-858150382706250%2Ffiles%2Fcentos7.x-hadoop3.3.x)
