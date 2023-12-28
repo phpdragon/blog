@@ -852,8 +852,8 @@ find /opt/server/zookeeper/ -name *.cmd -exec rm -f {} \;
 ### 2.2. 添加环境变量
 ```bash
 cat > /etc/profile.d/zookeeper.sh <<EOF
-export ZOOKEEPER_HOME="/opt/server/zookeeper/"
-export PATH=$PATH:\${ZOOKEEPER_HOME}/bin
+export ZOOKEEPER_HOME="/opt/server/zookeeper"
+export PATH=\$PATH:\${ZOOKEEPER_HOME}/bin
 EOF
 
 source /etc/profile
@@ -1476,6 +1476,10 @@ hadoop-202:8033                                 active
 ## 4.8. 常用命令
 
 ```bash
+查看节点状态
+hdfs haadmin -getAllServiceState
+yarn rmadmin -getAllServiceState
+
 # 启动JournalNode
 hdfs --daemon start journalnode
 hdfs --daemon status journalnode

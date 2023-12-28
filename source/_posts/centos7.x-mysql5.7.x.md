@@ -55,7 +55,7 @@ mv /var/lib/mysql /opt/
 sed -i 's|datadir=/var/lib/mysql|datadir=/opt/mysql|g' /etc/my.cnf
 sed -i 's|socket=/var/lib/mysql/mysql.sock|socket=/opt/mysql/mysql.sock|g' /etc/my.cnf
 
-cat > /etc/my.cnf <<EOF
+cat >> /etc/my.cnf <<EOF
 [mysql]
 socket=/opt/mysql/mysql.sock
 
