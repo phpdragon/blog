@@ -513,7 +513,7 @@ cat /var/spool/cron/root
 crontab -e
 
 #每分钟同步internet时间
-*/1 * * * * /usr/sbin/ntpdate cn.pool.ntp.org && /usr/sbin/hwclock -w
+*/1 * * * * /usr/sbin/ntpdate cn.pool.ntp.org >/dev/null && /usr/sbin/hwclock -w
 ```
 
 ## 9. 安装基础软件包
