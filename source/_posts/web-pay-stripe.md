@@ -1,7 +1,8 @@
 ---
 title: Stripe支付接入
 date: 2024-03-07 09:46:44
-tags:
+categories: ['WebSite', 'Pay']
+tags: ['WebSite', 'Pay']
 ---
 
 # 一、简述
