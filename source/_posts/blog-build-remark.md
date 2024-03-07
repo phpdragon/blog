@@ -4,11 +4,13 @@ date: 2023-11-16 18:39:43
 tags:
 ---
 
-Hexo 是一个快速、简单且功能强大的博客框架。使用 Markdown 解析文档，Hexo 能在几秒内生成带有自定义主题并集成各项功能的网站页面。
+# 一、简述
+
+&emsp;&emsp;Hexo 是一个快速、简单且功能强大的博客框架。使用 Markdown 解析文档，Hexo 能在几秒内生成带有自定义主题并集成各项功能的网站页面。
 
 本博客采用 Github Pages + Hexo 的方式，搭建个人博客。
 
-# 一、准备工作
+# 二、准备工作
 
 ## 1. 使用个人 GitHub 创建仓库，并配置 GitHub Pages
 
@@ -32,11 +34,11 @@ Hexo 是一个快速、简单且功能强大的博客框架。使用 Markdown �
 在 Build and deployment 栏目中 Branch一项中选择分支 main， / 根目录， 点击 Save 保存。 稍后刷新页面会出现一个Visit site按钮。
 点击跳转打开的浏览器中能正常访问，即代表个人 GitHub Pages 搭建成功，该地址便是是 https://<GitHub 用户名>.github.io。
 
-# 3. 安装 Git 和 NodeJS
+## 3. 安装 Git 和 NodeJS
 
 Hexo 基于 NodeJS 运行，因此在开始前，需要安装 NodeJS 和 npm 工具。安装教程可参考： []()。
 
-# 一、安装 Hexo
+# 三、安装 Hexo
 
 > 此处只列出本次所需的关键步骤，更多说明详见官方文档：https://hexo.io/zh-cn/
 
@@ -80,7 +82,7 @@ hexo server # 本地启动，可简写为 `hexo s`
 
 浏览器访问：http://localhost:4000/。
 
-# 二、安装 & 配置主题
+# 四、安装 & 配置主题
 
 ## 1. 安装 Fluid 主题
 
@@ -108,7 +110,7 @@ theme: fluid  # 指定主题
 language: zh-CN  # 指定语言，会影响主题显示的语言，按需修改
 ```
 
-# 3. 创建「关于页」
+## 3. 创建「关于页」
 
 首次使用主题的「关于页」需要手动创建。
 
@@ -144,7 +146,7 @@ hexo clean && hexo g && hexo s
 
 再次通过浏览器访问 http://localhost:4000 , 便可以看到已使用新的主题。
 
-# 三、创建文章
+# 五、创建文章
 
 修改 _config.yml 文件。这项配置是为了在生成文章的同时，生成一个同名的资源目录用于存放图片等资源文件。
 
@@ -189,7 +191,7 @@ $ source/_posts> tree
 
 图片的引用方式也不只这一种，更多详细介绍可参考官方文档 (https://hexo.io/zh-cn/docs/asset-folders.html)。
 
-# 四、配置 Hexo
+# 六、配置 Hexo
 
 ## 1. 页面 title 修改
 
@@ -232,7 +234,7 @@ index:
       keys: ["hitokoto"]
 ```
 
-# 五、发布 GitHub Pages
+# 七、发布 GitHub Pages
 
 ## 1. 基于GitHub Actions 部署
 
@@ -304,7 +306,7 @@ jobs:
 
 点击查看 https://github.com/<GitHub用户名>/<你的项目名>/actions， 部署完成后，前往 https://<GitHub用户名>.github.io 查看网站。
 
-# 六、参考资料
+# 八、参考资料
 
 - Hexo Docs：https://hexo.io/zh-cn/docs/
 - Hexo Fluid 用户手册：https://fluid-dev.github.io/hexo-fluid-docs/
