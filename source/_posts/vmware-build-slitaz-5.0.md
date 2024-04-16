@@ -43,6 +43,8 @@ x86_64位版本: [slitaz-rolling-core64.iso](https://mirror.slitaz.org/iso/rolli
 
 ### 1. 硬盘分区、格式化
 
+> [parted分区命令使用示例](https://www.cnblogs.com/pipci/p/11372530.html)
+
 #### 1.1. 创建dos分区表
 ```bash
 parted /dev/sda mktable msdos
@@ -446,6 +448,7 @@ iptables -S
 
 # 七、参考资料
 
+- [parted分区命令使用示例](https://www.cnblogs.com/pipci/p/11372530.html)
 - [Linux各主要发行版的包管理命令对照](https://www.cnblogs.com/huapox/p/3509640.html)
 
 # 八、附件
