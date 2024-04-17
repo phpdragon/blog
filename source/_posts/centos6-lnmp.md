@@ -605,6 +605,9 @@ cd /usr/local/src
 tar zxvf php-5.3.3.tar.gz
 cd php-5.3.3
 
+# 查看编译参数
+./configure --help
+
 ./configure \
 --prefix=/usr/local/php \
 --with-config-file-scan-dir=/usr/local/php/etc/php.d \
