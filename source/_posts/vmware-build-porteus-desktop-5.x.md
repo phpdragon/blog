@@ -342,8 +342,11 @@ removepkg bmp
 
 ### 7.2 修改slapt-get软件源
 
+> 官方可用源： [Salix Repository mirrors](https://docs.salixos.org/wiki/Repository_mirrors)
+
 ```bash
-vi /etc/slapt-get/slapt-getrc
+# 替换为美国的源
+sed -i 's|http://slackware.uk|http://mirrors.xmission.com|g' /etc/slapt-get/slapt-getrc
 ```
 
 软件源缓存更新：
@@ -381,8 +384,8 @@ rm spkg-1.7-x86_64-2gv.tgz
 ```bash
 mkdir -p /mnt/cdrom
 mount /dev/cdrom /mnt/cdrom
-cp /mnt/cdrom/VMwareTools-*.tar.gz /tmp && cd /tmp
-tar zxvf /tmp/VMwareTools-*.tar.gz 
+cp /mnt/cdrom/VMwareTools-*.tar.gz /tmp 
+cd /tmp && tar zxvf /tmp/VMwareTools-*.tar.gz 
 
 slackpkg install perl
 
@@ -403,17 +406,26 @@ chmod +x /etc/rc.d/init.d/vmware-tools
 echo '/etc/rc.d/init.d/vmware-tools start &' >> /etc/rc.d/rc.local
 ```
 
-## 9. 汉化
+## 9. 桌面汉化
+
+> 支持中文的字体包：[odosung-font(类似楷体)](http://dl.porteus.org/i486/current/packages/Language-Selection-Tool/odosung-font-1.4.2-noarch-1_Ahau.xzm)、[unifont(不推荐)](http://dl.porteus.org/i486/current/packages/Language-Selection-Tool/unifont-5.1.20080907-noarch-1_Ahau.xzm)
 
 ```bash
-# 安装字体
-slackpkg search wqy-zenhei-font-ttf
-slackpkg install wqy-zenhei-font-ttf
-
 # 下载官方语言包
 cd $MODDIR
+wget https://www.mirrorservice.org/sites/dl.porteus.org/x86_64/Porteus-v5.01/language/zh-core_locales.xzm
+wget https://www.mirrorservice.org/sites/dl.porteus.org/x86_64/Porteus-v5.01/language/zh-devel_locales.xzm
 wget https://www.mirrorservice.org/sites/dl.porteus.org/x86_64/Porteus-v5.01/language/zh-mate_locales.xzm
 
+# 下载文泉-禅黑字体
+cd $MODDIR
+wget http://dl.porteus.org/i486/current/packages/Language-Selection-Tool/wqy-zenhei-font-ttf-0.8.38_1-noarch-1.xzm
+
+# 或者直接安装文泉-禅黑字体
+slackpkg search wqy-zenhei-font-ttf
+slackpkg install wqy-zenhei-font-ttf 
+
+# 设置语言为zh_CN.UTF-8
 sed -i 's|^export LANG=en_US.UTF-8|export LANG=zh_CN.UTF-8|' /etc/profile.d/lang.sh
 
 # 生效
@@ -426,10 +438,31 @@ locale
 reboot
 ```
 
-或者在桌面环境下执行脚本：
+或者在桌面环境下执行脚本(不推荐)：
 ```bash
 wget https://www.mirrorservice.org/sites/dl.porteus.org/i486/testing/packages/Language-Selection-Tool/gtk-language-selection-tool
 bash ./gtk-language-selection-tool
+```
+
+
+修复执行locale报错：
+```text
+root@porteus:~/# locale
+locale: Cannot set LC_CTYPE to default locale: No such file or directory
+locale: Cannot set LC_MESSAGES to default locale: No such file or directory
+locale: Cannot set LC_ALL to default locale: No such file or directory
+```
+
+安装glibc-i18n国际化包，或者是漏装 zh-core_locales、zh-devel_locales 模块。
+```bash
+slackpkg search glibc-i18n
+slackpkg install glibc-i18n
+# 清理不必要的语言包
+cd /usr/lib64/locale && ls|grep '.*_.*'|grep -v 'en_US*'|grep -v 'zh_CN*'|xargs rm -rf
+cd /usr/lib64/locale && ls|grep -v 'C.utf8'|grep -v 'en_US'|grep -v 'zh_CN'|xargs rm -rf
+cd /usr/share/locale && ls|grep -v 'locale.alias'|grep -v 'zh_CN'|xargs rm -rf
+cd /usr/share/i18n/locales && ls|grep '.*_.*'|grep -v 'zh_CN'|grep -v 'en_US'|grep -v 'i18n*'|xargs rm -f
+cd /usr/share/i18n/locales && ls|grep -v 'C'|grep -v 'POSIX'|grep -v 'zh_CN'|grep -v 'en_US'|grep -v 'i18n*'|xargs rm -f
 ```
 
 
