@@ -68,7 +68,7 @@ x86_64版本: [Porteus-MATE-v5.01-x86_64.iso](https://www.mirrorservice.org/site
 选中未分配(unallocated)的分区，右键点击New菜单:
 {% asset_img 6.png 创建交换分区 %}
 
-创建交换分区，交换分区大小设置为1024M(根据实际情况自行设定)，格式未 linux-swap：
+创建交换分区，交换分区大小设置为1024M(根据实际情况自行设定)，格式为 linux-swap：
 {% asset_img 7.png 创建交换分区 %}
 
 #### 1.3. 创建ext4分区
@@ -95,7 +95,7 @@ x86_64版本: [Porteus-MATE-v5.01-x86_64.iso](https://www.mirrorservice.org/site
 分区操作明细：
 {% asset_img 13.png 分区操作明细 %}
 
-#### 1.5. 设置boot标记
+#### 1.5. 标记bootable flag
 
 选中第2分区(按实际分区情况决定)，右键点击 Manage Flags：
 {% asset_img 14.png 设置boot标记 %}
@@ -403,7 +403,13 @@ vmware-hgfsclient
 
 # 添加随机启动
 chmod +x /etc/rc.d/init.d/vmware-tools
-echo '/etc/rc.d/init.d/vmware-tools start &' >> /etc/rc.d/rc.local
+
+# 查看运行等级
+runlevel|awk '{print $2}'
+
+# 根据运行等级，添加响应的软链
+ln -s /etc/rc.d/init.d/vmware-tools /etc/rc.d/rc4.d/S03vmware-tools
+ln -s /etc/rc.d/init.d/vmware-tools /etc/rc.d/rc4.d/K99vmware-tools
 ```
 
 ## 9. 桌面汉化
