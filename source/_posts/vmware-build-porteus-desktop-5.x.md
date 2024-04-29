@@ -18,9 +18,9 @@ Porteus 可在任何 Intel、AMD 或 VIA x86/64 处理器上运行，只需要 5
 
 > 虚拟机版本：
 >
-> 产品：VMware® Workstation 16 Pro 
+> 产品：VMware® Workstation 17 Pro 
 >
-> 版本：16.1.2 build-17966106
+> 版本：17.5.1 build-23298084
 
 ## 1.下载系统包
 
