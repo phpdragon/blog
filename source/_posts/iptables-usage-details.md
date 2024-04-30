@@ -1,7 +1,8 @@
 ---
 title: iptables 命令详解和举例
 date: 2023-11-24 12:51:31
-tags:
+categories: ['Linux', 'FireWall', 'Iptables']
+tags: ['Linux', 'FireWall', 'Iptables']
 ---
 
 # 一、iptables 入门介绍
