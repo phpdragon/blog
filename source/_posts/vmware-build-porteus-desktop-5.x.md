@@ -1,13 +1,13 @@
 ---
 title: VMware虚拟机安装Porteus Desktop 5.x
 date: 2024-04-18 22:55:24
-categories: ['OS', 'Linux', 'Porteus']
-tags: ['OS', 'Linux', 'Porteus', 'Porteus Desktop 5.x']
+categories: ['OS', 'Linux', 'Slackware', 'Porteus']
+tags: ['OS', 'Linux', 'Slackware', 'Porteus', 'Porteus Desktop 5.x']
 ---
 
 # 一、前言
 
-Porteus 是一个轻量级但完整的 Linux 发行版，经过优化，可以从CD、USB闪存驱动器、CD、DVD、硬盘驱动器或其他可启动存储介质上运行。它基于Slackware Linux，它很小(不到300Mb)且启动速度非常快，让你在其他操作系统还在启动的时候就完成它的启动并开始上网了。
+Porteus 是一个基于Slackware Linux的轻量级但完整的Linux发行版，经过优化，可以从CD、USB闪存驱动器、CD、DVD、硬盘驱动器或其他可启动存储介质上运行。它很小(不到300Mb)且启动速度非常快，让你在其他操作系统还在启动的时候就完成它的启动并开始上网了。
 
 Porteus 可在任何 Intel、AMD 或 VIA x86/64 处理器上运行，只需要 512MB 的磁盘空间和 256MB 的内存。 硬盘不是必须的，因为它可以从可移动存储介质上运行。如果你在可移动存储媒体设备上使用Porteus，你可以利用其“持久”的模式，将数据直接保存在存储设备上。
 
@@ -24,7 +24,7 @@ Porteus 可在任何 Intel、AMD 或 VIA x86/64 处理器上运行，只需要 5
 
 ## 1.下载系统包
 
-> Porteus 基于 salix Linux
+> Porteus 基于 Salix Linux
 
 前往官网下载页面[Porteus Mirrors](http://porteus.org/porteus-mirrors.html)，下载所需要的版本：
 x86_64版本: [Porteus-MATE-v5.01-x86_64.iso](https://www.mirrorservice.org/sites/dl.porteus.org/x86_64/Porteus-v5.01/Porteus-MATE-v5.01-x86_64.iso)
@@ -276,7 +276,7 @@ ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 timeconfig
 ```
 
-修改时间同步服务地址：
+添加时间同步任务：
 ```bash
 cat >> /var/spool/cron/crontabs/root <<EOF
 #每分钟同步internet时间

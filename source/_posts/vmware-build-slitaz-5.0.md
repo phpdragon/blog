@@ -446,7 +446,7 @@ iptables -S
 参考： [iptables 命令详解和举例](/blog/2023/11/24/iptables-usage-details/)
 
 
-# 七、参考资料
+# 六、参考资料
 
 - [Slitaz入门指南-如何在Virtualbox下安装slitaz5.0及增强功能Additions](https://zhuanlan.zhihu.com/p/64391039?utm_id=0)
 - [How to Install SliTaz 4.0 Linux and Review on VMware](https://linux-video-tutorials.blogspot.com/2016/12/install-slitaz-4-0-and-review-on-vmware.html)
@@ -454,6 +454,6 @@ iptables -S
 - [parted分区命令使用示例](https://www.cnblogs.com/pipci/p/11372530.html)
 - [Linux各主要发行版的包管理命令对照](https://www.cnblogs.com/huapox/p/3509640.html)
 
-# 八、附件
+# 七、附件
 
 本文使用到的软件包已上传网盘：[BlogDocs->files->vmware-build-slitaz-5.0](https://pan.baidu.com/s/1yEbHDQBzy43uV8gIYXqbnw?pwd=6666#list/path=%2FBlogDocs%2Ffiles%2Fvmware-build-slitaz-5.0)

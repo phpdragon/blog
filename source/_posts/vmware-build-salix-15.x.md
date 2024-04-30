@@ -1,8 +1,8 @@
 ---
 title: VMware虚拟机安装Salix Linux 15.x
-date: 2024-04-16 22:55:24
-categories: ['OS', 'Linux', 'Salix']
-tags: ['OS', 'Linux', 'Salix', 'Salix Linux 15.x']
+date: 2024-04-30 22:55:24
+categories: ['OS', 'Linux', 'Slackware', 'Salix']
+tags: ['OS', 'Linux', 'Slackware', 'Salix', 'Salix Linux 15.x']
 ---
 
 # 一、前言
