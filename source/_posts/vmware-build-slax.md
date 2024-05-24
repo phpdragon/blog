@@ -381,6 +381,7 @@ cd "/etc/rc$(runlevel|awk '{print $2}').d" && ln -sf ../init.d/local_start.sh S9
 
 # 四、参考资料
 
+- [Slax 官网](https://www.slax.org/)
 - [parted分区命令使用示例](https://www.cnblogs.com/pipci/p/11372530.html)
 - [Linux各主要发行版的包管理命令对照](https://www.cnblogs.com/huapox/p/3509640.html)
 

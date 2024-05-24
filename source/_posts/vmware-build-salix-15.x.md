@@ -21,7 +21,7 @@ Salix是一个基于Slackware的GNU/Linux发行版，它简单快速，易于使
 
 > Salix 基于 Slackware Linux
 
-前往官网下载页面[Salix Downloads](http://porteus.org/porteus-mirrors.html)，下载所需要的版本：
+前往官网下载页面[Salix Downloads](https://www.salixos.org/download.html)，下载所需要的版本：
 x86_64版本: [Salix64 Xfce 15.0](https://download.salixos.org/x86_64/15.0/iso/salix64-xfce-15.0.torrent)
 
 
