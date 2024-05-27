@@ -813,11 +813,6 @@ wmi                    36864  4 video,asus_wmi,mxm_wmi,nouveau
         Subsystem: ASUSTeK Computer Inc. GeForce 820M [1043:16cd]
 ```
 
-或者：
-```
-dmesg | grep -i chipset
-```
-
 得知显卡型号是 NVIDIA Corporation GF117M ，GeForce 820M 型号。
 
 前往[英伟达代号查询页](https://www.nvidia.com/en-us/drivers/unix/legacy-gpu/), 匹配到 GeForce 820M 的对应记录：
