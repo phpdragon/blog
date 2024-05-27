@@ -12,6 +12,21 @@ tags: ['Linux', 'Arch Linux', 'Manjaro']
 再搞一个双系统，最后选择了Manjaro，主要的原因笔记本的无线网卡硬件比较低，驱动不好安装。
 很多Linux发行版本不能支持。
 
+桌面环境XFCE、LXDE、MATE都比较少用系统资源。
+浏览器推荐安装chrome内核浏览器，观看视频CPU利用不高，火狐有点偏高。
+| 分支 | 发行版 | 桌面 | 博通BCM43142无线网卡驱动 | 英伟达820M显卡驱动 | 备注 |
+|:-------:|:-------:|:--------:|:-------:|:-------:|:-------:|
+| Arch | Manjaro | KDE | mhwd -f -i pci network-broadcom-wl | mhwd -f -i pci video-nvidia-390xx | 系统流畅界面美观 |
+| Arch | Manjaro | XFCE | mhwd -f -i pci network-broadcom-wl | mhwd -f -i pci video-nvidia-390xx | 系统流畅界面美观 |
+| Redhat | Fedora | LXDE | dnf install broadcom-wl.noarch | dnf install xorg-x11-drv-nvidia-390xx.x86_64 | 安装驱动需要添加 RPMFusion 软件仓库 ，官方说适用于旧电脑、上网本，貌似装不上，弹幕流畅，火狐CPU利用率一般，菜单布局类似window|
+| Redhat | Fedora | XFCE | dnf install broadcom-wl.noarch | dnf install xorg-x11-drv-nvidia-390xx.x86_64 | 安装驱动需要添加 RPMFusion 软件仓库 ，火狐CPU利用率不高、弹幕流畅，界面比LXDE差一些，菜单布局类似、弹幕流畅、自带浏览器负载低|
+| Debian | LinuxMint | XFCE | apt install broadcom-stat-dkms | apt install xserver-xorg-video-nvidia-390 | 系统菜单接近window |
+| Debian | LinuxMint | MATE | apt install broadcom-stat-dkms | apt install xserver-xorg-video-nvidia-390 | 汉化不错 |
+| Debian | MX Linux | XFCE | apt install firmware-brcm80211 | apt install xserver-xorg-video-nvidia-legacy-390xx |  |
+| Debian | Lubuntu | LXDE | apt install bcmwl-kernel-source | apt install xserver-xorg-video-nvidia-390 | 火狐负载不高、弹幕流畅 |
+| Debian | Xubuntu | XFCE | apt install bcmwl-kernel-source | apt install xserver-xorg-video-nvidia-470 疑问 | 汉化做的很好、弹幕流畅 |
+
+
 # 二、LiveCD 安装系统
 - 1.准备一个至少6G的U盘。
 - 2.下载[Ventoy](https://www.ventoy.net/cn/download.html)的iso镜像到本地。
@@ -322,30 +337,6 @@ https://www.cnblogs.com/kfw5264/p/17893266.html
 yes|sudo pacman -Sy base-devel
 ```
 
-## 安装vim
-
-```bash
-yes|sudo pacman -S vim
-
-sudo bash -c 'cat > /etc/profile.d/alias.sh <<EOF
-alias vi="$(which vim)"
-
-if [ -f /etc/bashrc ]; then
-    . /etc/bashrc
-fi
-EOF'
-
-source /etc/profile
-```
-
-## 安装yay
-```bash
-yes|sudo pacman -S yay
-```
-
-PS: https://zhuanlan.zhihu.com/p/462061314
-
-
 ## 安装输入法
 
 ### 安装fctix
@@ -452,93 +443,97 @@ fcitx5-table-extra        #额外码表支持，包括仓颉 3, 仓颉 5, 粤拼
 fcitx5-table-other        #一些更奇怪的码表支持，包括 Latex, Emoji, 以及一大堆不明字符等等。
 ```
 
-
-
-## 安装字体
+## 日常软件安装
 ```bash
+# 安装vim
+yes|sudo pacman -S vim
+
+sudo bash -c 'cat > /etc/profile.d/alias.sh <<EOF
+alias vi="$(which vim)"
+
+if [ -f /etc/bashrc ]; then
+    . /etc/bashrc
+fi
+EOF'
+
+source /etc/profile
+
+
+# 安装yay
+# PS: https://zhuanlan.zhihu.com/p/462061314
+yes|sudo pacman -S yay
+
+
+# 安装上传下载工具
+sudo pacman -Sy lszrz
+
+cat > ~/tmp <<EOF
+alias rb="$(which lrzsz-rb)"
+alias rx="$(which lrzsz-rx)"
+alias rz="$(which lrzsz-rz)"
+alias sb="$(which lrzsz-sb)"
+alias sx="$(which lrzsz-sx)"
+alias sz="$(which lrzsz-sz)"
+EOF
+cat /etc/profile.d/alias.sh >> ~/tmp && sudo mv ~/tmp /etc/profile.d/alias.sh
+
+
+# 安装字体
 yes|sudo pacman -Sy ttf-dejavu wqy-zenhei wqy-microhei ttf-monaco
-```
 
-## 装备份软件
-
-强大好用的备份、回滚系统工具
-```bash
+#强大好用的备份、回滚系统工具
 yes|sudo pacman -Sy timeshift
-```
 
-## 安装谷歌的浏览器
-```bash
+# 安装谷歌的浏览器
 yes|yay -Sy google-chrome
 
-#基于Chromium内核的浏览器
+# 基于Chromium内核的浏览器
 yes|sudo pacman -Sy vivaldi
-```
 
-## 微信
-```bash
+# 微信
 yay -S wechat-uos
-```
 
-## 迅雷
-```bash
+# 迅雷
 yay -S xunlei-bin
-```
 
-## 安装图形化的解压软件
-```bash
+# 安装图形化的解压软件
 yes|sudo pacman -Sy p7zip file-roller unrar
-```
 
-## 安装gnome磁盘管理
-```bash
+# 安装gnome磁盘管理
 yes|sudo pacman -Sy gnome-disk-utility
-```
 
-## gedit编辑器
-该编辑器兼容 UTF-8 编码，同时支持语法高亮
-```bash
+# gedit编辑器
+# 该编辑器兼容 UTF-8 编码，同时支持语法高亮
 yes|sudo pacman -Sy gedit
-```
 
-## 网易云音乐
-```bash
+# 网易云音乐
 yes|yay -S netease-cloud-music
-```
 
-## Audacity：音频处理软件
-如果你听说过Cool Edit Pro的话，功能跟它差不多。
-```bash
+# Audacity：音频处理软件
+# 如果你听说过Cool Edit Pro的话，功能跟它差不多。
 yes|yay -Sy audacity
-```
 
-## OBS Studio：免费开源的录屏/直播软件，兼容Bilibili等直播平台。
-```bash
+# OBS Studio：免费开源的录屏/直播软件，兼容Bilibili等直播平台。
 yes|yay -Sy obs-studio
-```
 
-## WPS
-```
+# WPS
 yes|yay -S wps-office-cn wps-office-mime-cn wps-office-mui-zh-cn
 
 # 安装字体
 yay -S wps-office-fonts ttf-ms-fonts ttf-wps-fonts
 
-#aur方式安装ttf-wps-fonts
+# aur方式安装ttf-wps-fonts
 yes|sudo pacman -Sy git
 git clone https://aur.archlinux.org/ttf-wps-fonts.git
 cd ttf-wps-fonts
 yes|makepkg -si
 cd ~
 rm -rf ttf-wps-fonts
-```
 
-## flameshot火焰截图
-```bash
+# flameshot火焰截图
 yes|yay -Sy flameshot
-```
 
-## git
-```bash
+# git
 yes|sudo pacman -Sy git
 
 git config --global user.name "github昵称"
@@ -546,6 +541,18 @@ git config --global user.email "注册邮箱"
 
 #一个Git客户端。archlinux/manjaro的主源里就有它。
 yes|yay -Sy smartgit
+
+## 屏幕分辨率配置工具
+yes|sudo pacman -Sy xorg-xrandr
+
+## 远程win电脑, 使用Remmina
+yes|sudo pacman -S remmina freerdp
+
+## 远程控制 xrdp / VNC
+yes|sudo pacman -Sy xrdp
+sudo systemctl enable xrdp
+sudo systemctl start xrdp
+sudo systemctl status xrdp
 ```
 
 ## 开启ssh
@@ -625,41 +632,6 @@ sudo systemctl status fstrim.timer
 
 # 查看是否有fstrim.service计时任务
 sudo systemctl list-timers --all 
-```
-
-## 屏幕分辨率配置工具
-```
-yes|sudo pacman -Sy xorg-xrandr
-```
-
-## 安装上传下载工具
-```bash
-sudo pacman -Sy lszrz
-
-cat > ~/tmp <<EOF
-alias rb="$(which lrzsz-rb)"
-alias rx="$(which lrzsz-rx)"
-alias rz="$(which lrzsz-rz)"
-alias sb="$(which lrzsz-sb)"
-alias sx="$(which lrzsz-sx)"
-alias sz="$(which lrzsz-sz)"
-EOF
-cat /etc/profile.d/alias.sh >> ~/tmp && sudo mv ~/tmp /etc/profile.d/alias.sh
-```
-
-
-## 远程win电脑, 使用Remmina
-```bash
-yes|sudo pacman -S remmina freerdp
-```
-
-
-## 远程控制 xrdp / VNC
-```bash
-yes|sudo pacman -Sy xrdp
-sudo systemctl enable xrdp
-sudo systemctl start xrdp
-sudo systemctl status xrdp
 ```
 
 ## 安装网卡驱动
@@ -1414,3 +1386,8 @@ makepkg -si
 - [linux 设置分辨率](https://www.cnblogs.com/zhugeanran/p/9408426.html)
 - [Fcitx5输入法](https://wiki.archlinuxcn.org/wiki/Fcitx5)
 - [Fcitx输入法](https://wiki.archlinuxcn.org/wiki/Fcitx)
+
+
+# 七、附件
+
+本文使用到的软件包已上传网盘：[BlogDocs->files->asus-w519l-install-manjaro-kde-24.x](https://pan.baidu.com/s/1yEbHDQBzy43uV8gIYXqbnw?pwd=6666#list/path=%2FBlogDocs%2Ffiles%2Fasus-w519l-install-manjaro-kde-24.x)
