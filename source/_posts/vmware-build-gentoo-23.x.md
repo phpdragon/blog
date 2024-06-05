@@ -559,4 +559,4 @@ ip addr
 
 # 八、附件
 
-本文使用到的软件包已上传网盘：[BlogDocs->files->vmware-build-gentoo](https://pan.baidu.com/s/1yEbHDQBzy43uV8gIYXqbnw?pwd=6666#list/path=%2FBlogDocs%2Ffiles%2Fvmware-build-gentoo)
+本文使用到的软件包已上传网盘：[BlogDocs->files->vmware-build-gentoo-23.x](https://pan.baidu.com/s/1yEbHDQBzy43uV8gIYXqbnw?pwd=6666#list/path=%2FBlogDocs%2Ffiles%2Fvmware-build-gentoo-23.x)
