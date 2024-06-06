@@ -212,7 +212,7 @@ echo 'DISTDIR=/var/cache/distfiles' >> /mnt/gentoo/etc/portage/make.conf
 # PKGDIR 是Portage保存二进制包的位置。默认设置为“/var/cache/binpkgs”
 echo 'PKGDIR="/var/cache/binpkgs"' >> /mnt/gentoo/etc/portage/make.conf
 
-# 禁用gnome、kde依赖
+# 禁用gnome、kde依赖, 使用 `less /var/db/repos/gentoo/profiles/use.desc` 查看支持的参数
 echo 'USE="-kde -gnome"' >> /mnt/gentoo/etc/portage/make.conf
 
 # ACCEPT_LICENSE，安装软件接受的许可证类型。此处同意所有licenses
@@ -231,13 +231,13 @@ echo "CPU_FLAGS_X86=\"$(cpuid2cpuflags|awk -F ': ' '{print $2}')\"" >> /mnt/gent
 echo 'LINGUAS="en-US zh-CN en zh"' >> /mnt/gentoo/etc/portage/make.conf
 echo 'L10N="en-US zh-CN en zh"' >> /mnt/gentoo/etc/portage/make.conf
 
-# 配置显卡
-echo 'VIDEO_CARDS="video_cards_vmware"' >> /mnt/gentoo/etc/portage/make.conf
+# 配置显卡,这里官方手册建议填的只有A/I/N三家的驱动与vesa（这里应该说的是vesa总线），fbdev是tty终端下的帧缓冲设备（简单理解为内核模拟的显卡），dummy是虚拟显示器，v4l是指摄像头等视频设备
+echo 'VIDEO_CARDS="video_cards_vmware vesa"' >> /mnt/gentoo/etc/portage/make.conf
 
-# 配置声卡
-#echo 'ALSA_CARDS="hda-intel"' >> /mnt/gentoo/etc/portage/make.conf
+# 配置声卡, 启用了板载intel与USB声卡支持，根据机器情况选择
+#echo 'ALSA_CARDS="hda-intel usb-audio"' >> /mnt/gentoo/etc/portage/make.conf
 
-#笔记本电脑的触控板
+#笔记本电脑的触控板, 默认是libinput，机器不是synaptics触摸板，不用加参数
 #echo 'INPUT_DEVICES="libinput synaptics"' >> /mnt/gentoo/etc/portage/make.conf
 
 #如果想把CPU的microcode直接编译进内核，则需要设置为“-S”；否则注释掉
@@ -285,34 +285,14 @@ LLVM_TARGETS="X86"
 AUTO_CLEAN="yes"
 ```
 
-#### 2.3. 替换软件源
+> 如果是安装完成后又修改了make.conf，需要使用：`emerge --ask --changed-use --deep @world` 让之前安装过的包应用新的配置（有些包要重新编译安装）
+
+#### 2.3. 复制DNS信息
 
 ```bash
-# 替换软件源
-echo 'GENTOO_MIRRORS="https://mirrors.tuna.tsinghua.edu.cn/gentoo"' >> /mnt/gentoo/etc/portage/make.conf
-mkdir -p /mnt/gentoo/etc/portage/repos.conf
-cp /mnt/gentoo/usr/share/portage/config/repos.conf /mnt/gentoo/etc/portage/repos.conf/gentoo.conf
-sed 's|sync-uri = rsync://rsync.gentoo.org/gentoo-portage|sync-uri = rsync://mirrors.tuna.tsinghua.edu.cn/gentoo-portage|' -i /mnt/gentoo/etc/portage/repos.conf/gentoo.conf
-
-#替换Binhost二进制包镜像源
-sed 's|priority = 1|priority = 9999|' -i /mnt/gentoo/etc/portage/binrepos.conf/gentoobinhost.conf
-sed 's|https://distfiles.gentoo.org|https://mirrors.tuna.tsinghua.edu.cn/gentoo/|' -i /mnt/gentoo/etc/portage/binrepos.conf/gentoobinhost.conf
-#初始化密钥
-getuto
-
-
 #复制DNS信息
 cp --dereference /etc/resolv.conf /mnt/gentoo/etc/
-
-echo gentoo > /mnt/gentoo/etc/hostname
-
-cat > /mnt/gentoo/etc/hosts <<EOF
-# This defines the current system and must be set
-127.0.0.1     gentoo localhost
-
-EOF
 ```
-
 
 #### 2.4. 挂载文件系统
 
@@ -336,7 +316,32 @@ source /etc/profile
 export PS1="(chroot) ${PS1}"
 ```
 
-#### 2.6. 安装Gentoo基础系统
+#### 2.6. 替换软件源
+
+```bash
+# 替换软件源
+echo 'GENTOO_MIRRORS="https://mirrors.tuna.tsinghua.edu.cn/gentoo"' >> /etc/portage/make.conf
+mkdir -p /etc/portage/repos.conf
+cp /usr/share/portage/config/repos.conf /etc/portage/repos.conf/gentoo.conf
+sed 's|sync-uri = rsync://rsync.gentoo.org/gentoo-portage|sync-uri = rsync://mirrors.tuna.tsinghua.edu.cn/gentoo-portage|' -i /etc/portage/repos.conf/gentoo.conf
+
+#替换二进制包镜像源
+sed 's|priority = 1|priority = 9999|' -i /etc/portage/binrepos.conf/gentoobinhost.conf
+sed 's|https://distfiles.gentoo.org|https://mirrors.tuna.tsinghua.edu.cn/gentoo/|' -i /etc/portage/binrepos.conf/gentoobinhost.conf
+
+cat >> /etc/portage/make.conf <<EOF
+
+# Appending getbinpkg to the list of values within the FEATURES variable
+FEATURES="\${FEATURES} getbinpkg"
+# Require signatures
+FEATURES="\${FEATURES} binpkg-request-signature"
+EOF
+
+#设置Portage必要的密匙环
+getuto
+```
+
+#### 2.7. 安装Gentoo基础系统
 
 ```bash
 #从网站安装 Gentoo ebuild 数据库快照
@@ -345,14 +350,16 @@ emerge-webrsync
 #更新存储库
 emerge --sync
 
-#选择正确的配置文件
-eselect profile list|grep systemd|grep stable
-eselect profile set 22
+#查看被选中的配置文件
+eselect profile list|grep '*'
+#查看可选配置文件列表
+eselect profile list
+#不是想要的，则选择正确的配置文件
+eselect profile set [num]
 
-
-#更新@world集合
+#更新@world集合，大概10分钟
 emerge --verbose --update --deep --newuse @world
-emerge --pretend --depclean
+#删除过时的软件包
 emerge --depclean
 
 
@@ -375,11 +382,11 @@ locale-gen
 env-update && source /etc/profile && export PS1="(chroot) ${PS1}"
 ```
 
-#### 2.7. 配置Linux内核
+#### 2.8. 配置Linux内核
 
 ```bash
 # 安装无线网卡、视频等固件
-emerge sys-kernel/linux-firmware
+#emerge sys-kernel/linux-firmware
 
 #开源音频驱动
 emerge sys-firmware/sof-firmware
@@ -398,6 +405,7 @@ emerge sys-kernel/gentoo-kernel
 
 #更新和清理
 emerge --depclean
+#清理下内核安装文件
 emerge --prune sys-kernel/gentoo-kernel
 #如果使用了预编译好的Gentoo补丁内核映像，则使用这个命令代替 `emerge --prune sys-kernel/gentoo-kernel`
 #emerge --prune sys-kernel/gentoo-kernel-bin
@@ -408,7 +416,7 @@ eselect kernel list
 #eselect kernel set 1
 ```
 
-#### 2.8. 配置系统
+#### 2.9. 配置系统
 ```bash
 cat > /etc/fstab <<EOF
 /dev/sda1  none      swap    sw                  0 0
@@ -446,7 +454,7 @@ systemctl enable NetworkManager
 passwd root
 ```
 
-#### 2.9. 初始化、自启动配置
+#### 2.10. 初始化、自启动配置
 ```
 #随机生成机器ID
 systemd-machine-id-setup
@@ -458,7 +466,7 @@ systemd-firstboot --prompt
 systemctl preset-all --preset-mode=enable-only
 ```
 
-#### 2.10. 安装必要软件包
+#### 2.11. 安装必要软件包
 
 ```bash
 #安装文件索引
@@ -500,7 +508,7 @@ systemctl enable chronyd.service
 systemctl enable cronie
 ```
 
-#### 2.11. 安装系统引导
+#### 2.12. 安装系统引导
 
 ```bash
 #安装grub引导
@@ -510,7 +518,7 @@ grub-install /dev/sda
 grub-mkconfig -o /boot/grub/grub.cfg
 ```
 
-#### 2.12. 添加用户
+#### 2.13. 添加用户
 
 ```bash
 useradd -m -G users,wheel,audio -s /bin/bash lby
@@ -525,7 +533,7 @@ echo "%wheel ALL=(ALL:ALL) ALL" >> /etc/sudoers
 passwd -dl root
 ```
 
-#### 2.13. 重启计算机
+#### 2.14. 重启计算机
 
 ```bash
 # 移除安装工件
