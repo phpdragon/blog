@@ -448,12 +448,92 @@ eselect kernel set [num]
 
 #Genkernel 提供了通用的内核配置文件，并且会编译内核和 initramfs，然后将生成的二进制文件安装到适当的位置。
 #它提供了系统首次启动时最小的常规硬件支持，并允许将来自定义内核配置以及对内核额外升级。
-emerge --ask sys-kernel/genkernel
+emerge sys-kernel/genkernel
 
-#生成并安装内核和初始化内存文件， 16:25 ~ 17:15
+#生成并安装内核和初始化内存文件， 大概50分钟左右 8G内存  CPU: Intel i7-8700 (8) @ 3.192GHz
 genkernel --mountboot --install all
 ```
 
+##### 2.8.3 全手动方法构建安装 Linux 内核
+
+> 官方文档建议通过 lspci 、lsmod命令来收集当前硬件信息，然后看内核应该怎么配置。
+> lspci命令抛出异常在chroot环境下可以忽略
+
+当手动配置内核时，了解（硬件）系统是至关重要的。大多数信息可以通过安装包含lspci命令的sys-apps/pciutils来收集
+```bash
+# 安装pci工具箱
+#emerge sys-apps/pciutils
+```
+
+
+```bash
+# 安装无线网卡、视频等固件
+#emerge sys-kernel/linux-firmware
+
+#开源音频驱动
+#emerge sys-firmware/sof-firmware
+
+#Intel CPU需要安装微码，AMD CPU在linux-firmware中
+emerge sys-firmware/intel-microcode
+
+#installkernel是一个脚本集合，用于自动安装新内核和更新引导加载程序配置。
+#当安装这个包时，内核安装过程将委托给installkernel。
+#这允许并排安装几个不同的内核版本，以及管理和自动化与本手册后面描述的内核安装相关的几个任务。
+emerge sys-kernel/installkernel
+
+#安装linux内核源码
+emerge sys-kernel/gentoo-sources
+#列出所有已安装的内核
+eselect kernel list
+#output： [1]   linux-6.6.30-gentoo
+
+#创建一个名为 linux 的符号链接, 这里应该只有一个内核选项: `linux-6.x.x-gentoo`, 所以 num 应该是1
+eselect kernel set [num]
+
+#查看内核源码目录
+ls -l /usr/src/linux
+#output：lrwxrwxrwx 1 root root 19 Jun  7 06:26 /usr/src/linux -> linux-6.6.30-gentoo
+
+#进入内核源码目录并执行make menuconfig
+cd /usr/src/linux
+
+#启动内核配置菜单图形界面，然后选择你需要的内核配置
+make menuconfig
+
+#编译和安装，大概15分钟 8G内存  CPU: Intel i7-8700 (8) @ 3.192GHz
+make -j$(nproc) && make modules_install
+
+#复制内核镜像到/boot/
+make install
+
+#查看已安装好的内核
+ls /boot/kernel*
+
+# 反正就是需要安装这个
+cat > /etc/portage/package.use/systemd <<EOF
+sys-apps/systemd boot
+sys-kernel/installkernel systemd-boot
+EOF
+emerge sys-apps/systemd
+
+#如果启用drut USE标志，Installkernel可以在安装内核时自动生成initramfs:
+cat > /etc/portage/package.use/installkernel <<EOF
+sys-kernel/installkernel dracut
+EOF
+#安装dracut软件包，
+emerge sys-kernel/dracut
+
+#生成initramfs
+export kver="$(eselect kernel list|grep '*'|awk -F '-' '{print $2}')-gentoo"
+#如果内核启用了XZ压缩算法，则可以加上 --xz
+dracut --force --hostonly --kver=$kver --xz
+unset kver
+
+#结果文件可以通过简单地列出以initramfs开头的文件来找到:
+ls -l /boot/initramfs*
+```
+
+按上述操作执行完毕后，系统启动异常，应该是内核配置不对导致。
 
 #### 2.9. 配置系统
 ```bash
