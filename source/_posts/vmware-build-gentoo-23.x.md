@@ -319,16 +319,22 @@ export PS1="(chroot) ${PS1}"
 #### 2.6. 替换软件源
 
 ```bash
-# 替换软件源
+#替换软件源
 echo 'GENTOO_MIRRORS="https://mirrors.tuna.tsinghua.edu.cn/gentoo"' >> /etc/portage/make.conf
+cat /etc/portage/make.conf | grep 'tsinghua'
+
+#替换portage软件源
 mkdir -p /etc/portage/repos.conf
 cp /usr/share/portage/config/repos.conf /etc/portage/repos.conf/gentoo.conf
 sed 's|sync-uri = rsync://rsync.gentoo.org/gentoo-portage|sync-uri = rsync://mirrors.tuna.tsinghua.edu.cn/gentoo-portage|' -i /etc/portage/repos.conf/gentoo.conf
+cat /etc/portage/repos.conf/gentoo.conf | grep 'tsinghua'
 
 #替换二进制包镜像源
 sed 's|priority = 1|priority = 9999|' -i /etc/portage/binrepos.conf/gentoobinhost.conf
 sed 's|https://distfiles.gentoo.org|https://mirrors.tuna.tsinghua.edu.cn/gentoo/|' -i /etc/portage/binrepos.conf/gentoobinhost.conf
+cat /etc/portage/binrepos.conf/gentoobinhost.conf | grep 'tsinghua'
 
+# 加入FEATURES
 cat >> /etc/portage/make.conf <<EOF
 
 # Appending getbinpkg to the list of values within the FEATURES variable
@@ -384,26 +390,29 @@ env-update && source /etc/profile && export PS1="(chroot) ${PS1}"
 
 #### 2.8. 配置Linux内核
 
+##### 2.8.1 发行版内核(自动构建)安装
+
 ```bash
 # 安装无线网卡、视频等固件
 #emerge sys-kernel/linux-firmware
 
 #开源音频驱动
-emerge sys-firmware/sof-firmware
+#emerge sys-firmware/sof-firmware
 
 #Intel CPU需要安装微码，AMD CPU在linux-firmware中
 emerge sys-firmware/intel-microcode
 
 #内核配置和编译
 echo 'sys-kernel/installkernel dracut' > /etc/portage/package.use/installkernel
-# 15:10 ~ 15:55, 4G内存  CPU: Intel i7-8700 (8) @ 3.192GHz
+# 15:10 ~ 15:55, 4G内存    CPU: Intel i7-8700 (8) @ 3.192GHz
+# 11:56 ~ 12:38, 9.8G内存  CPU: Intel i7-8700 (8) @ 3.192GHz
 # 编译带有Gentoo补丁的内核
 emerge sys-kernel/gentoo-kernel
 
 #也可以使用预编译好的Gentoo补丁内核映像，避免在本地编译，代替 `emerge sys-kernel/gentoo-kernel`
 #emerge sys-kernel/gentoo-kernel-bin
 
-#更新和清理
+#删除过时的软件包
 emerge --depclean
 #清理下内核安装文件
 emerge --prune sys-kernel/gentoo-kernel
@@ -416,6 +425,36 @@ eselect kernel list
 #eselect kernel set 1
 ```
 
+##### 2.8.2 混合模式安装 Linux 内核
+
+```bash
+# 安装无线网卡、视频等固件
+#emerge sys-kernel/linux-firmware
+
+#开源音频驱动
+#emerge sys-firmware/sof-firmware
+
+#Intel CPU需要安装微码，AMD CPU在linux-firmware中
+emerge sys-firmware/intel-microcode
+
+#安装linux内核源码
+emerge sys-kernel/gentoo-sources
+#列出所有已安装的内核
+eselect kernel list
+#output： [1]   linux-6.6.30-gentoo
+
+#创建一个名为 linux 的符号链接, 这里应该只有一个内核选项: `linux-6.x.x-gentoo`, 所以 num 应该是1
+eselect kernel set [num]
+
+#Genkernel 提供了通用的内核配置文件，并且会编译内核和 initramfs，然后将生成的二进制文件安装到适当的位置。
+#它提供了系统首次启动时最小的常规硬件支持，并允许将来自定义内核配置以及对内核额外升级。
+emerge --ask sys-kernel/genkernel
+
+#生成并安装内核和初始化内存文件， 16:25 ~ 17:15
+genkernel --mountboot --install all
+```
+
+
 #### 2.9. 配置系统
 ```bash
 cat > /etc/fstab <<EOF
@@ -424,7 +463,7 @@ cat > /etc/fstab <<EOF
 EOF
 
 #或者偷个懒
-emerge --ask sys-fs/genfstab
+emerge sys-fs/genfstab
 genfstab -U / >> /etc/fstab
 
 #主机名
@@ -448,21 +487,21 @@ systemctl enable dhcpcd
 #emerge net-wireless/iw net-wireless/wpa_supplicant
 
 # NetworkManager
-emerge --ask net-misc/networkmanager
-systemctl enable NetworkManager
+#emerge net-misc/networkmanager
+#systemctl enable networkmanager
 
 passwd root
 ```
 
 #### 2.10. 初始化、自启动配置
 ```
-#随机生成机器ID
+#分配一个随机机器 ID
 systemd-machine-id-setup
 
-#设置键盘布局
+#提示用户设置区域设置、时区、主机名、root 密码和 root shell值
 systemd-firstboot --prompt
 
-#开启所有预设服务
+#重置所有已安装工具的文件为预设的策略值
 systemctl preset-all --preset-mode=enable-only
 ```
 
@@ -486,7 +525,7 @@ emerge sys-fs/xfsprogs
 #安装NTFS文件系统支持
 emerge sys-fs/ntfs3g
 #确保正确的调度nvme设备:
-emerge --ask sys-block/io-scheduler-udev-rules
+#emerge --ask sys-block/io-scheduler-udev-rules
 
 
 #任务调度工具
@@ -525,9 +564,9 @@ useradd -m -G users,wheel,audio -s /bin/bash lby
 passwd lby
 
 # 安装sudo
-emerge --ask app-admin/sudo
+emerge app-admin/sudo
 # 将普通用户加入sudo组以使用sudo
-echo "%wheel ALL=(ALL:ALL) ALL" >> /etc/sudoers
+sed 's|# %wheel ALL=(ALL:ALL) ALL|%wheel ALL=(ALL:ALL) ALL|' -i /etc/sudoers
 
 #删除root密码并禁止登录
 passwd -dl root
