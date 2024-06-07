@@ -405,7 +405,7 @@ emerge sys-firmware/intel-microcode
 #内核配置和编译
 echo 'sys-kernel/installkernel dracut' > /etc/portage/package.use/installkernel
 # 15:10 ~ 15:55, 4G内存    CPU: Intel i7-8700 (8) @ 3.192GHz
-# 11:56 ~ 12:38, 9.8G内存  CPU: Intel i7-8700 (8) @ 3.192GHz
+# 大概45分钟, 9.8G内存  CPU: Intel i7-8700 (8) @ 3.192GHz
 # 编译带有Gentoo补丁的内核
 emerge sys-kernel/gentoo-kernel
 
@@ -421,9 +421,18 @@ emerge --prune sys-kernel/gentoo-kernel
 
 # 列出已安装的linux内核
 eselect kernel list
-# 默认不需要执行，就一个内核
-#eselect kernel set 1
+#output: [1]   linux-6.6.30-gentoo-dist *
 ```
+
+/boot目录文件列表
+```
+(chroot) livecd / # ls -lh /boot
+total 46M
+-rw------- 1 root root  31M Jun  8 07:25 initramfs-6.6.30-gentoo-dist.img
+-rw-r--r-- 1 root root 522K Jun  8 07:22 intel-uc.img
+-rw-r--r-- 1 root root  15M Jun  8 07:25 kernel-6.6.30-gentoo-dist
+```
+
 
 ##### 2.8.2 混合模式安装 Linux 内核
 
