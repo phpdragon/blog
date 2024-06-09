@@ -394,10 +394,10 @@ env-update && source /etc/profile && export PS1="(chroot) ${PS1}"
 
 ```bash
 # 安装无线网卡、视频等固件
-#emerge sys-kernel/linux-firmware
+emerge sys-kernel/linux-firmware
 
 #开源音频驱动
-#emerge sys-firmware/sof-firmware
+emerge sys-firmware/sof-firmware
 
 #Intel CPU需要安装微码，AMD CPU在linux-firmware中
 emerge sys-firmware/intel-microcode
@@ -424,7 +424,7 @@ eselect kernel list
 #output: [1]   linux-6.6.30-gentoo-dist *
 ```
 
-/boot目录文件列表
+/boot目录文件列表:
 ```
 (chroot) livecd / # ls -lh /boot
 total 46M
@@ -438,10 +438,10 @@ total 46M
 
 ```bash
 # 安装无线网卡、视频等固件
-#emerge sys-kernel/linux-firmware
+emerge sys-kernel/linux-firmware
 
 #开源音频驱动
-#emerge sys-firmware/sof-firmware
+emerge sys-firmware/sof-firmware
 
 #Intel CPU需要安装微码，AMD CPU在linux-firmware中
 emerge sys-firmware/intel-microcode
@@ -461,9 +461,25 @@ emerge sys-kernel/genkernel
 
 #生成并安装内核和初始化内存文件， 大概50分钟左右 8G内存  CPU: Intel i7-8700 (8) @ 3.192GHz
 genkernel --mountboot --install all
+#也可以自定义配置内核参数后再进行编译，可以裁剪不必要的功能。
+#但需要足够了解内核配置参数，否则可能会导致系统无法启动
+# --menuconfig 启动内核参数配置界面
+#genkernel --menuconfig --mountboot --install all
 ```
 
-##### 2.8.3 全手动方法构建安装 Linux 内核
+/boot目录文件列表:
+```text
+gentoo /boot # ls -lh
+total 30M
+-rw-r--r-- 1 root root 6.1M Jun  8 02:55 System.map-6.6.30-gentoo-x86_64
+-rw-r--r-- 1 root root  76K Jun  8 02:46 amd-uc.img
+-rw-r--r-- 1 root root  12M Jun  8 03:28 initramfs-6.6.30-gentoo-x86_64.img
+-rw-r--r-- 1 root root 522K Jun  8 02:42 intel-uc.img
+-rw-r--r-- 1 root root  12M Jun  8 02:55 vmlinuz-6.6.30-gentoo-x86_64
+```
+
+
+##### 2.8.3 全手动方法构建安装 Linux 内核(极不推荐)
 
 > 官方文档建议通过 lspci 、lsmod命令来收集当前硬件信息，然后看内核应该怎么配置。
 > lspci命令抛出异常在chroot环境下可以忽略
@@ -474,13 +490,12 @@ genkernel --mountboot --install all
 #emerge sys-apps/pciutils
 ```
 
-
 ```bash
 # 安装无线网卡、视频等固件
-#emerge sys-kernel/linux-firmware
+emerge sys-kernel/linux-firmware
 
 #开源音频驱动
-#emerge sys-firmware/sof-firmware
+emerge sys-firmware/sof-firmware
 
 #Intel CPU需要安装微码，AMD CPU在linux-firmware中
 emerge sys-firmware/intel-microcode
@@ -507,7 +522,10 @@ ls -l /usr/src/linux
 cd /usr/src/linux
 
 #启动内核配置菜单图形界面，然后选择你需要的内核配置
+#参考这篇文章配置内核参数：https://cloud.tencent.com/developer/article/2210421
+#虚拟机内核参数配置参考：https://wiki.gentoo.org/wiki/VMware
 make menuconfig
+
 
 #编译和安装，大概15分钟 8G内存  CPU: Intel i7-8700 (8) @ 3.192GHz
 make -j$(nproc) && make modules_install
@@ -533,16 +551,16 @@ EOF
 emerge sys-kernel/dracut
 
 #生成initramfs
-export kver="$(eselect kernel list|grep '*'|awk -F '-' '{print $2}')-gentoo"
 #如果内核启用了XZ压缩算法，则可以加上 --xz
-dracut --force --hostonly --kver=$kver --xz
-unset kver
+dracut --force --hostonly --kver=6.6.30-gentoo --xz
 
 #结果文件可以通过简单地列出以initramfs开头的文件来找到:
 ls -l /boot/initramfs*
 ```
 
-按上述操作执行完毕后，系统启动异常，应该是内核配置不对导致。
+按官方文档来安装，无法启动进入登录界面。遂放弃尝试，配置内核太费心费力，参数太多了。
+原因应该是内核配置不对导致，因为替换为混合模式生成的内核编译配置，能正常启动。
+
 
 #### 2.9. 配置系统
 ```bash
@@ -684,12 +702,15 @@ ip addr
 
 
 # 七、参考资料
-
+- [ESXi/vCenter安装部署Gentoo Linux - OpenRC/SystemD](https://cloud.tencent.com/developer/article/2210421)
+- [Gentoo安装配置](https://www.jianshu.com/p/990eefdc0b90)
 - [Gentoo安装笔记](https://zhuanlan.zhihu.com/p/659996870)
 - [Gentoo Linux实用指北](https://zhuanlan.zhihu.com/p/679224479)
 - [Gentoo安装流程分享(step by step)，第一篇之基本系统的安装](https://www.zhihu.com/tardis/bd/art/122222365)
 - [最新Gentoo Linux安装教程 – 第1部分](https://zhuanlan.zhihu.com/p/672838696)
 - [最新Gentoo Linux安装教程 – 第2部分](https://zhuanlan.zhihu.com/p/673017312)
+- [Gentoo install VMware](https://wiki.gentoo.org/wiki/VMware)
+- [Gentoo AMD64 安装手册](https://wiki.gentoo.org/wiki/Handbook:AMD64)
 - [parted分区命令使用示例](https://www.cnblogs.com/pipci/p/11372530.html)
 - [Linux各主要发行版的包管理命令对照](https://www.cnblogs.com/huapox/p/3509640.html)
 
