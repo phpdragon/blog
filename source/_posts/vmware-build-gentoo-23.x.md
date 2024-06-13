@@ -185,7 +185,7 @@ sed 's|COMMON_FLAGS="|&-march=native |' -i /mnt/gentoo/etc/portage/make.conf
 # -fomit-frame-pointer 这一项会导致你编译出来的程序无法debug；不做程序开发或debug的普通用户可以放心开启。
 # -finline-functions 允许编译器选择某些简单的函数在其被调用处展开
 # -funswitch-loops 将循环体中不改变值的变量移动到循环体之外
-sed 's|^COMMON_FLAGS=.*-pipe|& -fomit-frame-pointer -finline-functions -funswitch-loops|' -i /etc/portage/make.conf
+sed 's|^COMMON_FLAGS=.*-pipe|& -fomit-frame-pointer -finline-functions -funswitch-loops|' -i /mnt/gentoo/etc/portage/make.conf
 
 echo 'LDFLAGS="${COMMON_FLAGS} -Wl,-O2 -Wl,--as-needed -Wl,--hash-style=gnu -Wl,--sort-common -Wl,--strip-all"' >> /mnt/gentoo/etc/portage/make.conf
 
@@ -353,6 +353,7 @@ getuto
 #从网站安装 Gentoo ebuild 数据库快照
 emerge-webrsync
 
+
 #更新存储库
 emerge --sync
 
@@ -435,6 +436,9 @@ total 46M
 
 
 ##### 2.8.2 混合模式安装 Linux 内核
+
+> 想要手动编译内核的，建议通过genkernel工具箱自定义配置内核。
+> 因为genkernel提供了一份通用可行的内核配置文件。
 
 ```bash
 # 安装无线网卡、视频等固件
