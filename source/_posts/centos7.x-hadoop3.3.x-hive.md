@@ -36,10 +36,22 @@ cd /opt/server/
 ln -s apache-hive-3.1.3-bin hive
 ```
 
-## 2.添加配置文件
+## 2.添加环境变量
 
 ```bash
-cat > /opt/server/hive/conf/hive-site.xml <<EOF
+cat > /etc/profile.d/hive-server.sh <<EOF
+export HIVE_HOME=/opt/server/hive
+export PATH=\${HIVE_HOME}/bin:\$PATH
+EOF
+
+source /etc/profile
+```
+
+
+## 3.添加配置文件
+
+```bash
+cat > ${HIVE_HOME}/conf/hive-site.xml <<EOF
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
 <configuration>
@@ -73,11 +85,11 @@ cat > /opt/server/hive/conf/hive-site.xml <<EOF
     </property>
     <property>
         <name>hive.metastore.uris</name>
-        <value>thrift://hadoop-201:9083</value>
+        <value>thrift://localhost:9083</value>
     </property>
     <property>
         <name>hive.server2.thrift.bind.host</name>
-        <value>hadoop-201</value>
+        <value>localhost</value>
         <description>Bind host on which to run the HiveServer2 Thrift service.</description>
     </property>
     <property>
@@ -86,17 +98,6 @@ cat > /opt/server/hive/conf/hive-site.xml <<EOF
     </property>
 </configuration>
 EOF
-```
-
-## 3.添加环境变量
-
-```bash
-cat > /etc/profile.d/hive-server.sh <<EOF
-export HIVE_HOME=/opt/server/hive
-export PATH=\${HIVE_HOME}/bin:\$PATH
-EOF
-
-source /etc/profile
 ```
 
 ## 4.下载MySQL驱动
