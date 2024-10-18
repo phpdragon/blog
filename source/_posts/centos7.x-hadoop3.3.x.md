@@ -163,8 +163,8 @@ EOF
 ```bash
 cd ${HADOOP_HOME}/sbin
 
-mv start-all.sh start-hadoop-all.sh
-mv stop-all.sh stop-hadoop-all.sh
+cp start-all.sh start-hadoop-all.sh
+cp stop-all.sh stop-hadoop-all.sh
 ```
 
 ## 6. 启动脚本说明
