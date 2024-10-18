@@ -25,6 +25,7 @@ Hive 是一个基于 Hadoop的开源数据仓库工具，用于存储和处理�
 ## 1. 安装Hive
 
 前往官网：[Hive Release Notes](https://www.apache.org/dyn/closer.cgi/hive/) 下载：[apache-hive-3.1.3-bin.tar.gz](https://dlcdn.apache.org/hive/hive-3.1.3/apache-hive-3.1.3-bin.tar.gz)
+归档下载：https://archive.apache.org/dist/hive/
 
 ```bash
 cd /usr/local/src
