@@ -91,6 +91,7 @@ Java HotSpot(TM) 64-Bit Server VM (build 25.241-b07, mixed mode)
 # 四、安装hadoop
 
 前往官网下载：[hadoop-3.3.6.tar.gz](https://downloads.apache.org/hadoop/common/hadoop-3.3.6/hadoop-3.3.6.tar.gz)，选择你想要的版本，这里选版本 3.3.6。
+归档下载：https://archive.apache.org/dist/hadoop/common/
 
 ## 1. 下载解压
 ```bash
