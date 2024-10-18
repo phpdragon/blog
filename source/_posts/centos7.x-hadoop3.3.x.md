@@ -290,6 +290,7 @@ EOF
 ### 4.1. 配置core-site.xml
 
 ```bash
+version=`hadoop version|head -n 1|awk '{print $2}'`
 cat > ${HADOOP_HOME}/etc/hadoop/core-site.xml <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
@@ -301,7 +302,7 @@ cat > ${HADOOP_HOME}/etc/hadoop/core-site.xml <<EOF
     </property>
     <property>
         <name>hadoop.tmp.dir</name>
-        <value>/opt/data/hadoop/tmp</value>
+        <value>/opt/data/hadoop-${version}/tmp</value>
         <description>指定hadoop运行时产生文件的存储路径</description>
     </property>
 </configuration>
@@ -311,6 +312,7 @@ EOF
 ### 4.2. 配置hdfs-site.xml
 
 ```bash
+version=`hadoop version|head -n 1|awk '{print $2}'`
 cat > ${HADOOP_HOME}/etc/hadoop/hdfs-site.xml <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
@@ -322,11 +324,11 @@ cat > ${HADOOP_HOME}/etc/hadoop/hdfs-site.xml <<EOF
     </property>
     <property>
         <name>dfs.namenode.name.dir</name>
-        <value>/opt/data/hadoop/hdfs/name</value>
+        <value>/opt/data/hadoop-${version}/hdfs/name</value>
     </property>
     <property>
         <name>dfs.datanode.data.dir</name>
-        <value>/opt/data/hadoop/hdfs/data</value>
+        <value>/opt/data/hadoop-${version}/hdfs/data</value>
     </property>
 </configuration>
 EOF
