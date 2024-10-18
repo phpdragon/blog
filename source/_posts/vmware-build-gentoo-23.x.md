@@ -232,7 +232,7 @@ echo 'LINGUAS="en-US zh-CN en zh"' >> /mnt/gentoo/etc/portage/make.conf
 echo 'L10N="en-US zh-CN en zh"' >> /mnt/gentoo/etc/portage/make.conf
 
 # 配置显卡,这里官方手册建议填的只有A/I/N三家的驱动与vesa（这里应该说的是vesa总线），fbdev是tty终端下的帧缓冲设备（简单理解为内核模拟的显卡），dummy是虚拟显示器，v4l是指摄像头等视频设备
-echo 'VIDEO_CARDS="video_cards_vmware vesa"' >> /mnt/gentoo/etc/portage/make.conf
+#echo 'VIDEO_CARDS="video_cards_vmware vesa"' >> /mnt/gentoo/etc/portage/make.conf
 
 # 配置声卡, 启用了板载intel与USB声卡支持，根据机器情况选择
 #echo 'ALSA_CARDS="hda-intel usb-audio"' >> /mnt/gentoo/etc/portage/make.conf
@@ -697,7 +697,10 @@ umount -R /mnt/gentoo
 reboot
 ```
 
-# 四、配置新系统
+# 四、安装桌面环境
+
+> 额 还是算了吧，尝试了安装KDE、XFCE，都无法进入桌面。遂放弃之。
+> 不折腾，选择其他的Gentoo衍生桌面版本吧！！！
 
 ```bash
 #查看ip地址
