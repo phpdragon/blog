@@ -247,11 +247,11 @@ node --version
 
 ### 1.2 修改项目配置
 
-在项目库中前往 Settings > Pages > Source，并将 Source 改为 GitHub Actions。
+访问在Github的项目仓库，点击 Settings > Pages > Source，并将 Source 改为 GitHub Actions。
 
 ### 1.3 配置workflows
 
-在储存库中建立 .github/workflows/pages.yml，并填入以下内容 (将 16 替换为上个步骤中记下的版本)：
+在储存库中建立 .github/workflows/pages.yml，并填入以下内容 (将内容中的 16 替换为上个步骤中记下的node版本)：
 
 ```yaml
 name: Pages
