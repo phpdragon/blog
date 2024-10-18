@@ -77,11 +77,11 @@ cat > ${HIVE_HOME}/conf/hive-site.xml <<EOF
     </property>
     <property>
         <name>javax.jdo.option.ConnectionUserName</name>
-        <value>hive</value>
+        <value>root</value>
     </property>
     <property>
         <name>javax.jdo.option.ConnectionPassword</name>
-        <value>hive1234</value>
+        <value>root1234</value>
     </property>
     <property>
         <name>hive.metastore.uris</name>
@@ -109,39 +109,26 @@ cd /usr/local/src
 wget https://cdn.mysql.com/archives/mysql-connector-java-5.1/mysql-connector-java-5.1.49.tar.gz
 tar zxf mysql-connector-java-5.1.49.tar.gz
 
-mv mysql-connector-java-5.1.49/mysql-connector-java-5.1.49-bin.jar /opt/server/hive/lib/
+mv mysql-connector-java-5.1.49/mysql-connector-java-5.1.49-bin.jar ${HIVE_HOME}/lib/
 rm -rf mysql-connector-java-5.1.49
 ```
 
 ## 5.初始化元数据库
 
-```bash
-mysql -h hadoop-201 -uroot -proot1234
-```
-
-添加用户hive
-```sql
-CREATE DATABASE db_hive;
-set global validate_password_policy=LOW;
-CREATE USER 'hive'@'%' IDENTIFIED BY 'hive1234';
-GRANT ALL ON db_hive.* TO 'hive'@'%';
-FLUSH PRIVILEGES;
-```
-
 初始化数据结构：
 ```bash
 schematool -dbType mysql -initSchema -verbose
 
-mysql -h hadoop-201 -uroot -proot1234 -e 'show databases';
+mysql -h localhost -uroot -proot1234 -e 'show databases' | grep db_hive;
 ```
 
 
 ## 6.启动服务
 ```bash
-mv /opt/server/hive/lib/guava-19.0.jar  /opt/server/hive/lib/guava-19.0.jar_bak
-cp /opt/server/hadoop/share/hadoop/hdfs/lib/guava-27.0-jre.jar /opt/server/hive/lib/
+mv ${HIVE_HOME}/lib/guava-19.0.jar  ${HIVE_HOME}/lib/guava-19.0.jar_bak
+cp ${HADOOP_HOME}/share/hadoop/hdfs/lib/guava-27.0-jre.jar ${HIVE_HOME}/lib/
 
-cd /opt/server/hive
+cd ${HIVE_HOME}
 mkdir -p logs
 nohup hive --service metastore > logs/hive_metastore.log 2>&1 &
 nohup hive --service hiveserver2  > logs/hive_server2.log 2>&1 &
@@ -163,6 +150,7 @@ create table test(id INT,name string, gender string);
 insert into test values(1,'王力宏','男'),(2,'阴丽华','女'),(3,'周杰伦','男');
 select gender,count(*) as total from test group by gender;
 select * from test;
+drop table test;
 ```
 
 ## 8.添加启动脚本
