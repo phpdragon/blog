@@ -550,6 +550,7 @@ EOF
 
 覆盖core-site.xml配置文件：
 ```bash
+version=`hadoop version|head -n 1|awk '{print $2}'`
 cat > ${HADOOP_HOME}/etc/hadoop/core-site.xml <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
@@ -561,7 +562,7 @@ cat > ${HADOOP_HOME}/etc/hadoop/core-site.xml <<EOF
     </property>
     <property>
         <name>hadoop.tmp.dir</name>
-        <value>/opt/data/hadoop/tmp</value>
+        <value>/opt/data/hadoop-${version}/tmp</value>
         <description>指定hadoop运行时产生文件的存储路径</description>
     </property>
 </configuration>
@@ -572,6 +573,7 @@ EOF
 
 覆盖hdfs-site.xml配置文件：
 ```bash
+version=`hadoop version|head -n 1|awk '{print $2}'`
 cat > ${HADOOP_HOME}/etc/hadoop/hdfs-site.xml <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
@@ -583,11 +585,11 @@ cat > ${HADOOP_HOME}/etc/hadoop/hdfs-site.xml <<EOF
     </property>
     <property>
         <name>dfs.namenode.name.dir</name>
-        <value>/opt/data/hadoop/hdfs/name</value>
+        <value>/opt/data/hadoop-${version}/hdfs/name</value>
     </property>
     <property>
         <name>dfs.datanode.data.dir</name>
-        <value>/opt/data/hadoop/hdfs/data</value>
+        <value>/opt/data/hadoop-${version}/hdfs/data</value>
     </property>
     <!-- secondarynamenode守护进程的http地址：主机名和端口号。参考守护进程布局-->
     <property>
@@ -687,14 +689,15 @@ EOF
 ## 8. 调整目录权限
 
 ```bash
+version=`hadoop version|head -n 1|awk '{print $2}'`
 mkdir -p /opt/server/hadoop/logs/
-mkdir -p /opt/data/hadoop/tmp/
+mkdir -p /opt/data/hadoop-${version}/tmp/
 
 chown -R hdfs:hadoop /opt/server/hadoop/
-chown -R hdfs:hadoop /opt/data/hadoop/
+chown -R hdfs:hadoop /opt/data/hadoop-${version}/
 
 chmod 775 /opt/server/hadoop/logs/
-chmod 777 /opt/data/hadoop/tmp/
+chmod 777 /opt/data/hadoop-${version}/tmp/
 ```
 
 ## 9. 克隆主机
@@ -727,9 +730,10 @@ echo '节点名称' > /etc/hostname
 
 在master主机上执行：
 ```bash
-rm -rf /opt/data/hadoop/hdfs/
-ssh root@hadoop-202 'rm -rf /opt/data/hadoop/hdfs/'
-ssh root@hadoop-203 'rm -rf /opt/data/hadoop/hdfs/'
+version=`hadoop version|head -n 1|awk '{print $2}'`
+rm -rf /opt/data/hadoop-${version}/hdfs/
+ssh root@hadoop-202 'rm -rf /opt/data/hadoop-${version}/hdfs/'
+ssh root@hadoop-203 'rm -rf /opt/data/hadoop-${version}/hdfs/'
 
 hdfs namenode -format
 ssh root@hadoop-202 'hdfs namenode -format'
@@ -1017,6 +1021,7 @@ scp /etc/profile.d/hadoop.sh root@hadoop-203:/etc/profile.d/
 
 覆盖core-site.xml配置文件：
 ```bash
+version=`hadoop version|head -n 1|awk '{print $2}'`
 cat > ${HADOOP_HOME}/etc/hadoop/core-site.xml <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
@@ -1028,7 +1033,7 @@ cat > ${HADOOP_HOME}/etc/hadoop/core-site.xml <<EOF
     </property>
     <property>
         <name>hadoop.tmp.dir</name>
-        <value>/opt/data/hadoop/tmp</value>
+        <value>/opt/data/hadoop-${version}/tmp</value>
         <description>指定hadoop运行时产生文件的存储路径</description>
     </property>
     <property>
@@ -1044,6 +1049,7 @@ EOF
 
 覆盖hdfs-site.xml配置文件：
 ```bash
+version=`hadoop version|head -n 1|awk '{print $2}'`
 cat > ${HADOOP_HOME}/etc/hadoop/hdfs-site.xml <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
@@ -1055,11 +1061,11 @@ cat > ${HADOOP_HOME}/etc/hadoop/hdfs-site.xml <<EOF
     </property>
     <property>
         <name>dfs.namenode.name.dir</name>
-        <value>/opt/data/hadoop/hdfs/name</value>
+        <value>/opt/data/hadoop-${version}/hdfs/name</value>
     </property>
     <property>
         <name>dfs.datanode.data.dir</name>
-        <value>/opt/data/hadoop/hdfs/data</value>
+        <value>/opt/data/hadoop-${version}/hdfs/data</value>
     </property>
 
     <property>
@@ -1112,7 +1118,7 @@ cat > ${HADOOP_HOME}/etc/hadoop/hdfs-site.xml <<EOF
     </property>
     <property>
         <name>dfs.journalnode.edits.dir</name>
-        <value>/opt/data/hadoop/journal-data</value>
+        <value>/opt/data/hadoop-${version}/journal-data</value>
         <description>指定journalNode在本地磁盘存放数据的位置</description>
     </property>
 
@@ -1277,11 +1283,12 @@ EOF
 ### 4.5. 分发配置
 
 ```bash
-chmod 700 /opt/data/hadoop/hdfs/name
+version=`hadoop version|head -n 1|awk '{print $2}'`
+chmod 700 /opt/data/hadoop-${version}/hdfs/name
 
-su hdfs -c "mkdir -p /opt/data/hadoop/journal-data"
-ssh root@hadoop-202 'su hdfs -c "mkdir -p /opt/data/hadoop/journal-data"'
-ssh root@hadoop-203 'su hdfs -c "mkdir -p /opt/data/hadoop/journal-data"'
+su hdfs -c "mkdir -p /opt/data/hadoop-${version}/journal-data"
+ssh root@hadoop-202 'su hdfs -c "mkdir -p /opt/data/hadoop-${version}/journal-data"'
+ssh root@hadoop-203 'su hdfs -c "mkdir -p /opt/data/hadoop-${version}/journal-data"'
 
 scp -r /opt/server/hadoop/etc/* root@hadoop-202:/opt/server/hadoop/etc/
 scp -r /opt/server/hadoop/etc/* root@hadoop-203:/opt/server/hadoop/etc/
@@ -1304,9 +1311,10 @@ ssh root@hadoop-203 'hdfs --daemon start journalnode'
 
 假如我们在hadoop-node2上执行：
 ```bash
-rm -rf /opt/data/hadoop/hdfs/
-ssh root@hadoop-201 'rm -rf /opt/data/hadoop/hdfs/'
-ssh root@hadoop-203 'rm -rf /opt/data/hadoop/hdfs/'
+version=`hadoop version|head -n 1|awk '{print $2}'`
+rm -rf /opt/data/hadoop-${version}/hdfs/
+ssh root@hadoop-201 'rm -rf /opt/data/hadoop-${version}/hdfs/'
+ssh root@hadoop-203 'rm -rf /opt/data/hadoop-${version}/hdfs/'
 
 hdfs namenode -format
 ```
