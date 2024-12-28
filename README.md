@@ -68,6 +68,6 @@ tags: ['hexo','fluid']
 ---
 ```
 
-# 流、参考资料
+# 六、参考资料
 - Hexo Docs：https://hexo.io/zh-cn/docs/
 - Hexo Fluid 用户手册：https://fluid-dev.github.io/hexo-fluid-docs/
