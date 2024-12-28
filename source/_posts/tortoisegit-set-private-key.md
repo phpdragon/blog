@@ -24,11 +24,11 @@ ssh-keygen -t ed25519 -C "Gitee SSH Key"
 输出，如：
 ```text
 Generating public/private ed25519 key pair.
-Enter file in which to save the key (/home/git/.ssh/id_ed25519):
-Enter passphrase (empty for no passphrase):
+Enter file in which to save the key (/c/Users/Administrator/.ssh/id_ed25519):
+Enter passphrase for "/c/Users/Administrator/.ssh/id_ed25519" (empty for no passphrase):
 Enter same passphrase again:
-Your identification has been saved in /home/git/.ssh/id_ed25519
-Your public key has been saved in /home/git/.ssh/id_ed25519.pub
+Your identification has been saved in /c/Users/Administrator/.ssh/id_ed25519
+Your public key has been saved in /c/Users/Administrator/.ssh/id_ed25519.pub
 The key fingerprint is:
 SHA256:ohDd0OK5WG2dx4gST/j35HjvlJlGHvihyY+Msl6IC8I Gitee SSH Key
 The key's randomart image is:
