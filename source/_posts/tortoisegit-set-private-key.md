@@ -111,9 +111,40 @@ ssh-ed25519 AAAA***5B Gitee SSH Key
 
 ### 5.拉取代码测试
 
+测试秘钥有效性:
+```bash
+# 显示明细请使用：ssh -vT git@github.com 
+ssh -T git@github.com
+```
+返回：
+```text
+Hi XXX! You've successfully authenticated, but GitHub does not provide shell access.
+```
+
+最后拉取代码：
 {% asset_img git-push.png 推送代码到远端 %}
 
-# 五、参考资料
+
+# 五、其他问题
+
+- Git正常拉取Tortoisegit无法拉取
+
+原因：出现这种问题的原因是因为TortoiseGit的默认网络SSH client是内置的TortoiseGitPlink.exe。
+
+办法：操作 TortoiseGit设置 -> Network -> SSH -> SSH client , 将 [TortoiseGit安装目录]\bin\TortoiseGitPlink.exe 改为 [Git安装目录]\usr\bin\ssh.exe 即可解决。
+
+如果还不行，则在 %HOMEPATH%/.ssh/ (直接在文件资源管理器地址栏输入进入)目录下增加如下配置文件：
+```txt
+# 请求转发到ssh.github.com
+Host github.com
+	port 22  #也可以是443端口
+	HostName ssh.github.com
+```
+
+
+# 六、参考资料
 
 - [TortoiseGit设置密钥](https://blog.csdn.net/lwb725/article/details/139381732)
 - [Gitee SSH公钥设置](https://help.gitee.com/base/account/SSH%E5%85%AC%E9%92%A5%E8%AE%BE%E7%BD%AE)
+- [Git正常拉取Tortoisegit无法拉取](https://blog.csdn.net/Blackrosetian/article/details/130244896)
+- [解决 Git：ssh: connect to host github.com port 22: Connection timed out 问题的三种方案](https://blog.csdn.net/weixin_43405300/article/details/135814505)

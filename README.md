@@ -40,6 +40,7 @@ yarn config set registry https://registry.npmmirror.com
 
 1.执行如下命令安装项目依赖库node_modules：
 ```bash
+# 或者使用 `yarn install` 代替
 npm install
 ```
 
