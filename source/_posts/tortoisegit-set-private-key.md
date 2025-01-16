@@ -133,7 +133,7 @@ Hi XXX! You've successfully authenticated, but GitHub does not provide shell acc
 
 办法：操作 TortoiseGit设置 -> Network -> SSH -> SSH client , 将 [TortoiseGit安装目录]\bin\TortoiseGitPlink.exe 改为 [Git安装目录]\usr\bin\ssh.exe 即可解决。
 
-如果还不行，则在 %HOMEPATH%/.ssh/ (直接在文件资源管理器地址栏输入进入)目录下增加如下配置文件：
+如果还不行，则在 %HOMEPATH%/.ssh/ (直接在文件资源管理器地址栏输入进入)目录下增加名为`config`的配置文件, 内容如下：
 ```txt
 # 请求转发到ssh.github.com
 Host github.com
