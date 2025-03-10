@@ -5,10 +5,10 @@ categories: ['SSL', 'Certificate']
 tags: ['SSL', 'Certificate']
 ---
 
-# 一、自签名ssl证书
+# 创建自签名SSL证书
 
 
-# 二、自签名ssl证书创建
+## 一、自签名ssl证书创建
 
 使用openssl工具进行自签名ssl证书，方便在内网环境中部署使用，为你的网站安全加把锁
 
@@ -16,13 +16,13 @@ tags: ['SSL', 'Certificate']
 
 操作方法：
 
-1、创建一个文件夹 ca 用来保存 ca 证书文件
+### 1、创建一个文件夹 ca 用来保存 ca 证书文件
 
 ```bash
 mkdir ca
 ```
 
-2、创建 ca 私钥（建议设置密码）
+### 2、创建 ca 私钥（建议设置密码）
 
 ```bash
 openssl genrsa -des3 -out ca/CA.key 2048
@@ -33,7 +33,7 @@ Enter PEM pass phrase:                #输入密码
 Verifying - Enter PEM pass phrase:    #输入确认密码
 ```
 
-3、生成 ca 证书，自签20年有效期，把此 ca 证书导入需要访问pc的“受信任的根证书颁发机构”中，后期用此 ca 签署的证书都可以使用
+### 3、生成 ca 证书，自签20年有效期，把此 ca 证书导入需要访问pc的“受信任的根证书颁发机构”中，后期用此 ca 签署的证书都可以使用
 
 ```bash
 openssl req -x509 -new -nodes -key ca/CA.key -sha256 -days 7300 -out ca/CA.crt
@@ -125,7 +125,7 @@ rg, emailAddress=it@test.org
         02:7a:ef:7f
 ```
 
-4、创建ssl证书私钥
+### 4、创建ssl证书私钥
 
 ```bash
 mkdir certs
@@ -134,7 +134,7 @@ mkdir certs
 openssl genrsa -out certs/zabbix.key 2048
 ```
 
-5、创建ssl证书csr
+### 5、创建ssl证书csr
 
 ```bash
 openssl req -new -key certs/zabbix.key -out certs/zabbix.csr
@@ -163,7 +163,7 @@ An optional company name []:              #可选的公司名称
 ```
 
 
-6、创建域名附加配置信息
+### 6、创建域名附加配置信息
 
 > IP.2 = 192.168.11.100 表示https要访问的ip，IP.3也是ip，ssl证书说明可以自签多个ip，这是自签ip的证书
 > DNS.4 = xa.it.com     表示https要访问的域名，DNS.5，DNS.6都一样是域名，ssl证书说明可以自签多个域名，这是自签域名的证书
@@ -185,7 +185,7 @@ DNS.6 = *.xa.com
 EOF
 ```
 
-7、使用CA根证书签署ssl证书，自签ssl证书有效期20年
+### 7、使用CA根证书签署ssl证书，自签ssl证书有效期20年
 
 ```bash
 openssl x509 -req -in certs/zabbix.csr -out certs/zabbix.crt -days 7300 -CAcreateserial -CA ca/CA.crt -CAkey ca/CA.key -CAserial certs/serial -extfile certs/cert.ext
@@ -197,7 +197,7 @@ subject=C=CN, ST=Guangdong, L=Shenzhen, O=ORG, OU=IT Dep, CN=www.test.org, email
 Enter pass phrase for ca/CA.key:      #输入证书密码
 ```
 
-8、查看文件列表
+### 8、查看文件列表
 
 ```bash
 ls -l certs
@@ -211,7 +211,7 @@ zabbix.csr        #ssl证书签名文件
 zabbix.key        #ssl证书私钥
 ```
 
-9、查看签署的证书信息
+### 9、查看签署的证书信息
 
 ```bash
 openssl x509 -in certs/zabbix.crt -noout -text
@@ -282,7 +282,7 @@ Certificate:
         b8:ae:6f:a9
 ```
 
-10、使用CA验证ssl证书状态，显示 OK 表示通过验证
+### 10、使用CA验证ssl证书状态，显示 OK 表示通过验证
 
 ```bash
 openssl verify -CAfile ca/CA.crt certs/zabbix.crt
@@ -294,7 +294,7 @@ certs/zabbix.crt: OK
 
 最后将 CA.crt 导入到需要访问的客户端PC`受信任的根证书颁发机构`中，把 `zabbix.crt`、`zabbix.key` 文件部署在服务器上即可。
 
-# 六、参考资料
+## 二、参考资料
 
 - [自签名ssl证书](https://www.cnblogs.com/xiykj/p/18099784)
 - [openssl自签一个给网站用的证书](https://zhuanlan.zhihu.com/p/630709832)
