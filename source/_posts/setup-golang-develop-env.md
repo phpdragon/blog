@@ -1,8 +1,8 @@
 ---
 title: Windows下搭建Golang开发环境
 date: 2023-11-12 18:39:43
-categories: ['Window', 'Golang']
-tags: ['Window', 'Golang', 'Fedora']
+categories: ['Window', 'Develop', 'Language', 'Golang']
+tags: ['Window', 'Develop', 'Language', 'Golang']
 ---
 
 # Windows下搭建Golang开发环境
