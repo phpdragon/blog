@@ -25,7 +25,7 @@ mkdir ca
 ### 2、创建 ca 私钥（建议设置密码）
 
 ```bash
-openssl genrsa -des3 -out ca/CA.key 2048
+openssl genrsa -des3 -out ca/CA.key 4096
 ```
 输出:
 ```txt
@@ -131,7 +131,7 @@ rg, emailAddress=it@test.org
 mkdir certs
 
 #创建ssl私钥
-openssl genrsa -out certs/zabbix.key 2048
+openssl genrsa -out certs/zabbix.key 4096
 ```
 
 ### 5、创建ssl证书csr
@@ -294,7 +294,49 @@ certs/zabbix.crt: OK
 
 最后将 CA.crt 导入到需要访问的客户端PC`受信任的根证书颁发机构`中，把 `zabbix.crt`、`zabbix.key` 文件部署在服务器上即可。
 
-## 二、参考资料
+## 二、示例
 
+生成一个自签的PEM格式根证书，可以用作于nginx的https服务器证书。
+
+```bash
+#生成密钥
+openssl genrsa -out rootCA.key 4096
+
+#生成证书
+openssl req -x509 -new -nodes -key rootCA.key -sha256 -days 3650 -out rootCA.crt -subj "/C=CN/ST=Shanghai/L=Shanghai/O=Custom CA Org/CN=Custom Root CA" -config <(cat <<EOF
+[ req ]
+default_bits       = 4096
+default_md         = sha256
+distinguished_name = req_distinguished_name
+x509_extensions    = v3_ca
+
+[ req_distinguished_name ]
+
+
+[ v3_ca ]
+keyUsage = digitalSignature, nonRepudiation, keyEncipherment, dataEncipherment, keyAgreement, keyCertSign
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid:always,issuer
+basicConstraints = critical, CA:true
+subjectAltName = @alt_names
+extendedKeyUsage = serverAuth, clientAuth
+
+[ alt_names ]
+IP.1 = 127.0.0.1
+IP.2 = 192.168.1.1
+DNS.1 = localhost
+DNS.2 = *.test.org
+DNS.3 = www.test.org
+EOF
+)
+
+#查看证书信息
+openssl x509 -in rootCA.crt -text -noout
+```
+
+## 三、参考资料
+
+- [openssl自签名CA根证书、服务端和客户端证书生成并模拟单向/双向证书验证](https://blog.csdn.net/qq_36940806/article/details/136016480)
 - [自签名ssl证书](https://www.cnblogs.com/xiykj/p/18099784)
 - [openssl自签一个给网站用的证书](https://zhuanlan.zhihu.com/p/630709832)
+- [OpenSSL 生成CA证书和自签名证书](https://www.cnblogs.com/hovin/p/18310022)
