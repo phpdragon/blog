@@ -1,8 +1,8 @@
 ---
 title: SpringBoot项目同时使用http和https
 date: 2025-03-12 18:55:43
-categories: ['Window', 'Develop', 'Language', 'Golang']
-tags: ['Window', 'Develop', 'Language', 'Golang']
+categories: ['SpringBoot', 'Https', 'SSL', 'PEM']
+tags: ['SpringBoot', 'Https', 'SSL', 'PEM']
 ---
 
 # SpringBoot项目同时使用http和https
