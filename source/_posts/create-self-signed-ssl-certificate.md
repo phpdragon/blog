@@ -294,7 +294,7 @@ certs/zabbix.crt: OK
 
 最后将 CA.crt 导入到需要访问的客户端PC`受信任的根证书颁发机构`中，把 `zabbix.crt`、`zabbix.key` 文件部署在服务器上即可。
 
-## 二、示例
+## 二、生成PEM格式自签根证书示例
 
 生成一个自签的PEM格式根证书，可以用作于nginx的https服务器证书。
 
