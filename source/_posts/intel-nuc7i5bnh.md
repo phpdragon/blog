@@ -25,7 +25,7 @@ tags: ['Computer', 'Intel', 'NUC', 'NUC7i5BNH']
 
 | 项目 | 规格 |
 | --- | --- |
-| 代号 | Baby Canyon 发布 2017 Q1 |
+| 代号 | Baby Canyon(婴儿峡谷) 发布 2017 Q1 |
 | 处理器 | Intel Core i5-7260U，2核4线，基础 2.2 GHz / 睿频 3.4 GHz，L3=4MB，14NM，TDP 15W，支持 9.5~15W 调整|
 | 核显 | Iris Plus Graphics 640，64EU，300–950MHz，支持 HDMI2.0 4K@60Hz |
 | 主板型号 | NUC7i5BNB |
@@ -49,6 +49,9 @@ tags: ['Computer', 'Intel', 'NUC', 'NUC7i5BNH']
 {% asset_img front-panel‌.png 前面板 %}
 
 {% asset_img back-panel‌.png 后面板 %}
+
+{% asset_img side.png 侧面板 %}
+
 
 ### 3. 📏 物理规格与状态
 
@@ -272,3 +275,5 @@ sudo stress-ng --gpu 4 --timeout 10m
 ## 四、参考
 
 - [清洁英特尔 第七代NUC（NUC7i5BNH）](https://www.clien.net/service/board/use/15653775#1)
+- [别再乱拆7代NUC正确保养](https://www.bilibili.com/video/BV1UxoFB9E6P/)
+- [300多的NUC7，刷飞牛做NAS的体验怎么样？](https://www.bilibili.com/video/BV1y4rkBFERA/)
