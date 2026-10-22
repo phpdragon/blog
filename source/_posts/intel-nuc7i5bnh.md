@@ -34,6 +34,7 @@ tags: ['Computer', 'Intel', 'NUC', 'NUC7i5BNH']
 
 {% asset_img inside.png 内部图 %}
 
+
 ### 2. 🔌 接口与网络
 
 | 类别 | 详情 |
@@ -82,6 +83,9 @@ tags: ['Computer', 'Intel', 'NUC', 'NUC7i5BNH']
 
 {% asset_img memory.png 内存参数 %}
 
+{% asset_img cachemem.png 内存测试 %}
+
+
 #### NVMe 存储
 
 | 项目 | 详情 |
@@ -97,6 +101,8 @@ tags: ['Computer', 'Intel', 'NUC', 'NUC7i5BNH']
 | 功耗 | 3.3V ⎓ 1.5A，实测运行功耗约 2.5W |
 
 {% asset_img nvme.png nvme参数 %}
+
+{% asset_img nvme-test.png nvme测试 %}
 
 #### 内置硬盘
 
