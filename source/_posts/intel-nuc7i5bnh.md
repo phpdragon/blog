@@ -1,14 +1,11 @@
 ---
-title: 英特尔 第七代 NUC（NUC7i5BNH）
+title: 英特尔 第七代 NUC（NUC7i5BNH）Baby Canyon 婴儿峡谷
 date: 2026-10-20 11:49:43
 categories: ['Computer', 'Intel', 'NUC', 'NUC7i5BNH']
 tags: ['Computer', 'Intel', 'NUC', 'NUC7i5BNH']
 ---
 
 **一台已停产的小钢炮：Intel NUC7i5BNH Baby Canyon 厚款的硬件档案、功耗实测与拆机清洁全记录。**
-
-本文涵盖：核心配置 · 接口网络 · 当前存储 · 功耗实测 · 拆机清灰 · 更换硅脂
-
 
 ## 竞品分析
 
@@ -133,7 +130,7 @@ tags: ['Computer', 'Intel', 'NUC', 'NUC7i5BNH']
 | 记录技术 | CMR |
 
 
-## 二、功耗实测
+## 二、功耗/性能实测
 
 ### 测试条件
 - 功耗计量器 - 得力 DL333501C。
@@ -203,6 +200,155 @@ sudo stress-ng --gpu 4 --timeout 10M
 | :---: | :---: | :---: | :---: | :---: |
 | 均衡 | 68 ~ 72 | 86 ~ 90 | 44 ~ 44.5（平均 44） | 78 ~ 80 |
 | Low | 68 ~ 72 | 89 ~ 91 | 34.2 ~ 34.9（平均 34.5） | 65 ~ 68 |
+
+### CPU 跑分
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/huladabang/coremark-goufan/main/run.sh | sh
+```
+
+得到CUP跑分 **58425**
+
+```text
+========================================
+  狗点饭 NAS CoreMark 跑分工具
+========================================
+
+检测系统信息...
+操作系统: linux
+架构: x86_64
+CPU 型号: Intel(R) Core(TM) i5-7260U CPU @ 2.20GHz
+CPU 核心数: 4
+✓ 找到可执行目录: /home/phpdragon
+
+正在从 GitHub 下载 CoreMark (x86_64)...
+######################################################################## 100.0%
+下载完成!
+
+正在运行 CoreMark 跑分...
+使用 4 个线程 (逻辑核心数)
+这可能需要几分钟时间，请耐心等待...
+
+
+========================================
+ CoreMark 跑分结果
+========================================
+分数: 58425.434539 CoreMark/MHz
+迭代次数: 1200000
+总耗时: 20.539000 秒
+========================================
+
+跑分结果详情:
+2K performance run parameters for coremark.
+CoreMark Size    : 666
+Total ticks      : 20539
+Total time (secs): 20.539000
+Iterations/Sec   : 58425.434539
+Iterations       : 1200000
+Compiler version : GCC13.3.0
+Compiler flags   : -O3 -DMULTITHREAD=64 -DUSE_PTHREAD -static  -pthread
+Parallel PThreads : 4
+Memory location  : Please put data memory location here
+                        (e.g. code in flash, data on heap etc)
+seedcrc          : 0xe9f5
+[0]crclist       : 0xe714
+[1]crclist       : 0xe714
+[2]crclist       : 0xe714
+[3]crclist       : 0xe714
+[0]crcmatrix     : 0x1fd7
+[1]crcmatrix     : 0x1fd7
+[2]crcmatrix     : 0x1fd7
+[3]crcmatrix     : 0x1fd7
+[0]crcstate      : 0x8e3a
+[1]crcstate      : 0x8e3a
+[2]crcstate      : 0x8e3a
+[3]crcstate      : 0x8e3a
+[0]crcfinal      : 0xcc42
+[1]crcfinal      : 0xcc42
+[2]crcfinal      : 0xcc42
+[3]crcfinal      : 0xcc42
+Correct operation validated. See README.md for run and reporting rules.
+CoreMark 1.0 : 58425.434539 / GCC13.3.0 -O3 -DMULTITHREAD=64 -DUSE_PTHREAD -static  -pthread / Heap / 4:PThreads
+
+========================================
+ 想要提交你的跑分结果？
+========================================
+📸 请截图保存：CPU信息 + 跑分结果
+🌐 然后访问提交页面：
+   https://gou.fan/coremark/submit
+
+💡 提交后需管理员审核，通过后将会显示在 NAS/迷你主机 CPU 性能天梯图中！
+   感谢你帮助我们完善低功耗CPU性能排行榜！
+
+清理临时文件...
+清理完成!
+
+感谢使用狗点饭 CoreMark 跑分工具！
+```
+
+### GPU 跑分
+
+- 安装必要的跑分软件
+```bash
+sudo apt update
+sudo apt install glmark2-es2-drm intel-gpu-tools
+sudo intel_gpu_top
+sudo glmark2-es2-drm
+```
+- HDMI接入显示器
+```bash
+sudo  glmark2-es2-drm
+```
+
+- 输出跑分测试，得分 **1996** 。
+```text
+=======================================================
+    glmark2 2023.01
+=======================================================
+    OpenGL Information
+    GL_VENDOR:      Intel
+    GL_RENDERER:    Mesa Intel(R) Iris(R) Plus Graphics 640 (Kaby Lake GT3e) (KBL GT3)
+    GL_VERSION:     OpenGL ES 3.2 Mesa 22.3.6
+    Surface Config: buf=32 r=8 g=8 b=8 a=8 depth=24 stencil=0 samples=0
+    Surface Size:   1920x1080 fullscreen
+=======================================================
+[build] use-vbo=false: FPS: 2277 FrameTime: 0.439 ms
+[build] use-vbo=true: FPS: 2920 FrameTime: 0.343 ms
+[texture] texture-filter=nearest: FPS: 2967 FrameTime: 0.337 ms
+[texture] texture-filter=linear: FPS: 2965 FrameTime: 0.337 ms
+[texture] texture-filter=mipmap: FPS: 3038 FrameTime: 0.329 ms
+[shading] shading=gouraud: FPS: 2714 FrameTime: 0.369 ms
+[shading] shading=blinn-phong-inf: FPS: 2713 FrameTime: 0.369 ms
+[shading] shading=phong: FPS: 2660 FrameTime: 0.376 ms
+[shading] shading=cel: FPS: 2798 FrameTime: 0.357 ms
+[bump] bump-render=high-poly: FPS: 2500 FrameTime: 0.400 ms
+[bump] bump-render=normals: FPS: 3373 FrameTime: 0.297 ms
+[bump] bump-render=height: FPS: 3155 FrameTime: 0.317 ms
+[effect2d] kernel=0,1,0;1,-4,1;0,1,0;: FPS: 1376 FrameTime: 0.727 ms
+[effect2d] kernel=1,1,1,1,1;1,1,1,1,1;1,1,1,1,1;: FPS: 595 FrameTime: 1.681 ms
+[pulsar] light=false:quads=5:texture=false: FPS: 2292 FrameTime: 0.436 ms
+[desktop] blur-radius=5:effect=blur:passes=1:separable=true:windows=4: FPS: 672 FrameTime: 1.489 ms
+[desktop] effect=shadow:windows=4: FPS: 1225 FrameTime: 0.817 ms
+[buffer] columns=200:interleave=false:update-dispersion=0.9:update-fraction=0.5:update-method=map: FPS: 357 FrameTime: 2.806 ms
+[buffer] columns=200:interleave=false:update-dispersion=0.9:update-fraction=0.5:update-method=subdata: FPS: 949 FrameTime: 1.054 ms
+[buffer] columns=200:interleave=true:update-dispersion=0.9:update-fraction=0.5:update-method=map: FPS: 404 FrameTime: 2.477 ms
+[ideas] speed=duration: FPS: 1518 FrameTime: 0.659 ms
+[jellyfish] <default>: FPS: 1166 FrameTime: 0.858 ms
+[terrain] <default>: FPS: 147 FrameTime: 6.849 ms
+[shadow] <default>: FPS: 1460 FrameTime: 0.685 ms
+[refract] <default>: FPS: 325 FrameTime: 3.086 ms
+[conditionals] fragment-steps=0:vertex-steps=0: FPS: 2427 FrameTime: 0.412 ms
+[conditionals] fragment-steps=5:vertex-steps=0: FPS: 2432 FrameTime: 0.411 ms
+[conditionals] fragment-steps=0:vertex-steps=5: FPS: 2432 FrameTime: 0.411 ms
+[function] fragment-complexity=low:fragment-steps=5: FPS: 2437 FrameTime: 0.410 ms
+[function] fragment-complexity=medium:fragment-steps=5: FPS: 2453 FrameTime: 0.408 ms
+[loop] fragment-loop=false:fragment-steps=5:vertex-steps=5: FPS: 2391 FrameTime: 0.418 ms
+[loop] fragment-steps=5:fragment-uniform=false:vertex-steps=5: FPS: 2365 FrameTime: 0.423 ms
+[loop] fragment-steps=5:fragment-uniform=true:vertex-steps=5: FPS: 2424 FrameTime: 0.413 ms
+=======================================================
+                                  glmark2 Score: 1996 
+=======================================================
+```
 
 
 ### 总结
