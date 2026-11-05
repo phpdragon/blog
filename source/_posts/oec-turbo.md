@@ -307,6 +307,7 @@ PS: `LOADER`模式下不需要刷入`boot`固件，只要刷入`system`固件就
 
 ## 五、参考
 
+- [OECTurbo 刷机短接点新方法](https://www.right.com.cn/forum/thread-8445911-1-1.html)
 - [网心云OEC/OECTubro的刷机教程/短接技巧/救砖心得](https://www.right.com.cn/forum/thread-8459375-1-1.html)
 - [Rockchip 瑞芯微系列 eMMC USB 线刷教程](https://help.fnnas.com/articles/v1/arm/arm-rk-usb)
 - [OEC-Turbo刷群晖、Armbian流程记录](https://www.right.com.cn/forum/thread-8446774-1-1.html)
