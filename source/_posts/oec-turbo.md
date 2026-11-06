@@ -35,7 +35,7 @@ OEC-turbo 是网心云推出的一款边缘计算小盒子，原本的设计用�
 | 尺寸 | 145mm × 90mm × 47mm |
 | 散热 | 无主动风扇 |
 | 产品状态 | 已停产，发布 2023年6月20日 |
-| 电源支持 | 12V ⎓ 2A，24W 直流输入 |
+| 电源支持 | 12V ⎓ 2A 5521 24W 规格直流输入 |
 | 功耗参考 | 每月耗电约 4 度 |
 
 
@@ -207,6 +207,8 @@ CoreMark 1.0 : 29067.846997 / GCC13.3.0 -O3 -DMULTITHREAD=64 -DUSE_PTHREAD -stat
 
 #### 4.1.2. Bootloader文件准备
 
+> 请使用[L1.0-1.01-2.0-MiniLoaderAll.bin](https://pan.quark.cn/s/a719af4c2816#/list/share/064813152b344753b8dfa88b2d2c7ef0), 或者[git源](https://github.com/ophub/u-boot/blob/main/u-boot/rockchip/wxy-oect/MiniLoaderAll.bin)
+
 Bootloader文件，用于 USB 线刷引导，在 RKDevTools 工具的文件夹下面，对应 $SOC/MiniLoaderAll.bin 文件名称。
 > 例如 RK3566，对应 rk3566/MiniLoaderAll.bin 文件，不要选错哦。
 {% asset_img bootloader.png MiniLoaderAll.bin %}
@@ -304,6 +306,37 @@ PS: `LOADER`模式下不需要刷入`boot`固件，只要刷入`system`固件就
 
 4. 然后登录路由器后台，查看多出来哪个设备，哪个就是飞牛的ip地址，浏览器访问http://ip地址开始使用。
 
+## 五、修改MAC地址
+
+刷机后可能MAC地址跟原厂的不匹配，就需要修改MAC地址了。
+
+```bash
+# 禁用飞牛官方的MAC地址初始化
+sudo systemctl disable --now system_setmac.service
+
+# 清除可能存在的旧绑定（防止被自动还原）
+sudo nmcli connection modify "Wired connection 1" 802-3-ethernet.mac-address ""
+
+# 设置新的克隆 MAC 地址
+sudo nmcli connection modify "Wired connection 1" 802-3-ethernet.cloned-mac-address 2C:C4:4F:A0:61:1E
+
+# 重新启用连接使配置生效
+sudo nmcli connection down "Wired connection 1" && sudo nmcli connection up "Wired connection 1"
+
+# 验证
+sudo ifconfig end0
+```
+
+还原飞牛MAC初始化逻辑：
+```bash
+# 启用飞牛官方的mac地址初始化
+sudo systemctl enable --now system_setmac.service
+
+# 清掉 NM 的 cloned MAC
+sudo nmcli connection modify "Wired connection 1" 802-3-ethernet.cloned-mac-address ""
+sudo nmcli connection up "Wired connection 1"
+```
+
 
 ## 五、参考
 
@@ -316,6 +349,7 @@ PS: `LOADER`模式下不需要刷入`boot`固件，只要刷入`system`固件就
 - [RKDevTool](https://docs.radxa.com/template/module/radxa-os/low-level-dev/rkdevtool)
 - [oec/oect最新飞牛rk3566-null-1.2.0701+刷机后恢复应用中心数据](https://www.right.com.cn/forum/thread-8462653-1-1.html)
 - [OEC/OECT刷飞牛终极教程](https://mp.weixin.qq.com/s/g8d-Q-HhBPZwax45E_HJYg)
+- [oec/oect最新飞牛rk3566-null-1.2.0701+刷机后恢复应用中心数据](https://www.right.com.cn/forum/thread-8462653-1-1.html)
 
 ## 六、附件
 
