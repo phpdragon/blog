@@ -10,10 +10,10 @@ OEC-turbo 是网心云推出的一款边缘计算小盒子，原本的设计用�
 
 ## 竞品分析
 
-| 项目 | CPU | 内存插槽/最大内存 | M.2(NVMe/SATA) | 2.5" SATA(7/9.5mm) |
-| :--- | :---: | :---: | :---: | :---: |
-| 英特尔 NUC7i5DNH | i5-7260U | 2/32GB | 支持 | 支持 |
-| 华硕PN60 | i3-8130U | 2/32GB | 支持 | 支持 |
+| 项目 | CPU | GPU | 内存 | eMMC | USB3 | 2.5" SATA(7mm) | 2.5" SATA(9.5mm) |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| 储流箱A3Pro | RK3568 | - | 4GB | 128GB | 2个 | 支持 | 支持 |
+| 派享云pro(光速盒子) | RK3568 | Mali-G52 | 4GB | 128GB | 2个 | 支持 | 支持 |
 
 
 ## 一、硬件信息
@@ -100,7 +100,7 @@ OEC-turbo 是网心云推出的一款边缘计算小盒子，原本的设计用�
 ### 日常负载
 
 | 场景 | 负载平均% | 功耗W | CPU温度℃ | 硬盘温度℃ |
-| :--- | :---: | :---: | :---: |
+| :--- | :---: | :---: | :---: | :---: |
 | 飞牛OS开机闲置空载(机械) | 3.5 ~ 6.1 | 4.3 ~ 4.79（平均 4.62） | 41.2 ~ 43.1 | 45 |
 | 飞牛OS开机闲置空载(固态) | 4.3 ~ 8.7 | 2.96 ~ 3.42（平均 3.1） | 41.2 ~ 43.1 | 40 |
 | DD命令读取200G(机械读取106.5MB/s) | 18.3 ~ 25.3 | 6.6 ~ 7.0（平均 6.82） | 43.8 ~ 52.5 | 46(没有中央空调则48) |
@@ -338,7 +338,7 @@ sudo nmcli connection up "Wired connection 1"
 ```
 
 
-## 五、参考
+## 六、参考
 
 - [OECTurbo 刷机短接点新方法](https://www.right.com.cn/forum/thread-8445911-1-1.html)
 - [网心云OEC/OECTubro的刷机教程/短接技巧/救砖心得](https://www.right.com.cn/forum/thread-8459375-1-1.html)
@@ -351,6 +351,6 @@ sudo nmcli connection up "Wired connection 1"
 - [OEC/OECT刷飞牛终极教程](https://mp.weixin.qq.com/s/g8d-Q-HhBPZwax45E_HJYg)
 - [oec/oect最新飞牛rk3566-null-1.2.0701+刷机后恢复应用中心数据](https://www.right.com.cn/forum/thread-8462653-1-1.html)
 
-## 六、附件
+## 七、附件
 
 本文使用到的软件包已上传网盘：[BlogDocs->files->oec-turbo](https://pan.baidu.com/s/1yEbHDQBzy43uV8gIYXqbnw?pwd=6666#list/path=%2FBlogDocs%2Ffiles%2Foec-turbo)
