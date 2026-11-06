@@ -349,7 +349,8 @@ sudo nmcli connection up "Wired connection 1"
 - [RKDevTool](https://docs.radxa.com/template/module/radxa-os/low-level-dev/rkdevtool)
 - [oec/oect最新飞牛rk3566-null-1.2.0701+刷机后恢复应用中心数据](https://www.right.com.cn/forum/thread-8462653-1-1.html)
 - [OEC/OECT刷飞牛终极教程](https://mp.weixin.qq.com/s/g8d-Q-HhBPZwax45E_HJYg)
-- [oec/oect最新飞牛rk3566-null-1.2.0701+刷机后恢复应用中心数据](https://www.right.com.cn/forum/thread-8462653-1-1.html)
+- [OEC/OETC-RK3566刷机飞牛NAS最新版330固件及刷机工具](https://www.right.com.cn/forum/thread-8459705-1-1.html)
+- [OEC ARM飞牛OTA最强工具-多系统切换 升级 克隆 LED灯 修改MAC 一键工具](https://www.right.com.cn/forum/thread-8459910-1-1.html)
 
 ## 七、附件
 
