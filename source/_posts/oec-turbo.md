@@ -288,6 +288,9 @@ PS: `LOADER`模式下不需要刷入`boot`固件，只要刷入`system`固件就
 3. 直接点击`执行`，刷入`Image`固件镜像即可。
 {% asset_img maskrom4.png LOADER模式刷机 %}
 
+4. 等待下载完毕。
+{% asset_img maskrom5.png LOADER模式完毕 %}
+
 #### 4.6.2. `MASKROM`模式刷入
 
 > **注意: boot固件为`.bin`格式，system固件为`.img`格式，如果下载为 gz/zip/rar 格式需要先解压。**
