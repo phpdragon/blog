@@ -327,7 +327,7 @@ sudo nmcli connection modify "Wired connection 1" 802-3-ethernet.cloned-mac-addr
 sudo nmcli connection down "Wired connection 1" && sudo nmcli connection up "Wired connection 1"
 
 # 验证
-sudo ifconfig end0
+sudo ifconfig end0 | grep ether
 ```
 
 还原飞牛MAC初始化逻辑：
@@ -340,8 +340,287 @@ sudo nmcli connection modify "Wired connection 1" 802-3-ethernet.cloned-mac-addr
 sudo nmcli connection up "Wired connection 1"
 ```
 
+## 六、添加sudo免密
 
-## 六、参考
+```bash
+echo 'phpdragon ALL=(ALL:ALL) NOPASSWD: ALL' | sudo tee /etc/sudoers.d/phpdragon
+sudo chmod 0440 /etc/sudoers.d/phpdragon
+sudo -k
+
+# 验证,不提示密码即成功
+sudo ls /root
+```
+
+## 七、迁移系统至SATA盘
+
+> 个别设备无法从USB的根分区启动系统，很不幸我手上这台设备就是。
+> 请切换到root用户执行以下操作。
+
+顾名思义，就是把根系统从`eMMC`中迁移出来到`SATA`盘中。
+一是缓解`eMMC`的写入寿命，二是给系统盘扩容。
+但不是所有设备都支持从`USB`启动根分区的，可以自己尝试，无非就是启动不了重新线刷罢了。
+
+下面的操作建议都切换到`root`用户进行操作，减少不必要的操作权限问题。
+
+```bash
+# 切换到root用户
+sudo -i
+```
+
+### 7.1、查看SATA盘分区
+
+```
+# 查看设备
+lsblk -f
+```
+解释：sda就是sata硬盘，sda1就是分区，我这个盘只分了一个区，飞牛自动挂载到了`/vol00/WDC WDS240G2G0A-00JH30`，重新分区，要先把这个分区卸载。
+
+### 7.2、卸载SATA盘分区
+
+{% asset_img umount-sda1.png 卸载SATA盘分区 %}
+
+```
+# 卸载分区
+umount "/vol00/WDC WDS240G2G0A-00JH30"
+
+# 验证是否卸载
+lsblk -f
+```
+命令中的挂载路径要根据实际路径修改，如果有多个分区被挂载了，都要卸载一遍，卸载过后可以再`lsblk -f`查看一下是否卸载成功。
+
+
+### 7.3、SATA盘重新分区
+
+#### 7.3.1. SATA盘创建两个分区
+
+假设SATA盘在系统中识别为 /dev/sda（请先执行`lsblk`命令确认，写错盘符会清空错误磁盘）。
+
+```bash
+# 进入 fdisk 交互界面
+fdisk /dev/sdb
+```
+
+在`fdisk`中按顺序输入（每输一个按回车）：
+| 输入 | 作用 |
+| :---: | :--- |
+| o | 创建新的空 DOS 分区表，会清空所有分区 |
+| n | 新建分区（系统分区）
+| 1 | 分区号 1 |
+| 回车 | 默认起始扇区2048 |
+| +32G | 给系统分区 32G 空间 |
+| n | 新建分区（存储分区） |
+| 2 | 分区号 2 |
+| 回车 | 默认起始扇区 |
+| 回车 | 默认结束扇区（占满剩余空间） |
+| p | 打印最终分区表信息，用于确认 |
+| w | 保存并退出 |
+
+这里只建了一个32G的分区，大小可以随意调节，剩余的空间先不创建分区，后面可以在飞牛内创建存储空间。
+
+#### 7.3.2. 格式化两个分区
+
+```bash
+# 系统分区格式化为 btrfs（与当前飞牛系统一致）
+mkfs.btrfs -f /dev/sdb1
+
+# 存储分区格式化为 ext4（飞牛对外接 ext4 兼容性较好）
+mkfs.ext4 /dev/sdb2
+```
+
+### 7.4、克隆根系统到SATA盘
+
+```
+# 创建临时挂载点
+mkdir -p /mnt/sata_root
+# 挂载格式化后的分区
+mount /dev/sda1 /mnt/sata_root
+
+# 分区开启压缩
+btrfs property set /mnt/sata_root compression zstd:3
+
+# 克隆eMMC根分区数据到SATA盘，排除无用目录
+rsync -aAXv \
+  --exclude=/proc --exclude=/sys --exclude=/dev \
+  --exclude=/mnt --exclude=/tmp --exclude=/media \
+  --exclude=/boot --exclude='/vol*' \
+  / /mnt/sata_root/
+```
+
+执行上面的命令，克隆根分区等几分钟就好了。
+
+
+### 7.5、切换启动分区
+
+> 调整为从`SATA`硬盘的根分区启动
+
+#### 7.5.1. 修改`fstab`文件
+
+修改`SATA`硬盘分区上的`fstab`文件，指定新的根分区挂载，原`eMMC`根分区的`fstab`不需要修改。
+
+{% asset_img edit-fstab.png fstab内容详情 %}
+
+```bash
+# 查看原始内容
+cat /mnt/sata_root/etc/fstab
+
+# 替换 /dev/mmcblk0p2 为 /dev/sda1
+sed -i 's|/dev/mmcblk0p2|/dev/sda1|g' /mnt/sata_root/etc/fstab
+
+# 验证替换结果, 应该为 /dev/sda1
+grep -e sda1 /mnt/sata_root/etc/fstab
+```
+
+#### 7.5.2. 修改`extlinux`引导配置
+
+修改`/boot/extlinux/extlinux.conf`引导配置文件，决定系统是从`eMMC`启动还是`SATA`启动的关键。
+
+{% asset_img edit-extlinux-cfg.png fstab内容详情 %}
+
+```bash
+# 查看原始内容
+cat /boot/extlinux/extlinux.conf
+
+# 替换 /dev/mmcblk0p2 为 /dev/sda1
+sed -i 's|root=/dev/mmcblk0p2|root=/dev/sda1|g' /boot/extlinux/extlinux.conf
+
+# 验证替换结果, 应该为 /dev/sda1
+grep -e sda1 /boot/extlinux/extlinux.conf
+```
+
+#### 7.5.3. 重启系统并验证
+
+```bash
+# 卸载SATA临时挂载点
+umount /mnt/sata_root
+
+# 删除临时挂载点
+rm -r /mnt/sata_root
+
+# 重启
+reboot
+```
+
+重新进`ssh`控制台，验证切换结果
+
+```bash
+# 确认 /dev/sda1 的挂载点是 / ，表示切换成功了
+df -h
+```
+
+
+#### 7.5.4. 恢复从`eMMC`启动
+
+```bash
+# 替换回从eMMC启动
+sed -i 's|root=/dev/sda1|root=/dev/mmcblk0p2|g' /boot/extlinux/extlinux.conf
+
+# 校验
+grep -e root /boot/extlinux/extlinux.conf
+
+# 重启
+reboot
+```
+
+**注意：千万不要用`eMMC`创建存储空间，因为`boot`分区还在`eMMC`里，`boot`分区被删除就启动不了了，只能用`SATA`硬盘的剩余空间或者外接存储创建。**
+
+
+## 八、迁移后的系统升级
+
+> 需要两边都做升级处理，先切换回`eMMC`升级，还原`boot`分区，再切回`SATA`升级。
+
+当前系统升级是已知的最优解，极大程度上减少了对`eMMC`的写入量，主要写入量 = 两遍升级写入 + 还原写入。
+
+首先请进入`ssh`控制台，切换为`root`用户执行以下操作，以减少不必要的权限校验。
+
+```bash
+# 切换为root用户
+sudo -i
+```
+
+### 8.1. 备份`eMMC`的`boot`分区
+
+```bash
+# 备份boot分区
+dd if=/dev/mmcblk0p1 of=./boot-partition-backup_1.2.0302.img bs=4M status=progress
+```
+
+### 8.2. 从`eMMC`启动系统
+
+```bash
+sed -i 's|root=/dev/sda1|root=/dev/mmcblk0p2|g' /boot/extlinux/extlinux.conf
+
+# 校验
+grep -e root /boot/extlinux/extlinux.conf
+
+# 重启
+reboot
+```
+
+### 8.3. 从`eMMC`升级系统
+
+在后台进行系统升级操作，等待系统升级完毕自动重启。
+
+### 8.4. 备份`eMMC`新`boot`分区
+
+进入`eMMC`系统的控制台，备份最新版的`boot`分区。
+
+```
+dd if=/dev/mmcblk0p1 of=./boot-partition-backup_1.2.1010.img bs=4M status=progress
+```
+
+### 8.5. 还原`boot`分区为旧版
+
+```
+# 先卸载boot分区
+umount /boot
+
+# 还原为旧版本
+sudo dd if=./boot-partition-backup_1.2.0302.img of=/dev/mmcblk0p1 bs=4M status=progress
+
+# 确认已还原为旧版本boot分区数据
+grep -e sda1 /boot/extlinux/extlinux.conf
+
+# 重启，从SATA启动
+reboot
+```
+
+### 8.6. 从`SATA`升级系统
+
+进入`SATA`版本的系统后台，操作升级，等待升级完毕自动重启。
+
+### 8.7. 确认升级结果
+
+登录`ssh`控制台，查看是否是从`SATA`启动系统，如果不是则切换从`SATA`启动系统。
+
+```bash
+# 确认 /dev/sda1 的挂载点是 / ，表示是从 SATA 启动系统
+df -h
+```
+
+切换从`SATA`启动系统。
+```bash
+cat /boot/extlinux/extlinux.conf
+sed -i 's|root=/dev/mmcblk0p2|root=/dev/sda1|g' /boot/extlinux/extlinux.conf
+grep -e sda1 /boot/extlinux/extlinux.conf
+
+reboot
+```
+
+切换从`eMMC`启动系统（可忽略这步操作）。
+
+> 主要是确认能否切换回去，从eMMC正常启动。
+
+```bash
+sudo sed -i 's|root=/dev/sda1|root=/dev/mmcblk0p2|g' /boot/extlinux/extlinux.conf
+grep -e root /boot/extlinux/extlinux.conf
+reboot
+```
+
+一起顺利，应该可以两边互相切换启动。
+后续的操作可以依照此步骤进行手动升级操作。
+
+
+## 九、参考
 
 - [OECTurbo 刷机短接点新方法](https://www.right.com.cn/forum/thread-8445911-1-1.html)
 - [网心云OEC/OECTubro的刷机教程/短接技巧/救砖心得](https://www.right.com.cn/forum/thread-8459375-1-1.html)
@@ -354,7 +633,10 @@ sudo nmcli connection up "Wired connection 1"
 - [OEC/OECT刷飞牛终极教程](https://mp.weixin.qq.com/s/g8d-Q-HhBPZwax45E_HJYg)
 - [OEC/OETC-RK3566刷机飞牛NAS最新版330固件及刷机工具](https://www.right.com.cn/forum/thread-8459705-1-1.html)
 - [OEC ARM飞牛OTA最强工具-多系统切换 升级 克隆 LED灯 修改MAC 一键工具](https://www.right.com.cn/forum/thread-8459910-1-1.html)
+- [OEC/OECT-飞牛双系统切换软更新系统-安装到SATA硬盘，解决eMMC硬盘太小问题](https://www.right.com.cn/forum/thread-8459776-1-1.html)
+- [OECT-飞牛系统迁移到SATA硬盘启动+调整系统分区大小【亲测】【命令简单适合小白搬砖】](https://www.right.com.cn/forum/thread-8459871-1-1.html)
 
-## 七、附件
+
+## 十、附件
 
 本文使用到的软件包已上传网盘：[BlogDocs->files->oec-turbo](https://pan.baidu.com/s/1yEbHDQBzy43uV8gIYXqbnw?pwd=6666#list/path=%2FBlogDocs%2Ffiles%2Foec-turbo)
