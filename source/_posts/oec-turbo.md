@@ -353,7 +353,144 @@ sudo nmcli connection modify "Wired connection 1" 802-3-ethernet.cloned-mac-addr
 sudo nmcli connection up "Wired connection 1"
 ```
 
-## 七、迁移系统至SATA盘
+## 七、迁移系统至U盘
+
+> 当前U盘的主控是`慧荣SM3267AE`。
+> JEYI佳翼硬盘盒转M2，主控是`RTL9201C`，不兼容，感觉应该是握手协议不稳定的问题。
+
+
+当前设备是插入了`SATA硬盘`和`USB盘`的, 所以`USB盘`的设备路径应该是`/dev/sdb`。
+如果没有插入`SATA硬盘`，`USB盘`的设备路径应该是`/dev/sda`，这里不要用错了。
+
+### 7.1 U盘分区
+
+```
+ 进入 fdisk 交互界面
+fdisk /dev/sdb
+```
+
+{% asset_img fdisk-usb.png 对U盘进行分区 %}
+
+这里只新建一个分区，剩余的容量可用作为软件安装的存储空间，在web后台操作即可。
+
+
+### 7.2 克隆分区至U盘
+
+`dd`命令是块级别拷贝，会把导致`UUID`等信息一模一样，所以需要处理。
+
+```bash
+# 克隆前先卸载分区
+umount /dev/sdb1
+
+# 克隆根分区至U盘的系统分区
+dd if=/dev/mmcblk0p2 of=/dev/sdb1 bs=4M status=progress conv=fsync
+
+# 更换UUID，不然会和 /dev/mmcblk0p2 一模一样
+# 执行 blkid /dev/mmcblk0p2 和 blkid /dev/sdb1 ，对比便知
+btrfstune -u /dev/sdb1
+```
+
+{% asset_img dd-usb.png 对U盘克隆和修改UUID %}
+
+
+### 7.3 U盘根分区扩容
+
+`dd`命令是块级别拷贝，会把导致容量显示和克隆源头信息一模一样，所以需要处理。
+
+```
+# 创建临时挂载点
+mkdir -p /tmp/sata_root
+
+# 挂载格式化后的分区
+mount /dev/sdb1 /tmp/sata_root
+
+# 强制扩容文件系统至分区上限
+btrfs filesystem resize max /tmp/sata_root
+
+# 3. 验证容量是否变回 32GB
+df -h /tmp/sata_root
+```
+
+{% asset_img resize-usb-max.png 对U盘根分区扩容 %}
+
+
+### 7.4 修改U盘fstab
+
+```bash
+# 查看原始内容
+cat /tmp/sata_root/etc/fstab
+
+# 替换 /dev/mmcblk0p2 为 /dev/sdb1
+sed -i 's|/dev/mmcblk0p2|/dev/sdb1|g' /tmp/sata_root/etc/fstab
+
+# 验证替换结果, 应该为 /dev/sdb1
+grep -e sdb1 /tmp/sata_root/etc/fstab
+```
+
+{% asset_img edit-usb-fstab.png 切换为sdb1 %}
+
+
+### 7.4 从U盘启动
+
+从U盘启动需要修改`/boot/extlinux/extlinux.conf` 文件。
+
+```bash
+# 查看原始内容
+cat /boot/extlinux/extlinux.conf
+
+# 替换 /dev/mmcblk0p2 为 /dev/sdb1
+sed -i 's|root=/dev/mmcblk0p2|root=/dev/sdb1|g' /boot/extlinux/extlinux.conf
+
+# 验证替换结果, 应该为 /dev/sdb1
+grep -e sdb1 /boot/extlinux/extlinux.conf
+```
+
+{% asset_img switch-usb-boot.png 改为从U盘启动 %}
+
+
+### 7.5 重启系统并验证
+
+```bash
+# 卸载SATA临时挂载点
+umount /tmp/sata_root
+
+# 重启
+reboot
+```
+
+重新进`ssh`控制台，验证切换结果。
+
+```bash
+# 确认 /dev/sdb1 的挂载点是 / ，表示切换成功了
+df -h
+```
+
+{% asset_img usb-boot-info.png 确认是从U盘启动 %}
+
+
+### 7.6 总结
+
+迁移采用的是`dd`命令，块级别克隆方案，然后再扩容的办法，优点就是比文件拷贝更靠谱。
+
+然后就是设备认USB硬件！！！
+
+1. 这里的U盘主控芯片是`慧荣SM3267AE - ISP (180806-001)`。
+
+- 主控厂商：SMI（慧荣）
+- 主控型号：SM3267AE - ISP 180509-0AE
+- 闪存识别码: 453CA5937ED0 - WDC(西部数据) SDTNRHDMC-128G - 4CE/单通道 [MLC-16K] -> 总容量 = 128GB
+- 闪存类型：MLC
+- 容量：128GB
+
+    {% asset_img usbinfo.png 确认是从U盘启动 %}
+
+
+2. 另一个`JEYI佳翼`M.2移动硬盘盒 NVME/SATA双协议，主控是`RTL9210C`，固态是`海力士BC711-2242`。
+整个组合不可用，应该是硬盘盒与设备硬件层面的不兼容。
+大概率是硬盘盒供电问题或者UASP握手协议不稳定导致，因为有时候会出现丢盘现象。
+
+
+## 八、迁移系统至SATA盘
 
 > 个别设备无法从`USB`的根分区启动系统，很不幸我手上这台设备就是。
 > 请切换到`root`用户执行以下操作。
@@ -378,7 +515,7 @@ sudo nmcli connection up "Wired connection 1"
     ```
 
 
-### 7.1、查看SATA盘分区
+### 8.1、查看SATA盘分区
 
 ```
 # 查看设备
@@ -389,7 +526,7 @@ lsblk
 
 sda就是sata硬盘，sda1就是分区，我这个盘有2个区，飞牛自动挂载到了`/vol00/Colorful SL500 256GB`，重新分区，要先把这个分区卸载。
 
-### 7.2、卸载SATA盘分区
+### 8.2、卸载SATA盘分区
 
 {% asset_img umount-sda1.png 卸载SATA盘分区 %}
 
@@ -404,9 +541,9 @@ lsblk
 命令中的挂载路径要根据实际路径修改，如果有多个分区被挂载了，都要卸载一遍，卸载过后可以再`lsblk`查看一下是否卸载成功。
 
 
-### 7.3、SATA盘重新分区
+### 8.3、SATA盘重新分区
 
-#### 7.3.1. SATA盘创建两个分区
+#### 8.3.1. SATA盘创建两个分区
 
 假设SATA盘在系统中识别为 /dev/sda（请先执行`lsblk`命令确认，写错盘符会清空错误磁盘）。
 
@@ -424,10 +561,6 @@ fdisk /dev/sda
 | 1 | 分区号 1 |
 | 回车 | 默认起始扇区2048 |
 | +32G | 给系统分区 32G 空间 |
-| n | 新建分区（存储分区） |
-| 2 | 分区号 2 |
-| 回车 | 默认起始扇区 |
-| 回车 | 默认结束扇区（占满剩余空间） |
 | p | 打印最终分区表信息，用于确认 |
 | w | 保存并退出 |
 
@@ -435,7 +568,7 @@ fdisk /dev/sda
 
 这里只建了一个32G的分区，大小可以随意调节。剩余的空间先不创建分区，后面可以在飞牛内创建存储空间。
 
-#### 7.3.2. 格式化分区
+#### 8.3.2. 格式化分区
 
 ```bash
 # 系统分区格式化为 btrfs（与当前飞牛系统一致）
@@ -445,7 +578,7 @@ mkfs.btrfs -f /dev/sda1
 {% asset_img mkfs-btrfs.png 格式化分区 %}
 
 
-### 7.4、克隆根系统到SATA盘
+### 8.4、克隆根系统到SATA盘
 
 > 推荐用方案一，减少`rsync`同步文件带来的权限等不可确定性。DD命令块拷贝更可靠。
 
@@ -468,13 +601,21 @@ dd if=/dev/loop0p2 of=/dev/sda1 bs=4M status=progress conv=fsync
 losetup -D
 ```
 
-校验克隆结果：
-```
+系统扩容, 扩容`SATA`系统分区：由于镜像只有3.4G，我们需要让它填满 32G 的 sda1。
+不扩容的话内置系统盘显示3.XG。
+
+```bash
 # 创建临时挂载点
 mkdir -p /tmp/sata_root
 
 # 挂载格式化后的分区
 mount /dev/sda1 /tmp/sata_root
+
+# 强制扩容文件系统至硬件上限
+btrfs filesystem resize max /tmp/sata_root
+
+# 3. 验证容量是否变回 32GB
+df -h /tmp/sata_root
 ```
 
 
@@ -501,11 +642,11 @@ rsync -aAXv \
 执行上面的命令，克隆根分区等几分钟就好了。
 
 
-### 7.5、切换启动分区
+### 8.5、切换启动分区
 
 > 调整为从`SATA`硬盘的根分区启动
 
-#### 7.5.1. 修改`fstab`文件
+#### 8.5.1. 修改`fstab`文件
 
 修改`SATA`硬盘分区上的`fstab`文件，指定新的根分区挂载，原`eMMC`根分区的`fstab`不需要修改。
 
@@ -522,7 +663,7 @@ sed -i 's|/dev/mmcblk0p2|/dev/sda1|g' /tmp/sata_root/etc/fstab
 grep -e sda1 /tmp/sata_root/etc/fstab
 ```
 
-#### 7.5.2. 修改`extlinux`引导配置
+#### 8.5.2. 修改`extlinux`引导配置
 
 修改`/boot/extlinux/extlinux.conf`引导配置文件，决定系统是从`eMMC`启动还是`SATA`启动的关键。
 
@@ -539,7 +680,7 @@ sed -i 's|root=/dev/mmcblk0p2|root=/dev/sda1|g' /boot/extlinux/extlinux.conf
 grep -e sda1 /boot/extlinux/extlinux.conf
 ```
 
-#### 7.5.3. 重启系统并验证
+#### 8.5.3. 重启系统并验证
 
 ```bash
 # 卸载SATA临时挂载点
@@ -549,7 +690,9 @@ umount /tmp/sata_root
 reboot
 ```
 
-重新进`ssh`控制台，验证切换结果
+如果使用的方案一进行的克隆迁移，请先登录网页版本进行后台，开启`SSH`权限。
+
+重新进`ssh`控制台，验证切换结果。
 
 ```bash
 # 确认 /dev/sda1 的挂载点是 / ，表示切换成功了
@@ -557,7 +700,7 @@ df -h
 ```
 
 
-#### 7.5.4. 恢复从`eMMC`启动
+#### 8.5.4. 恢复从`eMMC`启动
 
 ```bash
 # 替换回从eMMC启动
@@ -573,7 +716,7 @@ reboot
 **注意：千万不要用`eMMC`创建存储空间，因为`boot`分区还在`eMMC`里，`boot`分区被删除就启动不了了，只能用`SATA`硬盘的剩余空间或者外接存储创建。**
 
 
-## 八、迁移后的系统升级
+## 九、迁移后的系统升级
 
 > 需要两边都做升级处理，先切换回`eMMC`升级，还原`boot`分区，再切回`SATA`升级。
 
@@ -586,14 +729,14 @@ reboot
 sudo -i
 ```
 
-### 8.1. 备份`eMMC`的`boot`分区
+### 9.1. 备份`eMMC`的`boot`分区
 
 ```bash
 # 备份boot分区
 dd if=/dev/mmcblk0p1 of=./boot-partition-backup_1.2.0302.img bs=4M status=progress
 ```
 
-### 8.2. 从`eMMC`启动系统
+### 9.2. 从`eMMC`启动系统
 
 ```bash
 sed -i 's|root=/dev/sda1|root=/dev/mmcblk0p2|g' /boot/extlinux/extlinux.conf
@@ -605,11 +748,11 @@ grep -e root /boot/extlinux/extlinux.conf
 reboot
 ```
 
-### 8.3. 从`eMMC`升级系统
+### 9.3. 从`eMMC`升级系统
 
 在后台进行系统升级操作，等待系统升级完毕自动重启。
 
-### 8.4. 备份`eMMC`新`boot`分区
+### 9.4. 备份`eMMC`新`boot`分区
 
 进入`eMMC`系统的控制台，备份最新版的`boot`分区。
 
@@ -617,7 +760,7 @@ reboot
 dd if=/dev/mmcblk0p1 of=./boot-partition-backup_1.2.1010.img bs=4M status=progress
 ```
 
-### 8.5. 还原`boot`分区为旧版
+### 9.5. 还原`boot`分区为旧版
 
 ```
 # 先卸载boot分区
@@ -633,11 +776,11 @@ grep -e sda1 /boot/extlinux/extlinux.conf
 reboot
 ```
 
-### 8.6. 从`SATA`升级系统
+### 9.6. 从`SATA`升级系统
 
 进入`SATA`版本的系统后台，操作升级，等待升级完毕自动重启。
 
-### 8.7. 确认升级结果
+### 9.7. 确认升级结果
 
 登录`ssh`控制台，查看是否是从`SATA`启动系统，如果不是则切换从`SATA`启动系统。
 
@@ -669,7 +812,7 @@ reboot
 后续的操作可以依照此步骤进行手动升级操作。
 
 
-## 九、参考
+## 十、参考
 
 - [OECTurbo 刷机短接点新方法](https://www.right.com.cn/forum/thread-8445911-1-1.html)
 - [网心云OEC/OECTubro的刷机教程/短接技巧/救砖心得](https://www.right.com.cn/forum/thread-8459375-1-1.html)
@@ -686,6 +829,6 @@ reboot
 - [OECT-飞牛系统迁移到SATA硬盘启动+调整系统分区大小【亲测】【命令简单适合小白搬砖】](https://www.right.com.cn/forum/thread-8459871-1-1.html)
 
 
-## 十、附件
+## 十一、附件
 
 本文使用到的软件包已上传网盘：[BlogDocs->files->oec-turbo](https://pan.baidu.com/s/1yEbHDQBzy43uV8gIYXqbnw?pwd=6666#list/path=%2FBlogDocs%2Ffiles%2Foec-turbo)
