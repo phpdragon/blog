@@ -27,7 +27,7 @@ OEC-turbo 是网心云推出的一款边缘计算小盒子，原本的设计用�
 | GPU | ARM Mali-G52 2EE（集成于 RK3566） |
 | NPU | 算力约 1 TOPS，可用于轻量 AI 推理 |
 | 内存 | 4GB LPDDR4X |
-| 存储 | 8GB eMMC，生产日期2022年11月 |
+| 存储 | 8GB eMMC，生产日期2022年11月(Samsung eMMC 5.1 MLC系列？) |
 | 有线网口 | 1 个千兆以太网口 |
 | SATA 接口 | 1 个 SATA 3.0，支持内置 2.5 寸7mm硬盘 |
 | 调试口 | 1 个 USB Type-C，方说明仅用于生产调试，不具备实际功能。仅用于刷机 |
@@ -192,7 +192,7 @@ CoreMark 1.0 : 29067.846997 / GCC13.3.0 -O3 -DMULTITHREAD=64 -DUSE_PTHREAD -stat
 感谢使用狗点饭 CoreMark 跑分工具！
 ```
 
-## 四、刷机
+## 四、刷入飞牛OS
 
 ### 4.1 刷机准备
 
@@ -201,16 +201,18 @@ CoreMark 1.0 : 29067.846997 / GCC13.3.0 -O3 -DMULTITHREAD=64 -DUSE_PTHREAD -stat
 - 电脑：Windows10 / Windows 11 64bit 电脑
 - 驱动：[Rockchip_DriverAssitant_v5.1.1.zip](https://static2.fnnas.com/installer/DriverAssitant_v5.1.1.zip)
 - 刷机工具：[RKDevTool_Release_v3.37.zip](https://static2.fnnas.com/installer/RKDevTool_v3.37_for_window.zip)
+- 引导固件: [MiniLoaderAll.bin](https://pan.quark.cn/s/a719af4c2816#/list/share/064813152b344753b8dfa88b2d2c7ef0)
+- 系统固件：[fnos_Mainland-PE_arm_1.2.0302_onethingcloud-oec_2288.img](https://pan.baidu.com/s/1yEbHDQBzy43uV8gIYXqbnw?pwd=6666#list/path=%2FBlogDocs%2Ffiles%2Foec-turbo&vmode=list)
 - 卡针： 用于顶住`RESET`按钮
 - 镊子： 用来做短接线路使用
-- USB 刷机线：A-C Type-C数据线
+- USB 刷机线：`A-C` `Type-C`数据线
 
 #### 4.1.2. Bootloader文件准备
 
 > 请使用[L1.0-1.01-2.0-MiniLoaderAll.bin](https://pan.quark.cn/s/a719af4c2816#/list/share/064813152b344753b8dfa88b2d2c7ef0), 或者[git源](https://github.com/ophub/u-boot/blob/main/u-boot/rockchip/wxy-oect/MiniLoaderAll.bin)
 
-Bootloader文件，用于 USB 线刷引导，在 RKDevTools 工具的文件夹下面，对应 $SOC/MiniLoaderAll.bin 文件名称。
-> 例如 RK3566，对应 rk3566/MiniLoaderAll.bin 文件，不要选错哦。
+`Bootloader`文件，用于`USB`线刷引导，在`RKDevTools`工具的文件夹下面，对应`SOC/MiniLoaderAll.bin`文件名称。
+> 例如`RK3566`，对应`rk3566/MiniLoaderAll.bin`文件，不要选错哦。
 {% asset_img bootloader.png MiniLoaderAll.bin %}
 
 #### 4.1.3. Rockchip驱动安装
@@ -222,7 +224,7 @@ Bootloader文件，用于 USB 线刷引导，在 RKDevTools 工具的文件夹�
 
 ### 4.2 选择刷机模式
 
-> 注意：刷机过程中不需要连接电源，Type-C接口会给设备供电。
+> 注意：刷机过程中不需要连接电源，`Type-C`接口会给设备供电。
 
 #### 4.2.1 `LOADER`模式(二刷)
 
@@ -235,13 +237,13 @@ PS: `LOADER`模式下不需要刷入`boot`固件，只要刷入`system`固件就
 
 #### 4.2.1 `MASKROM`模式(首刷/救砖)
 
-> `MASKROM`模式是瑞芯微 SoC 内置的底层恢复 / 烧录模式，也就是刷机模式。
+> `MASKROM`模式是瑞芯微`SoC`内置的底层恢复 / 烧录模式，也就是刷机模式。
 
-要拆机短接才能进入，首次刷机和救砖要进入MASKROM模式，需要勾选`Boot`和`system`两个包，路径要根据下载的解压后的实际路径选择，点后面的`···`可以选择对应文件。
+要拆机短接才能进入，首次刷机和救砖要进入`MASKROM`模式，需要勾选`Boot`和`system`两个包，路径要根据下载的解压后的实际路径选择，点后面的`···`可以选择对应文件。
 
 下面开始拆机短接:
 
-1. 可以先插好Type-C接口数据，另一侧USB口先不插入电脑端(短接时不容易被插线的动作干扰)。
+1. 可以先插好`Type-C`接口数据，另一侧`USB`口先不插入电脑端(短接时不容易被插线的动作干扰)。
 
 2. 底部朝开锁标志方向推动底部盖板可以取下盖板。
 {% asset_img 1.png 取下盖板 %}
@@ -252,21 +254,21 @@ PS: `LOADER`模式下不需要刷入`boot`固件，只要刷入`system`固件就
 4. 卸下底部螺丝后向上推动侧边盖板可以取下侧边盖板。
 {% asset_img 3.png 取下侧边盖板 %}
 
-5. 卸下硬盘位周围的8颗螺丝，sata接口上的螺丝可以不用拆。
+5. 卸下硬盘位周围的8颗螺丝，`SATA排线`接口上的螺丝可以不用拆。
 {% asset_img 4.png 拆卸四周8颗螺丝 %}
 
-6. 顶住右侧可以将硬盘位翘起，注意左侧sata排线有点短，别用力过猛扯坏了。
+6. 顶住右侧可以将硬盘位翘起，注意左侧`SATA排线`有点短，别用力过猛扯坏了。
 {% asset_img 5.png 顶住右侧将硬盘位翘起 %}
 
-7. 硬盘位翘起来后可以插在左边竖起来，避免扯坏sata排线。
+7. 硬盘位翘起来后可以插在左边竖起来，避免扯坏`SATA排线`。
 {% asset_img 6.png 翘起硬盘位 %}
 
-8. 用镊子捏住图中电容两侧，相当于短接1V8和GND触点，但是比短接触点要简单。
+8. 用镊子捏住图中电容两侧，相当于短接`1V8`和`GND`触点，但是比短接触点要简单。
 {% asset_img duanjie.png 短接1V8和GND触点 %}
 
 {% asset_img pcb.png 短接1V8和GND触点 %}
 
-9. USB接口插入电脑2-3秒后松开镊子，烧录工具会从“没有发现设备”变为“发现一个MASKROM设备”，这时就可以开始刷机了。如果没成功就多短接几次。
+9. `USB`接口插入电脑2-3秒后松开镊子，烧录工具会从“没有发现设备”变为“发现一个MASKROM设备”，这时就可以开始刷机了。如果没成功就多短接几次。
 
 
 ### 4.6 刷入固件
@@ -277,7 +279,7 @@ PS: `LOADER`模式下不需要刷入`boot`固件，只要刷入`system`固件就
 | 地址 | 名字 | 路径 | 说明 |
 | :---: | :---: | :---: | :---: |
 | 0xCCCCCCCC | Boot | D:\OECT\rk3566\MiniLoaderAll.bin | **硬件初始化引导程序固件**，是`.bin`后缀格式 |
-| 0x00000000 | system | D:\OECT\firmware\fnos.img | 系统固件，`.img`后缀格式 |
+| 0x00000000 | system | D:\OECT\firmware\fnos_Mainland-PE_arm_1.2.0302_onethingcloud-oec_2288.img | 系统固件，`.img`后缀格式 |
 
 #### 4.6.1. `LOADER`模式刷入
 
@@ -295,23 +297,34 @@ PS: `LOADER`模式下不需要刷入`boot`固件，只要刷入`system`固件就
 
 > **注意: boot固件为`.bin`格式，system固件为`.img`格式，如果下载为 gz/zip/rar 格式需要先解压。**
 
-1. 根据设备的SOC选择合适的`Boot`文件和`system`固件镜像，不要选错。
+1. 根据设备的`SOC`选择合适的`Boot`文件和`system`固件镜像，不要选错。
 {% asset_img maskrom.png 进入MASKROM模式 %}
 
-2. 然后点击`执行`，开始刷机。
+2. 然后点击`执行`，开始刷机，图片仅供参考。
 {% asset_img maskrom1.png 进入MASKROM模式刷机，图片仅供参考 %}
 
-3. 等待刷机进度 100% 完成后，即可拔掉所有线，然后接上电源重新启动即可。
+3. 刷机进行中，图片仅供参考。
+{% asset_img maskrom2.png 刷机进行中，图片仅供参考 %}
 
-{% asset_img maskrom2.png 开始MASKROM模式刷机 %}
-
+4. 刷机进度100%完成，拔掉刷机数据线，然后接上电源重新启动即可。
 {% asset_img maskrom3.png MASKROM模式刷机完成 %}
 
-4. 然后登录路由器后台，查看多出来哪个设备，哪个就是飞牛的ip地址，浏览器访问http://ip地址开始使用。
+5. 然后登录路由器后台，查看多出来哪个设备，哪个就是飞牛的ip地址，浏览器访问`http://ip:5666`地址开始使用。
 
-## 五、修改MAC地址
+## 五、添加sudo免密
 
-刷机后可能MAC地址跟原厂的不匹配，就需要修改MAC地址了。
+```bash
+echo 'phpdragon ALL=(ALL:ALL) NOPASSWD: ALL' | sudo tee /etc/sudoers.d/phpdragon
+sudo chmod 0440 /etc/sudoers.d/phpdragon
+sudo -k
+
+# 验证,不提示密码即成功
+sudo ls /root
+```
+
+## 六、修改MAC地址
+
+刷机后可能`MAC`地址跟原厂的不匹配，就需要修改`MAC`地址了。
 
 ```bash
 # 禁用飞牛官方的MAC地址初始化
@@ -326,7 +339,7 @@ sudo nmcli connection modify "Wired connection 1" 802-3-ethernet.cloned-mac-addr
 # 重新启用连接使配置生效
 sudo nmcli connection down "Wired connection 1" && sudo nmcli connection up "Wired connection 1"
 
-# 验证
+# 另开ssh控制台登录并验证
 sudo ifconfig end0 | grep ether
 ```
 
@@ -340,40 +353,41 @@ sudo nmcli connection modify "Wired connection 1" 802-3-ethernet.cloned-mac-addr
 sudo nmcli connection up "Wired connection 1"
 ```
 
-## 六、添加sudo免密
-
-```bash
-echo 'phpdragon ALL=(ALL:ALL) NOPASSWD: ALL' | sudo tee /etc/sudoers.d/phpdragon
-sudo chmod 0440 /etc/sudoers.d/phpdragon
-sudo -k
-
-# 验证,不提示密码即成功
-sudo ls /root
-```
-
 ## 七、迁移系统至SATA盘
 
-> 个别设备无法从USB的根分区启动系统，很不幸我手上这台设备就是。
-> 请切换到root用户执行以下操作。
+> 个别设备无法从`USB`的根分区启动系统，很不幸我手上这台设备就是。
+> 请切换到`root`用户执行以下操作。
 
 顾名思义，就是把根系统从`eMMC`中迁移出来到`SATA`盘中。
 一是缓解`eMMC`的写入寿命，二是给系统盘扩容。
 但不是所有设备都支持从`USB`启动根分区的，可以自己尝试，无非就是启动不了重新线刷罢了。
 
-下面的操作建议都切换到`root`用户进行操作，减少不必要的操作权限问题。
+1. 准备工作
 
-```bash
-# 切换到root用户
-sudo -i
-```
+    - 系统固件：[fnos_Mainland-PE_arm_1.2.0302_onethingcloud-oec_2288.img](https://pan.baidu.com/s/1yEbHDQBzy43uV8gIYXqbnw?pwd=6666#list/path=%2FBlogDocs%2Ffiles%2Foec-turbo&vmode=list)
+    - SATA硬盘一块。
+    - U盘一个，用于保存系统固件。
+
+2. 切换为root用户
+
+    下面的操作建议都切换到`root`用户进行操作，减少不必要的操作权限问题。
+
+    ```bash
+    # 切换到root用户
+    sudo -i
+    ```
+
 
 ### 7.1、查看SATA盘分区
 
 ```
 # 查看设备
-lsblk -f
+lsblk
 ```
-解释：sda就是sata硬盘，sda1就是分区，我这个盘只分了一个区，飞牛自动挂载到了`/vol00/WDC WDS240G2G0A-00JH30`，重新分区，要先把这个分区卸载。
+
+{% asset_img lsblk.png 查看设备信息 %}
+
+sda就是sata硬盘，sda1就是分区，我这个盘有2个区，飞牛自动挂载到了`/vol00/Colorful SL500 256GB`，重新分区，要先把这个分区卸载。
 
 ### 7.2、卸载SATA盘分区
 
@@ -381,12 +395,13 @@ lsblk -f
 
 ```
 # 卸载分区
-umount "/vol00/WDC WDS240G2G0A-00JH30"
+umount "/dev/sda1"
 
 # 验证是否卸载
-lsblk -f
+lsblk
 ```
-命令中的挂载路径要根据实际路径修改，如果有多个分区被挂载了，都要卸载一遍，卸载过后可以再`lsblk -f`查看一下是否卸载成功。
+
+命令中的挂载路径要根据实际路径修改，如果有多个分区被挂载了，都要卸载一遍，卸载过后可以再`lsblk`查看一下是否卸载成功。
 
 
 ### 7.3、SATA盘重新分区
@@ -397,14 +412,15 @@ lsblk -f
 
 ```bash
 # 进入 fdisk 交互界面
-fdisk /dev/sdb
+fdisk /dev/sda
 ```
 
 在`fdisk`中按顺序输入（每输一个按回车）：
 | 输入 | 作用 |
 | :---: | :--- |
 | o | 创建新的空 DOS 分区表，会清空所有分区 |
-| n | 新建分区（系统分区）
+| n | 新建分区（系统分区） |
+| p | 选择分区类型为主动分区 |
 | 1 | 分区号 1 |
 | 回车 | 默认起始扇区2048 |
 | +32G | 给系统分区 32G 空间 |
@@ -415,35 +431,71 @@ fdisk /dev/sdb
 | p | 打印最终分区表信息，用于确认 |
 | w | 保存并退出 |
 
-这里只建了一个32G的分区，大小可以随意调节，剩余的空间先不创建分区，后面可以在飞牛内创建存储空间。
+{% asset_img fdisk-sda1.png 新建一个32GB分区 %}
 
-#### 7.3.2. 格式化两个分区
+这里只建了一个32G的分区，大小可以随意调节。剩余的空间先不创建分区，后面可以在飞牛内创建存储空间。
+
+#### 7.3.2. 格式化分区
 
 ```bash
 # 系统分区格式化为 btrfs（与当前飞牛系统一致）
-mkfs.btrfs -f /dev/sdb1
-
-# 存储分区格式化为 ext4（飞牛对外接 ext4 兼容性较好）
-mkfs.ext4 /dev/sdb2
+mkfs.btrfs -f /dev/sda1
 ```
+
+{% asset_img mkfs-btrfs.png 格式化分区 %}
+
 
 ### 7.4、克隆根系统到SATA盘
 
+> 推荐用方案一，减少`rsync`同步文件带来的权限等不可确定性。DD命令块拷贝更可靠。
+
+- 方案一
+
+```bash
+# 创建临时挂载点
+mkdir -p /tmp/usb
+
+# 挂载U盘到 /tmp/usb
+mount /dev/sdb1 /tmp/usb
+
+# 关联官方镜像，losetup -fP /path/to/你的镜像.img
+losetup -fP /tmp/usb/fnos_Mainland-PE_arm_1.2.0302_onethingcloud-oec_2288.img 
+
+# 把镜像的系统分区写入 SATA 系统分区
+dd if=/dev/loop0p2 of=/dev/sda1 bs=4M status=progress conv=fsync
+
+# 释放关联
+losetup -D
+```
+
+校验克隆结果：
 ```
 # 创建临时挂载点
-mkdir -p /mnt/sata_root
+mkdir -p /tmp/sata_root
+
 # 挂载格式化后的分区
-mount /dev/sda1 /mnt/sata_root
+mount /dev/sda1 /tmp/sata_root
+```
+
+
+- 方案二
+
+```bash
+# 创建临时挂载点
+mkdir -p /tmp/sata_root
+
+# 挂载格式化后的分区
+mount /dev/sda1 /tmp/sata_root
 
 # 分区开启压缩
-btrfs property set /mnt/sata_root compression zstd:3
+btrfs property set /tmp/sata_root compression zstd:3
 
 # 克隆eMMC根分区数据到SATA盘，排除无用目录
 rsync -aAXv \
   --exclude=/proc --exclude=/sys --exclude=/dev \
   --exclude=/mnt --exclude=/tmp --exclude=/media \
   --exclude=/boot --exclude='/vol*' \
-  / /mnt/sata_root/
+  / /tmp/sata_root/
 ```
 
 执行上面的命令，克隆根分区等几分钟就好了。
@@ -461,13 +513,13 @@ rsync -aAXv \
 
 ```bash
 # 查看原始内容
-cat /mnt/sata_root/etc/fstab
+cat /tmp/sata_root/etc/fstab
 
 # 替换 /dev/mmcblk0p2 为 /dev/sda1
-sed -i 's|/dev/mmcblk0p2|/dev/sda1|g' /mnt/sata_root/etc/fstab
+sed -i 's|/dev/mmcblk0p2|/dev/sda1|g' /tmp/sata_root/etc/fstab
 
 # 验证替换结果, 应该为 /dev/sda1
-grep -e sda1 /mnt/sata_root/etc/fstab
+grep -e sda1 /tmp/sata_root/etc/fstab
 ```
 
 #### 7.5.2. 修改`extlinux`引导配置
@@ -491,10 +543,7 @@ grep -e sda1 /boot/extlinux/extlinux.conf
 
 ```bash
 # 卸载SATA临时挂载点
-umount /mnt/sata_root
-
-# 删除临时挂载点
-rm -r /mnt/sata_root
+umount /tmp/sata_root
 
 # 重启
 reboot
