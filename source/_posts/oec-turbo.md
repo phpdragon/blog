@@ -356,7 +356,7 @@ sudo nmcli connection up "Wired connection 1"
 ## 七、迁移系统至U盘
 
 > 当前U盘的主控是`慧荣SM3267AE`，可以做系统盘，但写入延时会很高，不推荐。
-> JEYI佳翼硬盘盒转M2，主控是`RTL9201C`，`UASP`传输协议不兼容，改成`BOT`传输协议没有问题。
+> JEYI佳翼硬盘盒转M2，主控是`RTL9210C`，`UASP`传输协议不兼容，改成`BOT`传输协议没有问题。
 
 顾名思义，就是把根系统从`eMMC`中迁移出来到U盘中。
 一是缓解`eMMC`的写入寿命，二是给系统盘扩容。
@@ -367,7 +367,36 @@ sudo nmcli connection up "Wired connection 1"
 当前设备是插入了`SATA硬盘`和`USB盘`的, 所以`USB盘`的设备路径应该是`/dev/sdb`。
 如果没有插入`SATA硬盘`，`USB盘`的设备路径应该是`/dev/sda`，这里不要用错了。
 
-### 7.1 U盘分区
+### 7.1 禁用U盘UASP传输协议
+
+> 每一个厂家硬件ID不一样。
+> **有些`USB`设备可能`UASP`传输协议很稳，可以跳过这步操作！！！**
+
+查看`USB`设备的硬件ID（厂商 ID + 产品 ID），执行`lsusb`命令：
+
+{% asset_img lsusb.png 查看USB端口信息 %}
+传输模式是 `uas` => `UASP`。
+
+厂商ID + 产品ID具体对应如下：
+- 0bda：厂商 ID（Vendor ID），属于 Realtek Semiconductor Corp.（瑞昱半导体）。
+- 9210：产品 ID（Product ID），对应的是 RTL9210 芯片。
+
+得到需要添加的参数: `usb-storage.quirks=0bda:9210:u`， 格式：`usb-storage.quirks=厂商ID:产品ID:u`。
+
+1. 输入命令打开文件：`sudo nano /boot/extlinux/extlinux.conf`。
+2. 使用键盘方向键，长按`↓`向下键直到光标移动到最下行，再短按`←`向左键移到最后一行末尾。
+3. 按一下空格，然后输入你要追加的参数: `usb-storage.quirks=0bda:9210:u`。
+4. 按`Ctrl + o`（字母 o）保存，按`Enter`确认文件名。
+5. 按`Ctrl + x`，退出。
+6. 输入`cat /boot/extlinux/extlinux.conf`检查是否修改成功。
+    {% asset_img cat-extlinux.png 确认extlinux.conf信息 %}
+
+7. 输入`sudo reboot`重启设备，重新执行`lsusb`，查看`USB`设备识别是否正常。
+    {% asset_img lsusb2.png 查看USB端口信息 %}
+
+8. 结果显示是`Driver=usb-storage`，表示已经由`UASP`转为`BOT`模式了。
+
+### 7.2 U盘分区
 
 ```
  进入 fdisk 交互界面
@@ -453,30 +482,6 @@ grep -e sdb1 /boot/extlinux/extlinux.conf
 {% asset_img switch-usb-boot.png 改为从U盘启动 %}
 
 
-### 7.5 禁用U盘UASP传输协议
-
-> 每一个厂家硬件ID不一样
-
-查看`USB`设备的硬件ID（厂商 ID + 产品 ID），执行`lsusb`命令：
-
-{% asset_img lsusb.png 查看USB端口信息 %}
-
-具体对应如下：
-- 0bda：厂商 ID（Vendor ID），属于 Realtek Semiconductor Corp.（瑞昱半导体）。
-- 9210：产品 ID（Product ID），对应的是 RTL9210 芯片。
-
-得到需要添加的参数: `usb-storage.quirks=0bda:9210:u`， 格式：`usb-storage.quirks=厂商ID:产品ID:u`。
-
-1. 输入命令打开文件：`nano /boot/extlinux/extlinux.conf`。
-2. 使用键盘方向键，长按`↓`向下键直到光标移动到最下行，再短按`←`向左键移到最后一行末尾。
-3. 按一下空格，然后输入你要追加的参数: `usb-storage.quirks=0bda:9210:u`。
-4. 按`Ctrl + O`（字母 O）保存，按`Enter`确认文件名。
-5. 按`Ctrl + X`，退出。
-6. 输入`cat /boot/extlinux/extlinux.conf`检查是否修改成功。
-
-{% asset_img cat-extlinux.png 确认extlinux.conf信息 %}
-
-
 ### 7.6 重启系统并验证
 
 ```bash
@@ -503,7 +508,13 @@ df -h
 
 迁移采用的是`dd`命令，块级别克隆方案，然后再扩容的办法，优点就是比文件拷贝更靠谱。
 
+| 主控 | BOT | UASP |
+| :--: | :--: | :--: |
+| 慧荣SM3267AE | 支持启动 | U盘不支持 |
+| 瑞昱RTL9210C | 支持启动 | 不兼容 |
+
 然后就是设备认`USB`硬件！！！
+
 
 1. 这里的U盘主控芯片是`慧荣SM3267AE - ISP (180806-001)`。
 
@@ -513,7 +524,7 @@ df -h
     - 闪存类型：MLC
     - 容量：128GB
 
-        {% asset_img usbinfo.png 确认是从U盘启动 %}
+        {% asset_img usbinfo.png U盘主控信息 %}
 
 
 2. 另一个`JEYI佳翼`M.2移动硬盘盒 NVME/SATA双协议，主控是`RTL9210C`，固态是`海力士BC711-2242`。
