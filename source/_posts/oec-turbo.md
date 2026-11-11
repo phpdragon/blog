@@ -455,10 +455,9 @@ grep -e sdb1 /boot/extlinux/extlinux.conf
 
 ### 7.5 禁用U盘UASP传输协议
 
-查看`USB`设备的硬件ID（厂商 ID + 产品 ID）
-```bash
-lsusb
-```
+> 每一个厂家硬件ID不一样
+
+查看`USB`设备的硬件ID（厂商 ID + 产品 ID），执行`lsusb`命令：
 
 {% asset_img lsusb.png 查看USB端口信息 %}
 
@@ -466,7 +465,7 @@ lsusb
 - 0bda：厂商 ID（Vendor ID），属于 Realtek Semiconductor Corp.（瑞昱半导体）。
 - 9210：产品 ID（Product ID），对应的是 RTL9210 芯片。
 
-得到需要添加的参数: `usb-storage.quirks=0bda:9210:u`。
+得到需要添加的参数: `usb-storage.quirks=0bda:9210:u`， 格式：`usb-storage.quirks=厂商ID:产品ID:u`。
 
 1. 输入命令打开文件：`nano /boot/extlinux/extlinux.conf`。
 2. 使用键盘方向键，长按`↓`向下键直到光标移动到最下行，再短按`←`向左键移到最后一行末尾。
@@ -496,6 +495,8 @@ df -h
 ```
 
 {% asset_img usb-boot-info.png 确认是从U盘启动 %}
+
+如果无法启动，就请重新线刷还原吧。然后重试？
 
 
 ### 7.6 总结
