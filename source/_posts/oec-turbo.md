@@ -868,7 +868,38 @@ reboot
 后续的操作可以依照此步骤进行手动升级操作。
 
 
-## 十、参考
+## 十、系统优化
+
+```
+# 禁用ups电源，因为不需要
+systemctl disable --now nut-monitor nut-server
+sudo systemctl mask --now nut-server nut-monitor
+
+# 禁用风扇控制，因为没有
+systemctl disable --now pwm-fancontrol.service
+sudo mv /etc/systemd/system/pwm-fancontrol.service /etc/systemd/system/pwm-fancontrol.service.bak
+sudo systemctl mask --now pwm-fancontrol.service
+
+# 禁用串口，因为不需要
+sudo systemctl stop serial-getty@ttyAMA0.service
+sudo systemctl mask serial-getty@ttyAMA0.service
+
+# 重载
+sudo systemctl daemon-reload
+```
+
+修改`/etc/systemd/system/nmbd.service`配置，解决开机启动慢的问题，能节省20多秒。
+
+```
+ExecStart=/usr/sbin/nmbd -D $NMBDOPTIONS
+```
+改为：
+```
+ExecStart=/usr/sbin/nmbd --foreground --no-process-group $NMBDOPTIONS
+```
+
+
+## 十一、参考
 
 - [OECTurbo 刷机短接点新方法](https://www.right.com.cn/forum/thread-8445911-1-1.html)
 - [网心云OEC/OECTubro的刷机教程/短接技巧/救砖心得](https://www.right.com.cn/forum/thread-8459375-1-1.html)
@@ -885,6 +916,6 @@ reboot
 - [OECT-飞牛系统迁移到SATA硬盘启动+调整系统分区大小【亲测】【命令简单适合小白搬砖】](https://www.right.com.cn/forum/thread-8459871-1-1.html)
 
 
-## 十一、附件
+## 十二、附件
 
 本文使用到的软件包已上传网盘：[BlogDocs->files->oec-turbo](https://pan.baidu.com/s/1yEbHDQBzy43uV8gIYXqbnw?pwd=6666#list/path=%2FBlogDocs%2Ffiles%2Foec-turbo)
