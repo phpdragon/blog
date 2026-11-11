@@ -355,8 +355,8 @@ sudo nmcli connection up "Wired connection 1"
 
 ## 七、迁移系统至U盘
 
-> 当前U盘的主控是`慧荣SM3267AE`。
-> JEYI佳翼硬盘盒转M2，主控是`RTL9201C`，不兼容，感觉应该是握手协议不稳定的问题。
+> 当前U盘的主控是`慧荣SM3267AE`，可以做系统盘，但写入延时会很高，不推荐。
+> JEYI佳翼硬盘盒转M2，主控是`RTL9201C`，`UASP`传输协议不兼容。改成BOT模式没有问题。
 
 顾名思义，就是把根系统从`eMMC`中迁移出来到U盘中。
 一是缓解`eMMC`的写入寿命，二是给系统盘扩容。
@@ -451,7 +451,32 @@ grep -e sdb1 /boot/extlinux/extlinux.conf
 {% asset_img switch-usb-boot.png 改为从U盘启动 %}
 
 
-### 7.5 重启系统并验证
+### 7.5 禁用U盘UASP传输协议
+
+查看`USB`设备的硬件ID（厂商 ID + 产品 ID）
+```bash
+lsusb
+```
+
+{% asset_img lsusb.png 查看USB端口信息 %}
+
+具体对应如下：
+- 0bda：厂商 ID（Vendor ID），属于 Realtek Semiconductor Corp.（瑞昱半导体）。
+- 9210：产品 ID（Product ID），对应的是 RTL9210 芯片。
+
+得到需要添加的参数: `usb-storage.quirks=0bda:9210:u`。
+
+1. 输入命令打开文件：`nano /boot/extlinux/extlinux.conf`。
+2. 使用键盘方向键，长按`↓`向下键直到光标移动到最下行，再短按`←`向左键移到最后一行末尾。
+3. 按一下空格，然后输入你要追加的参数: `usb-storage.quirks=0bda:9210:u`。
+4. 按`Ctrl + O`（字母 O）保存，按`Enter`确认文件名。
+5. 按`Ctrl + X`，退出。
+6. 输入`cat /boot/extlinux/extlinux.conf`检查是否修改成功。
+
+{% asset_img cat-extlinux.png 确认extlinux.conf信息 %}
+
+
+### 7.6 重启系统并验证
 
 ```bash
 # 卸载SATA临时挂载点
@@ -770,6 +795,9 @@ umount /boot
 
 # 还原为旧版本
 sudo dd if=./boot-partition-backup_1.2.0302.img of=/dev/mmcblk0p1 bs=4M status=progress
+
+# 重新挂载boot分区
+mount /dev/mmcblk0p1 /boot 
 
 # 确认已还原为旧版本boot分区数据
 grep -e sda1 /boot/extlinux/extlinux.conf
