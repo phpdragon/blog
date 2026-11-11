@@ -408,7 +408,7 @@ fdisk /dev/sdb
 这里只新建一个分区，剩余的容量可用作为软件安装的存储空间，在web后台操作即可。
 
 
-### 7.2 克隆分区至U盘
+### 7.3 克隆分区至U盘
 
 `dd`命令是块级别拷贝，会把导致`UUID`等信息一模一样，所以需要处理。
 
@@ -427,7 +427,7 @@ btrfstune -u /dev/sdb1
 {% asset_img dd-usb.png 对U盘克隆和修改UUID %}
 
 
-### 7.3 U盘根分区扩容
+### 7.4 U盘根分区扩容
 
 `dd`命令是块级别拷贝，会把导致容量显示和克隆源头信息一模一样，所以需要处理。
 
@@ -448,7 +448,7 @@ df -h /tmp/sata_root
 {% asset_img resize-usb-max.png 对U盘根分区扩容 %}
 
 
-### 7.4 修改U盘fstab
+### 7.5 修改U盘fstab
 
 ```bash
 # 查看原始内容
@@ -464,7 +464,7 @@ grep -e sdb1 /tmp/sata_root/etc/fstab
 {% asset_img edit-usb-fstab.png 切换为sdb1 %}
 
 
-### 7.4 从U盘启动
+### 7.6 从U盘启动
 
 从U盘启动需要修改`/boot/extlinux/extlinux.conf` 文件。
 
@@ -482,7 +482,7 @@ grep -e sdb1 /boot/extlinux/extlinux.conf
 {% asset_img switch-usb-boot.png 改为从U盘启动 %}
 
 
-### 7.6 重启系统并验证
+### 7.7 重启系统并验证
 
 ```bash
 # 卸载SATA临时挂载点
@@ -504,17 +504,30 @@ df -h
 如果无法启动，就请重新线刷还原吧。然后重试？
 
 
-### 7.6 总结
+### 7.8 备份U盘分区
+
+```bash
+# 备份分区
+sudo dd if=/dev/sdb1 bs=4M status=progress | zstd -T0 -3 > ./fnos-bot-usb-sda1-backup.img.zst
+
+# 还原分区
+zstd -d -c ./fnos-bot-usb-sda1-backup.img.zst | sudo dd of=/dev/sdb1 bs=4M status=progress conv=fsync
+```
+
+32G的根分区压缩后大概2.3G左右，主要还是要看根分区容量使用情况。
+
+
+### 7.9 总结
+
+设备兼容情况：
+
+| 主控 | 设备ID | BOT | UASP |
+| :--: | :--: | :--: | :--: |
+| 慧荣SM3267AE | 8564:1000 | 支持启动 | U盘不支持 |
+| 瑞昱RTL9210C | 0bda:9210 | 支持启动 | 不兼容 |
+
 
 迁移采用的是`dd`命令，块级别克隆方案，然后再扩容的办法，优点就是比文件拷贝更靠谱。
-
-| 主控 | BOT | UASP |
-| :--: | :--: | :--: |
-| 慧荣SM3267AE | 支持启动 | U盘不支持 |
-| 瑞昱RTL9210C | 支持启动 | 不兼容 |
-
-然后就是设备认`USB`硬件！！！
-
 
 1. 这里的U盘主控芯片是`慧荣SM3267AE - ISP (180806-001)`。
 
@@ -529,19 +542,6 @@ df -h
 
 2. 另一个`JEYI佳翼`M.2移动硬盘盒 NVME/SATA双协议，主控是`RTL9210C`，固态是`海力士BC711-2242`。
 整个组合在`UASP`传输协议下不可用，是主控硬件和设备供电、系统内核上不兼容，改为`BOT`模式即可。
-
-
-3. 备份U盘上的系统分区。
-
-```bash
-# 备份分区
-sudo dd if=/dev/sdb1 bs=4M status=progress | zstd -T0 -3 > ./fnos-bot-usb-sda1-backup.img.zst
-
-# 还原分区
-zstd -d -c ./fnos-bot-usb-sda1-backup.img.zst | sudo dd of=/dev/sdb1 bs=4M status=progress conv=fsync
-```
-
-32G的根分区压缩后大概2.3G左右，主要还是要看根分区容量使用情况。
 
 
 ## 八、迁移系统至SATA盘
