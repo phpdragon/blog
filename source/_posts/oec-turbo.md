@@ -360,6 +360,7 @@ sudo nmcli connection up "Wired connection 1"
 
 顾名思义，就是把根系统从`eMMC`中迁移出来到U盘中。
 一是缓解`eMMC`的写入寿命，二是给系统盘扩容。
+
 但不是USB设备都支持从`USB`启动根分区的，还是要确认一下你的U盘主控芯片的兼容性。
 不行就尝试切换`USB`口为`BOT`传输协议试试，说不定有意外之喜。
 
@@ -515,8 +516,20 @@ df -h
 
 
 2. 另一个`JEYI佳翼`M.2移动硬盘盒 NVME/SATA双协议，主控是`RTL9210C`，固态是`海力士BC711-2242`。
-整个组合不可用，应该是硬盘盒与设备硬件层面的不兼容。
-大概率是硬盘盒供电问题或者UASP握手协议不稳定导致，因为有时候会出现丢盘现象。
+整个组合在`UASP`传输协议下不可用，是主控硬件和设备供电、系统内核上不兼容。
+
+
+3. 备份U盘上的系统分区。
+
+```bash
+# 备份分区
+sudo dd if=/dev/sdb1 bs=4M status=progress | zstd -T0 -3 > ./fnos-bot-usb-sda1-backup.img.zst
+
+# 还原分区
+zstd -d -c ./fnos-bot-usb-sda1-backup.img.zst | sudo dd of=/dev/sdb1 bs=4M status=progress conv=fsync
+```
+
+32G的根分区压缩后大概2.3G左右，主要还是要看根分区容量使用情况。
 
 
 ## 八、迁移系统至SATA盘
